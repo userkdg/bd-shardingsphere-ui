@@ -17,14 +17,15 @@
 
 package org.apache.shardingsphere.ui.servcie.impl;
 
-import org.apache.shardingsphere.orchestration.center.ConfigCenterRepository;
-import org.apache.shardingsphere.orchestration.core.configcenter.ConfigCenterNode;
+import org.apache.shardingsphere.mode.metadata.persist.MetaDataPersistService;
+import org.apache.shardingsphere.mode.repository.cluster.ClusterPersistRepository;
 import org.apache.shardingsphere.ui.common.constant.OrchestrationType;
 import org.apache.shardingsphere.ui.common.domain.CenterConfig;
 import org.apache.shardingsphere.ui.common.exception.ShardingSphereUIException;
 import org.apache.shardingsphere.ui.servcie.CenterConfigService;
 import org.apache.shardingsphere.ui.servcie.ConfigCenterService;
 import org.apache.shardingsphere.ui.util.CenterRepositoryFactory;
+import org.apache.shardingsphere.ui.util.ConfigCenterNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -40,7 +41,7 @@ public final class ConfigCenterServiceImpl implements ConfigCenterService {
     private CenterConfigService centerConfigService;
     
     @Override
-    public ConfigCenterRepository getActivatedConfigCenter() {
+    public ClusterPersistRepository getActivatedConfigCenter() {
         Optional<CenterConfig> optional = centerConfigService.loadActivated(OrchestrationType.CONFIG_CENTER.getValue());
         if (optional.isPresent()) {
             return CenterRepositoryFactory.createConfigCenter(optional.get());

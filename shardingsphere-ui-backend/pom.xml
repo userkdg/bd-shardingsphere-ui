@@ -21,46 +21,35 @@
     <parent>
         <groupId>org.apache.shardingsphere</groupId>
         <artifactId>shardingsphere-ui</artifactId>
-        <version>4.1.1</version>
+        <version>5.0.0</version>
     </parent>
     <artifactId>shardingsphere-ui-backend</artifactId>
     <name>${project.artifactId}</name>
-    
+
+    <properties>
+        <shardingsphere.version>5.0.0</shardingsphere.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.shardingsphere</groupId>
-            <artifactId>sharding-core-common</artifactId>
-            <version>${project.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.shardingsphere</groupId>
-                    <artifactId>shardingsphere-sql-parser-spi</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.shardingsphere</groupId>
-                    <artifactId>shardingsphere-sql-parser-engine</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.shardingsphere</groupId>
-                    <artifactId>shardingsphere-sql-parser-binder</artifactId>
-                </exclusion>
-            </exclusions>
+            <artifactId>shardingsphere-infra-common</artifactId>
+            <version>${shardingsphere.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.shardingsphere</groupId>
-            <artifactId>sharding-orchestration-core-facade</artifactId>
-            <version>${project.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.shardingsphere</groupId>
-                    <artifactId>shardingsphere-pluggable</artifactId>
-                </exclusion>
-            </exclusions>
+            <artifactId>shardingsphere-readwrite-splitting-core</artifactId>
+            <version>${shardingsphere.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.shardingsphere</groupId>
-            <artifactId>sharding-orchestration-center-zookeeper-curator</artifactId>
-            <version>${project.version}</version>
+            <artifactId>shardingsphere-encrypt-core</artifactId>
+            <version>${shardingsphere.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.shardingsphere</groupId>
+            <artifactId>shardingsphere-cluster-mode-repository-zookeeper-curator</artifactId>
+            <version>${shardingsphere.version}</version>
         </dependency>
         
         <dependency>

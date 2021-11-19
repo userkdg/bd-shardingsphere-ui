@@ -119,7 +119,7 @@ public final class CenterConfigServiceImpl implements CenterConfigService {
             toBeUpdatedConfig.setOrchestrationType(config.getOrchestrationType());
             toBeUpdatedConfig.setInstanceType(config.getInstanceType());
             toBeUpdatedConfig.setServerLists(config.getServerLists());
-            toBeUpdatedConfig.setOrchestrationName(config.getOrchestrationName());
+            toBeUpdatedConfig.setOrchestrationName(config.getNamespace());
             toBeUpdatedConfig.setDigest(config.getDigest());
             centerConfigsRepository.save(configs);
         }

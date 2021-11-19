@@ -17,11 +17,16 @@
 
 package org.apache.shardingsphere.ui.servcie.impl;
 
+import org.apache.shardingsphere.infra.config.RuleConfiguration;
+import org.apache.shardingsphere.mode.metadata.persist.MetaDataPersistService;
 import org.apache.shardingsphere.ui.servcie.ConfigCenterService;
 import org.apache.shardingsphere.ui.servcie.ProxyAuthenticationService;
 import org.apache.shardingsphere.ui.util.ConfigurationYamlConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Implementation of sharding proxy authentication service.
@@ -31,6 +36,9 @@ public final class ProxyAuthenticationServiceImpl implements ProxyAuthentication
     
     @Autowired
     private ConfigCenterService configCenterService;
+
+    @Autowired
+    private MetaDataPersistService metaDataPersistService;
     
     @Override
     public String getAuthentication() {
@@ -39,14 +47,14 @@ public final class ProxyAuthenticationServiceImpl implements ProxyAuthentication
     
     @Override
     public void updateAuthentication(final String authentication) {
-        checkAuthenticationConfiguration(authentication);
-        configCenterService.getActivatedConfigCenter()
-                .persist(configCenterService.getActivateConfigurationNode().getAuthenticationPath(), authentication);
+        Collection<RuleConfiguration> ruleConfigurations = checkAuthenticationConfiguration(authentication);
+        metaDataPersistService.getGlobalRuleService()
+                .persist(ruleConfigurations, true);
     }
     
-    private void checkAuthenticationConfiguration(final String data) {
+    private Collection<RuleConfiguration> checkAuthenticationConfiguration(final String data) {
         try {
-            ConfigurationYamlConverter.loadAuthentication(data);
+            return ConfigurationYamlConverter.loadAuthentication(data);
             // CHECKSTYLE:OFF
         } catch (final Exception ex) {
             // CHECKSTYLE:ON

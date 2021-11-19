@@ -36,7 +36,8 @@ public final class CenterConfig {
     private String serverLists;
     
     private String namespace;
-    
+
+    @Deprecated
     private String orchestrationName;
     
     private String orchestrationType;

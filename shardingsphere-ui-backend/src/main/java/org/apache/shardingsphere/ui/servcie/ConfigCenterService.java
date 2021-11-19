@@ -17,8 +17,8 @@
 
 package org.apache.shardingsphere.ui.servcie;
 
-import org.apache.shardingsphere.orchestration.center.ConfigCenterRepository;
-import org.apache.shardingsphere.orchestration.core.configcenter.ConfigCenterNode;
+import org.apache.shardingsphere.mode.repository.cluster.ClusterPersistRepository;
+import org.apache.shardingsphere.ui.util.ConfigCenterNode;
 
 /**
  * Config center service
@@ -30,7 +30,7 @@ public interface ConfigCenterService {
      *
      * @return config center
      */
-    ConfigCenterRepository getActivatedConfigCenter();
+    ClusterPersistRepository getActivatedConfigCenter();
     
     /**
      * Get activated configuration node.
