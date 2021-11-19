@@ -36,10 +36,15 @@ import java.util.Optional;
  */
 @Service
 public final class ConfigCenterServiceImpl implements ConfigCenterService {
-    
+
     @Autowired
     private CenterConfigService centerConfigService;
-    
+
+    @Override
+    public MetaDataPersistService getActivatedMetadataService(){
+        return new MetaDataPersistService(getActivatedConfigCenter());
+    }
+
     @Override
     public ClusterPersistRepository getActivatedConfigCenter() {
         Optional<CenterConfig> optional = centerConfigService.loadActivated(OrchestrationType.CONFIG_CENTER.getValue());

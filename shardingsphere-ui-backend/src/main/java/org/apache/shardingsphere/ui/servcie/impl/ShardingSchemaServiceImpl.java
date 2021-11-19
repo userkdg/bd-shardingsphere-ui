@@ -40,26 +40,22 @@ import java.util.Map;
 @Service
 public final class ShardingSchemaServiceImpl implements ShardingSchemaService {
 
-    private final MetaDataPersistService metaDataPersistService;
-
-    public ShardingSchemaServiceImpl(@Autowired ConfigCenterService configCenterService) {
-        this.metaDataPersistService = new MetaDataPersistService(configCenterService.getActivatedConfigCenter());
-    }
+    @Autowired ConfigCenterService configCenterService;
 
     @Override
     public Collection<String> getAllSchemaNames() {
-        return metaDataPersistService.getSchemaMetaDataService().loadAllNames();
+        return configCenterService.getActivatedMetadataService().getSchemaMetaDataService().loadAllNames();
     }
 
     @Override
     public String getRuleConfiguration(final String schemaName) {
-        PersistRepository repository = metaDataPersistService.getRepository();
+        PersistRepository repository = configCenterService.getActivatedMetadataService().getRepository();
         return repository.get(SchemaMetaDataNode.getRulePath(schemaName));
     }
 
     @Override
     public String getDataSourceConfiguration(final String schemaName) {
-        PersistRepository repository = metaDataPersistService.getRepository();
+        PersistRepository repository = configCenterService.getActivatedMetadataService().getRepository();
         return repository.get(SchemaMetaDataNode.getMetaDataDataSourcePath(schemaName));
     }
 
@@ -100,7 +96,7 @@ public final class ShardingSchemaServiceImpl implements ShardingSchemaService {
     }
 
     private void persistRuleConfiguration(final String schemaName, final Collection<RuleConfiguration> ruleConfiguration) {
-        metaDataPersistService.getSchemaRuleService()
+        configCenterService.getActivatedMetadataService().getSchemaRuleService()
                 .persist(schemaName, ruleConfiguration, true);
     }
 
@@ -117,7 +113,7 @@ public final class ShardingSchemaServiceImpl implements ShardingSchemaService {
     }
 
     private void persistDataSourceConfiguration(final String schemaName, final Map<String, DataSourceConfiguration> dataSourceConfiguration) {
-        metaDataPersistService.getDataSourceService().persist(schemaName, dataSourceConfiguration);
+        configCenterService.getActivatedMetadataService().getDataSourceService().persist(schemaName, dataSourceConfiguration);
     }
 
     private void checkSchemaName(final String schemaName, final Collection<String> existedSchemaNames) {
@@ -126,6 +122,6 @@ public final class ShardingSchemaServiceImpl implements ShardingSchemaService {
     }
 
     private void persistSchemaName(final String schemaName) {
-        metaDataPersistService.getSchemaMetaDataService().persist(schemaName, new ShardingSphereSchema());
+        configCenterService.getActivatedMetadataService().getSchemaMetaDataService().persist(schemaName, new ShardingSphereSchema());
     }
 }

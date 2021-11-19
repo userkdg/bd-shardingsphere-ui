@@ -18,7 +18,6 @@
 package org.apache.shardingsphere.ui.servcie.impl;
 
 import org.apache.shardingsphere.infra.config.properties.ConfigurationProperties;
-import org.apache.shardingsphere.mode.metadata.persist.MetaDataPersistService;
 import org.apache.shardingsphere.mode.metadata.persist.node.GlobalNode;
 import org.apache.shardingsphere.mode.persist.PersistRepository;
 import org.apache.shardingsphere.ui.servcie.ConfigCenterService;
@@ -34,22 +33,19 @@ import java.util.Properties;
  */
 @Service
 public final class ShardingPropertiesServiceImpl implements ShardingPropertiesService {
-    private final MetaDataPersistService metaDataPersistService;
-
-    public ShardingPropertiesServiceImpl(@Autowired ConfigCenterService configCenterService) {
-        this.metaDataPersistService = new MetaDataPersistService(configCenterService.getActivatedConfigCenter());
-    }
+    @Autowired
+    ConfigCenterService configCenterService;
 
     @Override
     public String loadShardingProperties() {
-        PersistRepository repository = metaDataPersistService.getRepository();
+        PersistRepository repository = configCenterService.getActivatedMetadataService().getRepository();
         return repository.get(GlobalNode.getPropsPath());
     }
 
     @Override
     public void updateShardingProperties(final String configData) {
         Properties properties = checkShardingProperties(configData);
-        metaDataPersistService.getPropsService().persist(properties, true);
+        configCenterService.getActivatedMetadataService().getPropsService().persist(properties, true);
 //        configCenterService.getActivatedConfigCenter().persist(configCenterService.getActivateConfigurationNode().getPropsPath(), configData);
     }
 

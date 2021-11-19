@@ -17,6 +17,7 @@
 
 package org.apache.shardingsphere.ui.servcie;
 
+import org.apache.shardingsphere.mode.metadata.persist.MetaDataPersistService;
 import org.apache.shardingsphere.mode.repository.cluster.ClusterPersistRepository;
 import org.apache.shardingsphere.ui.util.ConfigCenterNode;
 
@@ -24,14 +25,19 @@ import org.apache.shardingsphere.ui.util.ConfigCenterNode;
  * Config center service
  */
 public interface ConfigCenterService {
-    
+
+    /**
+     * Get activated metadata persist service
+     */
+    MetaDataPersistService getActivatedMetadataService();
+
     /**
      * Get activated config center.
      *
      * @return config center
      */
     ClusterPersistRepository getActivatedConfigCenter();
-    
+
     /**
      * Get activated configuration node.
      *

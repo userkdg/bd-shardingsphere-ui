@@ -18,7 +18,6 @@
 package org.apache.shardingsphere.ui.servcie.impl;
 
 import org.apache.shardingsphere.infra.config.RuleConfiguration;
-import org.apache.shardingsphere.mode.metadata.persist.MetaDataPersistService;
 import org.apache.shardingsphere.mode.metadata.persist.node.GlobalNode;
 import org.apache.shardingsphere.mode.persist.PersistRepository;
 import org.apache.shardingsphere.ui.servcie.ConfigCenterService;
@@ -34,22 +33,19 @@ import java.util.Collection;
  */
 @Service
 public final class ProxyAuthenticationServiceImpl implements ProxyAuthenticationService {
-    private final MetaDataPersistService metaDataPersistService;
-
-    public ProxyAuthenticationServiceImpl(@Autowired ConfigCenterService configCenterService) {
-        this.metaDataPersistService = new MetaDataPersistService(configCenterService.getActivatedConfigCenter());
-    }
+    @Autowired
+    ConfigCenterService configCenterService;
 
     @Override
     public String getAuthentication() {
-        PersistRepository repository = metaDataPersistService.getRepository();
+        PersistRepository repository = configCenterService.getActivatedMetadataService().getRepository();
         return repository.get(GlobalNode.getGlobalRuleNode());
     }
 
     @Override
     public void updateAuthentication(final String authentication) {
         Collection<RuleConfiguration> ruleConfigurations = checkAuthenticationConfiguration(authentication);
-        metaDataPersistService.getGlobalRuleService()
+        configCenterService.getActivatedMetadataService().getGlobalRuleService()
                 .persist(ruleConfigurations, true);
     }
 
