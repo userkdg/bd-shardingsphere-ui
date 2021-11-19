@@ -17,21 +17,21 @@
 
 package org.apache.shardingsphere.ui.servcie.impl;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import org.apache.shardingsphere.infra.config.RuleConfiguration;
 import org.apache.shardingsphere.infra.config.datasource.DataSourceConfiguration;
-import org.apache.shardingsphere.mode.repository.cluster.ClusterPersistRepository;
+import org.apache.shardingsphere.infra.metadata.schema.ShardingSphereSchema;
+import org.apache.shardingsphere.mode.metadata.persist.MetaDataPersistService;
+import org.apache.shardingsphere.mode.metadata.persist.node.SchemaMetaDataNode;
+import org.apache.shardingsphere.mode.persist.PersistRepository;
 import org.apache.shardingsphere.ui.servcie.ConfigCenterService;
 import org.apache.shardingsphere.ui.servcie.ShardingSchemaService;
 import org.apache.shardingsphere.ui.util.ConfigurationYamlConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -39,53 +39,56 @@ import java.util.Map;
  */
 @Service
 public final class ShardingSchemaServiceImpl implements ShardingSchemaService {
+    private ConfigCenterService configCenterService;
 
     @Autowired
-    private ConfigCenterService configCenterService;
+    private MetaDataPersistService metaDataPersistService;
 
     @Override
     public Collection<String> getAllSchemaNames() {
-        return configCenterService.getActivatedConfigCenter().getChildrenKeys(configCenterService.getActivateConfigurationNode().getSchemaPath());
+        return metaDataPersistService.getSchemaMetaDataService().loadAllNames();
     }
 
     @Override
     public String getRuleConfiguration(final String schemaName) {
-        return configCenterService.getActivatedConfigCenter().get(configCenterService.getActivateConfigurationNode().getRulePath(schemaName));
+        PersistRepository repository = metaDataPersistService.getRepository();
+        return repository.get(SchemaMetaDataNode.getRulePath(schemaName));
     }
 
     @Override
     public String getDataSourceConfiguration(final String schemaName) {
-        return configCenterService.getActivatedConfigCenter().get(configCenterService.getActivateConfigurationNode().getDataSourcePath(schemaName));
+        PersistRepository repository = metaDataPersistService.getRepository();
+        return repository.get(SchemaMetaDataNode.getMetaDataDataSourcePath(schemaName));
     }
 
     @Override
     public void updateRuleConfiguration(final String schemaName, final String configData) {
-        checkRuleConfiguration(configData);
-        persistRuleConfiguration(schemaName, configData);
+        Collection<RuleConfiguration> ruleConfigurations = checkRuleConfiguration(configData);
+        persistRuleConfiguration(schemaName, ruleConfigurations);
     }
 
     @Override
     public void updateDataSourceConfiguration(final String schemaName, final String configData) {
-        checkDataSourceConfiguration(configData);
-        persistDataSourceConfiguration(schemaName, configData);
+        Map<String, DataSourceConfiguration> sourceConfigurationMap = checkDataSourceConfiguration(configData);
+        persistDataSourceConfiguration(schemaName, sourceConfigurationMap);
     }
 
     @Override
     public void addSchemaConfiguration(final String schemaName, final String ruleConfiguration, final String dataSourceConfiguration) {
         checkSchemaName(schemaName, getAllSchemaNames());
-        checkRuleConfiguration(ruleConfiguration);
-        checkDataSourceConfiguration(dataSourceConfiguration);
-        persistRuleConfiguration(schemaName, ruleConfiguration);
-        persistDataSourceConfiguration(schemaName, dataSourceConfiguration);
+        Collection<RuleConfiguration> ruleConfigurations = checkRuleConfiguration(ruleConfiguration);
+        Map<String, DataSourceConfiguration> dataSourceConfigurationMap = checkDataSourceConfiguration(dataSourceConfiguration);
+        persistRuleConfiguration(schemaName, ruleConfigurations);
+        persistDataSourceConfiguration(schemaName, dataSourceConfigurationMap);
         persistSchemaName(schemaName);
     }
 
-    private void checkRuleConfiguration(final String configData) {
+    private Collection<RuleConfiguration> checkRuleConfiguration(final String configData) {
         try {
             if (configData.contains("encryptors:\n")) {
-                ConfigurationYamlConverter.loadEncryptRuleConfiguration(configData);
+                return ConfigurationYamlConverter.loadEncryptRuleConfiguration(configData);
             } else {
-                ConfigurationYamlConverter.loadMasterSlaveRuleConfiguration(configData);
+                return ConfigurationYamlConverter.loadMasterSlaveRuleConfiguration(configData);
             }
             // CHECKSTYLE:OFF
         } catch (final Exception ex) {
@@ -93,39 +96,34 @@ public final class ShardingSchemaServiceImpl implements ShardingSchemaService {
             throw new IllegalArgumentException("rule configuration is invalid.");
         }
     }
-    
-    private void persistRuleConfiguration(final String schemaName, final String ruleConfiguration) {
-        configCenterService.getActivatedConfigCenter().persist(configCenterService.getActivateConfigurationNode().getRulePath(schemaName), ruleConfiguration);
+
+    private void persistRuleConfiguration(final String schemaName, final Collection<RuleConfiguration> ruleConfiguration) {
+        metaDataPersistService.getSchemaRuleService()
+                .persist(schemaName, ruleConfiguration, true);
     }
-    
-    private void checkDataSourceConfiguration(final String configData) {
+
+    private Map<String, DataSourceConfiguration> checkDataSourceConfiguration(final String configData) {
         try {
             Map<String, DataSourceConfiguration> dataSourceConfigs = ConfigurationYamlConverter.loadDataSourceConfigurations(configData);
             Preconditions.checkState(!dataSourceConfigs.isEmpty(), "data source configuration is invalid.");
+            return dataSourceConfigs;
             // CHECKSTYLE:OFF
         } catch (final Exception ex) {
             // CHECKSTYLE:ON
             throw new IllegalArgumentException("data source configuration is invalid.");
         }
     }
-    
-    private void persistDataSourceConfiguration(final String schemaName, final String dataSourceConfiguration) {
-        configCenterService.getActivatedConfigCenter().persist(configCenterService.getActivateConfigurationNode().getDataSourcePath(schemaName), dataSourceConfiguration);
+
+    private void persistDataSourceConfiguration(final String schemaName, final Map<String, DataSourceConfiguration> dataSourceConfiguration) {
+        metaDataPersistService.getDataSourceService().persist(schemaName, dataSourceConfiguration);
     }
-    
+
     private void checkSchemaName(final String schemaName, final Collection<String> existedSchemaNames) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(schemaName), "schema name is invalid.");
         Preconditions.checkArgument(!existedSchemaNames.contains(schemaName), "schema name already exists.");
     }
-    
+
     private void persistSchemaName(final String schemaName) {
-        ClusterPersistRepository configCenterRepository = configCenterService.getActivatedConfigCenter();
-        String schemaPath = configCenterService.getActivateConfigurationNode().getSchemaPath();
-        String schemaNames = configCenterRepository.get(schemaPath);
-        List<String> schemaNameList = Strings.isNullOrEmpty(schemaNames)?new ArrayList<>():new ArrayList<>(Splitter.on(",").splitToList(schemaNames));
-        if (!schemaNameList.contains(schemaName)) {
-            schemaNameList.add(schemaName);
-            configCenterRepository.persist(schemaPath, Joiner.on(",").join(schemaNameList));
-        }
+        metaDataPersistService.getSchemaMetaDataService().persist(schemaName, new ShardingSphereSchema());
     }
 }

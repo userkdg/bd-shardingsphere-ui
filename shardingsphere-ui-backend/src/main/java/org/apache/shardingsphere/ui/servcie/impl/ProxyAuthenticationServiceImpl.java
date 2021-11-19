@@ -19,39 +19,38 @@ package org.apache.shardingsphere.ui.servcie.impl;
 
 import org.apache.shardingsphere.infra.config.RuleConfiguration;
 import org.apache.shardingsphere.mode.metadata.persist.MetaDataPersistService;
-import org.apache.shardingsphere.ui.servcie.ConfigCenterService;
+import org.apache.shardingsphere.mode.metadata.persist.node.GlobalNode;
+import org.apache.shardingsphere.mode.persist.PersistRepository;
 import org.apache.shardingsphere.ui.servcie.ProxyAuthenticationService;
 import org.apache.shardingsphere.ui.util.ConfigurationYamlConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
-import java.util.Collections;
 
 /**
  * Implementation of sharding proxy authentication service.
  */
 @Service
 public final class ProxyAuthenticationServiceImpl implements ProxyAuthenticationService {
-    
-    @Autowired
-    private ConfigCenterService configCenterService;
+
 
     @Autowired
     private MetaDataPersistService metaDataPersistService;
-    
+
     @Override
     public String getAuthentication() {
-        return configCenterService.getActivatedConfigCenter().get(configCenterService.getActivateConfigurationNode().getAuthenticationPath());
+        PersistRepository repository = metaDataPersistService.getRepository();
+        return repository.get(GlobalNode.getGlobalRuleNode());
     }
-    
+
     @Override
     public void updateAuthentication(final String authentication) {
         Collection<RuleConfiguration> ruleConfigurations = checkAuthenticationConfiguration(authentication);
         metaDataPersistService.getGlobalRuleService()
                 .persist(ruleConfigurations, true);
     }
-    
+
     private Collection<RuleConfiguration> checkAuthenticationConfiguration(final String data) {
         try {
             return ConfigurationYamlConverter.loadAuthentication(data);
