@@ -20,20 +20,19 @@ package org.apache.shardingsphere.ui.util;
 import com.google.common.base.Preconditions;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.apache.shardingsphere.encrypt.api.config.EncryptRuleConfiguration;
-import org.apache.shardingsphere.encrypt.yaml.config.YamlEncryptRuleConfiguration;
-import org.apache.shardingsphere.encrypt.yaml.swapper.EncryptRuleConfigurationYamlSwapper;
 import org.apache.shardingsphere.infra.config.RuleConfiguration;
 import org.apache.shardingsphere.infra.config.datasource.DataSourceConfiguration;
+import org.apache.shardingsphere.infra.config.datasource.DataSourceConverter;
+import org.apache.shardingsphere.infra.yaml.config.swapper.YamlDataSourceConfigurationSwapper;
 import org.apache.shardingsphere.infra.yaml.config.swapper.YamlRuleConfigurationSwapperEngine;
 import org.apache.shardingsphere.infra.yaml.engine.YamlEngine;
 import org.apache.shardingsphere.readwritesplitting.api.ReadwriteSplittingRuleConfiguration;
-import org.apache.shardingsphere.readwritesplitting.yaml.config.YamlReadwriteSplittingRuleConfiguration;
-import org.apache.shardingsphere.readwritesplitting.yaml.swapper.ReadwriteSplittingRuleConfigurationYamlSwapper;
 
+import javax.sql.DataSource;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 /**
  * YAML converter for configuration.
@@ -49,8 +48,10 @@ public final class ConfigurationYamlConverter {
      */
     @SuppressWarnings("unchecked")
     public static Map<String, DataSourceConfiguration> loadDataSourceConfigurations(final String data) {
-        Map<String, DataSourceConfiguration> result = YamlEngine.unmarshal(data, Map.class);
-        Preconditions.checkState(null != result && !result.isEmpty(), "No available data sources to load for orchestration.");
+        Map<String, Map<String, Object>> yamlDataSources = YamlEngine.unmarshal(data, Map.class);
+        YamlDataSourceConfigurationSwapper yamlDataSourceConfigurationSwapper = new YamlDataSourceConfigurationSwapper();
+        Map<String, DataSourceConfiguration> result = yamlDataSources.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
+                (entry) -> yamlDataSourceConfigurationSwapper.swapToDataSourceConfiguration(entry.getValue())));
         return result;
     }
 
@@ -60,8 +61,10 @@ public final class ConfigurationYamlConverter {
      * @param data data
      * @return master-slave rule configuration
      */
-    public static ReadwriteSplittingRuleConfiguration loadMasterSlaveRuleConfiguration(final String data) {
-        return new ReadwriteSplittingRuleConfigurationYamlSwapper().swapToObject(YamlEngine.unmarshal(data, YamlReadwriteSplittingRuleConfiguration.class));
+    @SuppressWarnings("unchecked")
+    public static Collection<RuleConfiguration> loadMasterSlaveRuleConfiguration(final String data) {
+        Collection collection = new YamlRuleConfigurationSwapperEngine().swapToRuleConfigurations(YamlEngine.unmarshal(data, Collection.class));
+        return collection;
     }
 
     /**
@@ -95,7 +98,9 @@ public final class ConfigurationYamlConverter {
      * @param data data
      * @return encrypt rule configuration
      */
-    public static EncryptRuleConfiguration loadEncryptRuleConfiguration(final String data) {
-        return new EncryptRuleConfigurationYamlSwapper().swapToObject(YamlEngine.unmarshal(data, YamlEncryptRuleConfiguration.class));
+    @SuppressWarnings("unchecked")
+    public static Collection<RuleConfiguration> loadEncryptRuleConfiguration(final String data) {
+        Collection collection = new YamlRuleConfigurationSwapperEngine().swapToRuleConfigurations(YamlEngine.unmarshal(data, Collection.class));
+        return collection;
     }
 }
