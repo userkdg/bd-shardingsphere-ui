@@ -18,6 +18,7 @@
 package org.apache.shardingsphere.ui.servcie.impl;
 
 import org.apache.shardingsphere.infra.config.properties.ConfigurationProperties;
+import org.apache.shardingsphere.mode.metadata.persist.MetaDataPersistService;
 import org.apache.shardingsphere.ui.servcie.ConfigCenterService;
 import org.apache.shardingsphere.ui.servcie.ShardingPropertiesService;
 import org.apache.shardingsphere.ui.util.ConfigurationYamlConverter;
@@ -31,25 +32,30 @@ import java.util.Properties;
  */
 @Service
 public final class ShardingPropertiesServiceImpl implements ShardingPropertiesService {
-    
+
     @Autowired
     private ConfigCenterService configCenterService;
-    
+
+    @Autowired
+    private MetaDataPersistService metaDataPersistService;
+
     @Override
     public String loadShardingProperties() {
         return configCenterService.getActivatedConfigCenter().get(configCenterService.getActivateConfigurationNode().getPropsPath());
     }
-    
+
     @Override
     public void updateShardingProperties(final String configData) {
-        checkShardingProperties(configData);
-        configCenterService.getActivatedConfigCenter().persist(configCenterService.getActivateConfigurationNode().getPropsPath(), configData);
+        Properties properties = checkShardingProperties(configData);
+        metaDataPersistService.getPropsService().persist(properties, true);
+//        configCenterService.getActivatedConfigCenter().persist(configCenterService.getActivateConfigurationNode().getPropsPath(), configData);
     }
-    
-    private void checkShardingProperties(final String configData) {
+
+    private Properties checkShardingProperties(final String configData) {
         try {
             Properties properties = ConfigurationYamlConverter.loadProperties(configData);
             new ConfigurationProperties(properties);
+            return properties;
             // CHECKSTYLE:OFF
         } catch (final Exception ex) {
             // CHECKSTYLE:ON
