@@ -39,10 +39,12 @@ import java.util.Map;
  */
 @Service
 public final class ShardingSchemaServiceImpl implements ShardingSchemaService {
-    private ConfigCenterService configCenterService;
 
-    @Autowired
-    private MetaDataPersistService metaDataPersistService;
+    private final MetaDataPersistService metaDataPersistService;
+
+    public ShardingSchemaServiceImpl(@Autowired ConfigCenterService configCenterService) {
+        this.metaDataPersistService = new MetaDataPersistService(configCenterService.getActivatedConfigCenter());
+    }
 
     @Override
     public Collection<String> getAllSchemaNames() {
