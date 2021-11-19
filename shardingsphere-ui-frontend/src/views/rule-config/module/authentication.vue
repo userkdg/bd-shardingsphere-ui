@@ -48,7 +48,13 @@ export default {
   },
   computed: {
     textarea2() {
-      return JSON.stringify(yaml.safeLoad(this.textarea), null, '\t')
+      let AuthYamlType = new yaml.Type('!AUTHORITY', { kind: 'mapping' });
+      let TranYamlType = new yaml.Type('!TRANSACTION', { kind: 'mapping' });
+      let SharYamlType = new yaml.Type('!SHARDING', { kind: 'mapping' });
+      let ReadYamlType = new yaml.Type('!READWRITE_SPLITTING', { kind: 'mapping' });
+      let EncYamlType = new yaml.Type('!ENCRYPT', { kind: 'mapping' });
+      let STATUS_SCHEMA = yaml.Schema.create([ AuthYamlType, TranYamlType, SharYamlType, ReadYamlType, EncYamlType]);
+      return JSON.stringify(yaml.safeLoad(this.textarea, {schema: STATUS_SCHEMA}), null, '\t')
     }
   },
   created() {
