@@ -37,7 +37,12 @@
   </el-card>
 </template>
 <script>
-import yaml from 'js-yaml'
+import {AuthYamlType,
+        TranYamlType,
+        SharYamlType,
+        ReadYamlType,
+        EncYamlType,
+        jsYaml}  from '../../../utils/yamlTranstoJsonGlobal'
 import API from '../api'
 export default {
   name: 'Authentication',
@@ -48,13 +53,8 @@ export default {
   },
   computed: {
     textarea2() {
-      let AuthYamlType = new yaml.Type('!AUTHORITY', { kind: 'mapping' });
-      let TranYamlType = new yaml.Type('!TRANSACTION', { kind: 'mapping' });
-      let SharYamlType = new yaml.Type('!SHARDING', { kind: 'mapping' });
-      let ReadYamlType = new yaml.Type('!READWRITE_SPLITTING', { kind: 'mapping' });
-      let EncYamlType = new yaml.Type('!ENCRYPT', { kind: 'mapping' });
-      let STATUS_SCHEMA = yaml.Schema.create([ AuthYamlType, TranYamlType, SharYamlType, ReadYamlType, EncYamlType]);
-      return JSON.stringify(yaml.safeLoad(this.textarea, {schema: STATUS_SCHEMA}), null, '\t')
+      let STATUS_SCHEMA = jsYaml.Schema.create([ AuthYamlType, TranYamlType, SharYamlType, ReadYamlType, EncYamlType]);
+      return JSON.stringify(jsYaml.safeLoad(this.textarea, {schema: STATUS_SCHEMA}), null, '\t')
     }
   },
   created() {

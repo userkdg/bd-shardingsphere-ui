@@ -109,7 +109,12 @@
   </div>
 </template>
 <script>
-import yaml from 'js-yaml'
+import {AuthYamlType,
+  TranYamlType,
+  SharYamlType,
+  ReadYamlType,
+  EncYamlType,
+  jsYaml}  from '../../../utils/yamlTranstoJsonGlobal'
 import API from '../api'
 
 export default {
@@ -159,7 +164,7 @@ export default {
   },
   computed: {
     textarea2() {
-      const dsYamlType = new yaml.Type(
+      const dsYamlType = new jsYaml.Type(
         'tag:yaml.org,2002:org.apache.shardingsphere.orchestration.core.configuration.YamlDataSourceConfiguration',
         {
           kind: 'mapping',
@@ -168,9 +173,9 @@ export default {
           }
         }
       )
-      const DS_SCHEMA = yaml.Schema.create(dsYamlType)
+      const DS_SCHEMA = jsYaml.Schema.create([AuthYamlType, TranYamlType, SharYamlType, ReadYamlType, EncYamlType])
       return JSON.stringify(
-        yaml.load(this.textarea, { schema: DS_SCHEMA }),
+        jsYaml.load(this.textarea, { schema: DS_SCHEMA }),
         null,
         '\t'
       )
