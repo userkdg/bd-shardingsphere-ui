@@ -23,7 +23,7 @@ Vue.use(Router)
 export const constantRouterMap = [
   {
     path: '*',
-    redirect: '/registry-center'
+    redirect: '/config-center'
   },
   {
     path: '/config-center',
