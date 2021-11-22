@@ -32,7 +32,7 @@ export default {
           }
         ]
       },
-      {
+     /* {
         title: '注册中心',
         child: [
           {
@@ -44,11 +44,11 @@ export default {
             href: '/runtime-status'
           }
         ]
-      },
-      {
+      },*/
+    /*  {
         title: '数据扩容',
         href: '/data-scaling'
-      }
+      }*/
     ],
     connect: '已连接',
     connection: '连接',
