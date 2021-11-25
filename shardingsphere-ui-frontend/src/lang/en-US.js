@@ -32,7 +32,7 @@ export default {
           }
         ]
       },
-      {
+     /* {
         title: 'Registry Center',
         child: [
           {
@@ -48,7 +48,7 @@ export default {
       {
         title: 'Data scaling',
         href: '/data-scaling'
-      }
+      }*/
     ],
     connected: 'Connected',
     connection: 'Connection',

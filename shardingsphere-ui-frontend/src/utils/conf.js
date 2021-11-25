@@ -17,7 +17,7 @@
 
 // npm run build 部署对应后端地址
 // const HOST = 'http://192.168.243.34:18088'
-const HOST = 'http://localhost:8080'
+const HOST = 'http://localhost:8081'
 const OTHERHOST = ''
 
 export default {

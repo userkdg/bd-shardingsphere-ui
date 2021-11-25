@@ -18,14 +18,14 @@
 <template>
   <div id="app">
     <s-container v-if="localStorage.getItem('Access-Token')">
-      <el-breadcrumb separator="/" class="bread-wrap">
+<!--      <el-breadcrumb separator="/" class="bread-wrap">
         <el-breadcrumb-item :to="{ path: '/' }">{{
           $t('common.home')
         }}</el-breadcrumb-item>
         <el-breadcrumb-item v-for="each in menus" :key="each">
           {{ each }}
         </el-breadcrumb-item>
-      </el-breadcrumb>
+      </el-breadcrumb>-->
       <router-view />
     </s-container>
     <template v-else>

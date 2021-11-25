@@ -20,8 +20,8 @@
     <el-menu
       :collapse="isCollapse"
       :default-active="defActive"
-      background-color="#090a01"
-      text-color="#fff"
+      background-color="white"
+      text-color="black"
       active-text-color="#fff"
       class="el-menu-vertical-menu"
       @open="handleOpen"
@@ -98,10 +98,10 @@ export default {
 </script>
 <style lang="scss">
 .s-menu {
-  height: 100%;
+  height: 60px;
   .el-menu--collapse {
     height: 100%;
-    width: 80px;
+    width: 60px;
     .s-pro-components-sider-menu-index-logo {
       padding-left: 22px;
     }
@@ -111,18 +111,19 @@ export default {
     height: 100%;
   }
   .el-menu-item {
-    background: #090a01;
+    background: white;
+    color: black;
   }
   .el-menu {
     border-right: none;
   }
   .el-submenu {
     .el-menu {
-      background: #090a01;
+      background: white;
     }
   }
   .is-active {
-    background-color: #e17425 !important;
+    background-color: #1890ff !important;
   }
   .icon-sidebar {
     background: url("../../assets/img/sidebar-icon.png") no-repeat left center;
@@ -142,7 +143,7 @@ export default {
 }
 .el-menu--vertical {
   .is-active {
-    background-color: #e17425 !important;
+    background-color: #1890ff !important;
   }
 }
 </style>

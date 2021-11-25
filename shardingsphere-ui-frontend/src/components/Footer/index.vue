@@ -18,7 +18,7 @@
 <template>
   <div
     class="footer-wrapper"
-  >Copyright © The Apache Software Foundation, Licensed under the Apache License 2</div>
+  ></div>
 </template>
 <script>
 export default {

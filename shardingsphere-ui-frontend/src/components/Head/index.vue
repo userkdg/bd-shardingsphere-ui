@@ -18,7 +18,6 @@
 <template>
   <div class="s-layout-header">
     <div class="s-pro-components-header">
-      <i :class="classes" @click="togger" />
       <div class="s-pro-components-header-right">
         <div class="avatar">
           <el-dropdown @command="handlerClick">
@@ -44,13 +43,26 @@
           </el-dropdown>
         </div>
       </div>
-      <el-breadcrumb separator="/" class="bread-nav">
+      <div style="width: 50%">
+        <el-menu
+          mode = 'horizontal'
+          :default-active="defActive"
+          :defaultSelectedKeys = '[$route.path]'
+        >
+          <template v-for="(item, index) in menuData">
+            <el-menu-item v-if="!item.child" :index="String(index)" :key="String(index)">
+              <a :href="'#' + item.href" :key="String(index)">{{item.title}}</a>
+            </el-menu-item>
+          </template>
+        </el-menu>
+      </div>
+<!--      <el-breadcrumb separator="/" class="bread-nav">
         <el-breadcrumb-item>
           <a
-            style="font-weight: bold; color: #E17425;"
+            style="font-weight: bold; color: #1890ff;"
           >{{ $store.state.global.regCenterActivated || '' }}</a>
         </el-breadcrumb-item>
-      </el-breadcrumb>
+      </el-breadcrumb>-->
     </div>
   </div>
 </template>
@@ -59,11 +71,35 @@ export default {
   name: 'Head',
   data() {
     return {
+      menuData: this.$t('common').menuData[0].child,
+      defActive: '',
       isCollapse: false,
       username: '',
       breadcrumbTxt: '',
       dropdownList: this.$t('common').dropdownList,
       dropdownTitle: localStorage.getItem('language') === 'zh-CN' ? this.$t('common').dropdownList[0].title : this.$t('common').dropdownList[1].title
+    }
+  },
+  watch:{
+    $route: {
+      handler(route) {
+        for (const v of this.menuData) {
+          if (!v.child) {
+            if (v.href === route.path) {
+              this.defActive = v.href
+              break
+            }
+          } else {
+            for (const vv of v.child) {
+              if (route.path === vv.href) {
+                this.defActive = vv.href
+                break
+              }
+            }
+          }
+        }
+      },
+      immediate: true
     }
   },
   computed: {
@@ -88,6 +124,9 @@ export default {
       this.dropdownTitle = command === 'zh-CN' ? ls[0].title : ls[1].title
       localStorage.setItem('language', command)
       location.reload()
+    },
+    handleClick({ item, key, keyPath }){
+      console.log(key)
     },
     togger() {
       this.isCollapse = !this.isCollapse
@@ -158,6 +197,12 @@ export default {
     //   width: 32px;
     //   height: 60px;
     // }
+  }
+  .a-span{
+    margin-left: 20px;
+  }
+  .b-span{
+    margin-left: 10px;
   }
 }
 </style>

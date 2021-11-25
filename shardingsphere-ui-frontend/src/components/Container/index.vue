@@ -17,9 +17,9 @@
 
 <template>
   <el-container style="height: 100%;">
-    <el-aside width="auto">
+<!--    <el-aside width="auto">
       <s-menu :is-collapse="isCollapse" />
-    </el-aside>
+    </el-aside>-->
     <el-container>
       <el-header style="padding: 0">
         <s-head class="s-head" @on-togger="onTogger" />
@@ -35,19 +35,19 @@
 </template>
 
 <script>
-import SMenu from '../Menu/index.vue'
+//import SMenu from '../Menu/index.vue'
 import SHead from '../Head/index.vue'
 import SFooter from '../Footer/index.vue'
 export default {
   name: 'Container',
   components: {
-    SMenu,
+    //SMenu,
     SHead,
     SFooter
   },
   data() {
     return {
-      isCollapse: false
+      isCollapse: true
     }
   },
   methods: {
@@ -61,5 +61,6 @@ export default {
 <style lang="scss" scoped>
 .el-main {
   overflow: inherit;
+  width: 100%;
 }
 </style>
