@@ -64,6 +64,7 @@
 <script>
 import SFooter from '../../components/Footer/index'
 import API from './api'
+import loginApi from "./api";
 export default {
   name: 'Login',
   components: {
@@ -91,6 +92,10 @@ export default {
   created() {
     if (window.localStorage.getItem('Access-Token')) {
       location.href = '#/config-center'
+    }else if(this.$route.query.username && this.$route.query.pwd){
+      this.loginForm.username = this.$route.query.username
+      this.loginForm.password = this.$route.query.pwd
+      this.handleLogin()
     }
   },
   methods: {

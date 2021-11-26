@@ -18,13 +18,13 @@
 <template>
   <div class="s-layout-header">
     <div class="s-pro-components-header">
-      <div class="s-pro-components-header-right">
+<!--      <div class="s-pro-components-header-right">
         <div class="avatar">
           <el-dropdown @command="handlerClick">
             <el-tag type="success">
               <span class="el-dropdown-link">
                 {{ username || 'Not logged in' }}
-                <i class="el-icon-arrow-down el-icon--right" />
+                <i class="el-icon-arrow-down el-icon&#45;&#45;right" />
               </span>
             </el-tag>
             <el-dropdown-menu slot="dropdown">
@@ -35,14 +35,14 @@
         <div class="lang-more">
           <el-dropdown @command="handleCommand">
             <span class="el-dropdown-link">
-              {{ dropdownTitle }}<i class="el-icon-arrow-down el-icon--right" />
+              {{ dropdownTitle }}<i class="el-icon-arrow-down el-icon&#45;&#45;right" />
             </span>
             <el-dropdown-menu slot="dropdown">
               <el-dropdown-item v-for="(item, index) in dropdownList" :key="index" :command="item.command">{{ item.title }}</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
         </div>
-      </div>
+      </div>-->
       <div style="width: 50%">
         <el-menu
           mode = 'horizontal'
