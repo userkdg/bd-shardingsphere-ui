@@ -64,20 +64,18 @@ public class EncryptionRuleSourceTablePlainSetNullTest extends BaseTest {
         // update table_xx set field_1=null, field_2 = null where 1=1
         // alter table xx drop column col1, drop column col2 ..;
         List<String> updateSqls = getSqlMode(FieldMode.DROP);
-        try (Connection conn = DriverManager.getConnection(sourceUrl)) {
-            updateSqls.parallelStream()
-                    .forEach(sql -> {
+        updateSqls.parallelStream()
+                .forEach(sql -> {
+                    try (Connection conn = DriverManager.getConnection(sourceUrl)) {
                         try (PreparedStatement ps = conn.prepareStatement(sql)) {
                             boolean execute = ps.execute();
                             log.info("sql={},status:{}", sql, execute);
-                        } catch (SQLException e) {
-                            e.printStackTrace();
                         }
-                    });
-            log.info("sqls:{}", updateSqls);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                });
+        log.info("sqls:{}", updateSqls);
     }
 
     private List<String> getSqlMode(FieldMode mode) {
