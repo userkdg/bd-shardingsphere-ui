@@ -1,0 +1,95 @@
+spring:
+  #  redis:
+  #    database: 5
+  #    host: 192.168.234.4
+  #    password: ""
+  #    jedis:
+  #      pool:
+  #        max-active: 10
+  #        min-idle: 0
+  #        maxWait: 3000
+  #  data:
+  #    redis:
+  #      repositories:
+  #        enabled: false
+  http:
+    encoding:
+      force: true
+      charset: utf-8
+      enabled: true
+  application:
+    name: bd-data-security-proxy-app
+  servlet:
+    multipart:
+      max-file-size: 1MB
+      max-request-size: 10MB
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    default-property-inclusion: non_null
+  messages:
+    encoding: UTF-8
+    basename: message/messages_zh
+  #数据库配置
+  datasource:
+    url: jdbc:mysql://192.168.234.4:3307/data_asset_platform?useUnicode=true&useSSL=false&characterEncoding=utf-8&rewriteBatchedStatements=true&serverTimezone=Asia/Shanghai&autoReconnect=true
+    username: dsmanager
+    password: 'ufxErKTi'
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  main:
+    allow-bean-definition-overriding: true
+
+# Logger Config
+logging:
+  level:
+    org.apache.shardingsphere: info
+    org.springframework: info
+    org.apache.shardingsphere.ui: debug
+    cn.com.bluemoon.daps.domp.api: debug
+    cn.com.bluemoon.metadata.inter: debug
+  config:
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://192.168.243.21:9001/eureka/
+  instance:
+    lease-expiration-duration-in-seconds: 30
+    lease-renewal-interval-in-seconds: 10
+    prefer-ip-address: true
+    metadata-map:
+      weight: 11
+
+
+hystrix:
+  command:
+    default:
+      circuitBreaker:
+        sleepWindowInMilliseconds: 100000
+        forceClosed: true
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 6000
+          strategy: SEMAPHORE
+  shareSecurityContext: true
+  threadpool:
+    default:
+      coreSize: 200 #并发执行的最大线程数，默认10
+      maxQueueSize: 1000 #BlockingQueue的最大队列数，默认值-1
+      queueSizeRejectionThreshold: 800 #即使maxQueueSize没有达到，达到queueSizeRejectionThreshold该值后，请求也会被拒绝，默认值5
+
+feign:
+  hystrix:
+    enabled: true
+  compression:
+    request:
+      min-request-size: 4096 # Ribbon 配置
+
+ribbon:
+  # 连接超时
+  ConnectTimeout: 10000
+  # 响应超时
+  ReadTimeout: 10000

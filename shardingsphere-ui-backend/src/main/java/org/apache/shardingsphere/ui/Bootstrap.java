@@ -23,9 +23,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 /**
  * bootstrap of ShardingSphere UI.
  */
+
+//@EnableEurekaClient
+//@EnableHystrix
 @SpringBootApplication
 public class Bootstrap {
-    
+
     /**
      * Main entrance of ShardingSphere UI.
      *

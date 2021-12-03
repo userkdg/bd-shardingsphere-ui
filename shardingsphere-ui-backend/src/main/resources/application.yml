@@ -1,0 +1,11 @@
+#spring:
+#  profiles:
+#    active: dev
+
+server:
+  port: 8088
+
+user:
+  admin:
+    username: admin
+    password: admin
