@@ -15,8 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -47,7 +47,7 @@ public class EncryptionRuleSourceTablePlainSetNullTest extends BaseTest {
         Map<String, DataSourceConfiguration> dataSource = metaDataPersistService.getDataSourceService().load(schema);
         Map<String, Object> dataSourceProps = dataSource.values().stream().findFirst()
                 .map(DataSourceConfiguration::getAllProps).orElseThrow(() -> new RuntimeException("ERROR"));
-        this.sourceUrl = dataSourceProps.get("jdbcUrl").toString()+"&user="+dataSourceProps.get("username").toString()+"&password="+dataSourceProps.get("password");
+        this.sourceUrl = dataSourceProps.get("jdbcUrl").toString() + "&user=" + dataSourceProps.get("username").toString() + "&password=" + dataSourceProps.get("password");
         // 读取配置中心的规则的表和明文列
         List<EncryptRuleConfiguration> encrypts = readRule();
         List<TableInfo> tableInfos0 = encrypts.stream().flatMap(e -> e.getTables().stream())
@@ -62,6 +62,45 @@ public class EncryptionRuleSourceTablePlainSetNullTest extends BaseTest {
     @Test
     public void testSourceTablePlainSetNull() {
         // update table_xx set field_1=null, field_2 = null where 1=1
+        // alter table xx drop column col1, drop column col2 ..;
+        List<String> updateSqls = getSqlMode(FieldMode.DROP);
+        try (Connection conn = DriverManager.getConnection(sourceUrl)) {
+            updateSqls.parallelStream()
+                    .forEach(sql -> {
+                        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                            boolean execute = ps.execute();
+                            log.info("sql={},status:{}", sql, execute);
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                    });
+            log.info("sqls:{}", updateSqls);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private List<String> getSqlMode(FieldMode mode) {
+        if (FieldMode.DROP.equals(mode)) {
+            return getDropSqls();
+        }
+        return getUpdateSqls();
+    }
+
+    private List<String> getDropSqls() {
+        List<String> updateSqls = new ArrayList<>(tableInfos.size());
+        for (TableInfo tableInfo : tableInfos) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("alter table ").append(tableInfo.getName());
+            String setFieldNulls = tableInfo.getCleanFields().stream()
+                    .map(f -> " drop column " + f).collect(Collectors.joining(" , "));
+            sb.append(setFieldNulls);
+            updateSqls.add(sb.toString());
+        }
+        return updateSqls;
+    }
+
+    private List<String> getUpdateSqls() {
         List<String> updateSqls = new ArrayList<>(tableInfos.size());
         for (TableInfo tableInfo : tableInfos) {
             StringBuilder sb = new StringBuilder();
@@ -70,18 +109,11 @@ public class EncryptionRuleSourceTablePlainSetNullTest extends BaseTest {
             sb.append(setFieldNulls);
             updateSqls.add(sb.toString());
         }
-        try (Connection conn = DriverManager.getConnection(sourceUrl)) {
-            try (Statement statement = conn.createStatement()) {
-                for (String updateSql : updateSqls) {
-                    statement.addBatch(updateSql);
-                }
-                int[] batch = statement.executeBatch();
-                log.info("sqls:{}", updateSqls);
-                log.info("res:{}", batch);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        return updateSqls;
+    }
+
+    public enum FieldMode {
+        UPDATE, DROP;
     }
 
     @RequiredArgsConstructor
