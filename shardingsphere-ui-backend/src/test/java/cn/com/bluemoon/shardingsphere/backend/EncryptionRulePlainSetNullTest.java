@@ -78,9 +78,6 @@ public class EncryptionRulePlainSetNullTest extends BaseTest {
                 .map(e -> {
                     List<EncryptTableRuleConfiguration> tables = e.getTables().stream().map(t -> {
                         List<EncryptColumnRuleConfiguration> newCols = t.getColumns().stream().map(col ->{
-                            if (t.getName().equalsIgnoreCase("ec_oms_order")) {
-                                return new EncryptColumnRuleConfiguration(col.getLogicColumn(), col.getCipherColumn(), col.getAssistedQueryColumn(), col.getLogicColumn(), col.getEncryptorName());
-                            }else
                                 return new EncryptColumnRuleConfiguration(col.getLogicColumn(), col.getCipherColumn(), col.getAssistedQueryColumn(), null, col.getEncryptorName());
                         }).collect(Collectors.toList());
                         return new EncryptTableRuleConfiguration(t.getName(), newCols, t.getQueryWithCipherColumn());
