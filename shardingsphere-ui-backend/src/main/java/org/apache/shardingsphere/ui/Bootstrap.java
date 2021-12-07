@@ -19,12 +19,13 @@ package org.apache.shardingsphere.ui;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 
 /**
  * bootstrap of ShardingSphere UI.
  */
 
-//@EnableEurekaClient
+@EnableEurekaClient
 //@EnableHystrix
 @SpringBootApplication
 public class Bootstrap {

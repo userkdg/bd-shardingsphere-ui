@@ -12,11 +12,6 @@ spring:
   #    redis:
   #      repositories:
   #        enabled: false
-  http:
-    encoding:
-      force: true
-      charset: utf-8
-      enabled: true
   application:
     name: bd-data-security-proxy-app
   servlet:
@@ -93,3 +88,9 @@ ribbon:
   ConnectTimeout: 10000
   # 响应超时
   ReadTimeout: 10000
+server:
+  servlet:
+    encoding:
+      force: true
+      charset: utf-8
+      enabled: true
