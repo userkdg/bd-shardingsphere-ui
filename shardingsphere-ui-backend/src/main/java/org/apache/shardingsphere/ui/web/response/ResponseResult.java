@@ -42,4 +42,22 @@ public final class ResponseResult<T> implements Serializable {
     private String errorMsg;
     
     private T model;
+
+    private ResponseResult(int code, String msg) {
+        this.success = false;
+        this.errorCode = code;
+        this.errorMsg = msg;
+    }
+
+    private ResponseResult(T model) {
+        this.model = model;
+    }
+
+    public static <T> ResponseResult<T> error(String msg) {
+        return new ResponseResult(500, msg);
+    }
+
+    public static <T> ResponseResult<T> ok(T data) {
+        return new ResponseResult(data);
+    }
 }

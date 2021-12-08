@@ -97,7 +97,7 @@ public final class ShardingSchemaServiceImpl implements ShardingSchemaService {
         }
     }
 
-    public void persistRuleConfiguration(final String schemaName, final Collection<RuleConfiguration> ruleConfiguration) {
+    private void persistRuleConfiguration(final String schemaName, final Collection<RuleConfiguration> ruleConfiguration) {
         configCenterService.getActivatedMetadataService().getSchemaRuleService()
                 .persist(schemaName, ruleConfiguration, true);
     }

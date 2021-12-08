@@ -33,6 +33,27 @@
 
     <dependencies>
 
+        <dependency>
+            <groupId>cn.com.bluemoon</groupId>
+            <artifactId>daps-api-system</artifactId>
+            <version>1.4.1-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.github.openfeign.form</groupId>
+                    <artifactId>feign-form</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openfeign.form</groupId>
+            <artifactId>feign-form</artifactId>
+            <version>3.8.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-hystrix</artifactId>
+            <version>10.12</version>
+        </dependency>
         <!--增加eureka-server的依赖 -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>

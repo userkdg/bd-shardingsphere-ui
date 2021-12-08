@@ -20,14 +20,19 @@ package org.apache.shardingsphere.ui;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
+import org.springframework.cloud.netflix.hystrix.EnableHystrix;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
 /**
  * bootstrap of ShardingSphere UI.
  */
 
 @EnableEurekaClient
-//@EnableHystrix
+// @EnableHystrix
 @SpringBootApplication
+// @EnableCustomConfig
+@EnableFeignClients(basePackages = "cn.com.bluemoon")
+// @EnableHystrix
 public class Bootstrap {
 
     /**
