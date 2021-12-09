@@ -5,12 +5,18 @@ import cn.com.bluemoon.daps.api.sys.RemoteSystemDatasourceService;
 import cn.com.bluemoon.daps.common.domain.ResultBean;
 import cn.com.bluemoon.daps.system.entity.DapSystemDatasourceEnvironment;
 import com.alibaba.excel.EasyExcel;
+import com.alibaba.fastjson.JSON;
+import com.google.gson.JsonArray;
 import org.apache.poi.util.IOUtils;
 import org.apache.shardingsphere.infra.config.RuleConfiguration;
+import org.apache.shardingsphere.infra.config.datasource.DataSourceConfiguration;
+import org.apache.shardingsphere.infra.metadata.schema.ShardingSphereSchema;
 import org.apache.shardingsphere.ui.common.domain.DatasourceInfo;
 import org.apache.shardingsphere.ui.common.domain.FormWorkConstant;
 import org.apache.shardingsphere.ui.common.domain.SensitiveInformation;
+import org.apache.shardingsphere.ui.servcie.ConfigCenterService;
 import org.apache.shardingsphere.ui.servcie.ExcelShardingSchemaService;
+import org.apache.shardingsphere.ui.servcie.ShardingSchemaService;
 import org.apache.shardingsphere.ui.util.ImportEncryptionRuleUtils;
 import org.apache.shardingsphere.ui.web.response.ResponseResult;
 import org.apache.shardingsphere.ui.web.response.ResponseResultUtil;
@@ -20,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -33,10 +40,13 @@ import java.util.Map;
 public class ImportEncryptionRuleController {
 
     @Autowired
-    RemoteSystemDatasourceService remoteSystemDatasourceService;
+    private RemoteSystemDatasourceService remoteSystemDatasourceService;
 
     @Resource
-    ExcelShardingSchemaService excelShardingSchemaService;
+    private ExcelShardingSchemaService excelShardingSchemaService;
+
+    @Autowired
+    ConfigCenterService configCenterService;
 
     /**
      * 模板下载
@@ -58,7 +68,7 @@ public class ImportEncryptionRuleController {
      * @return
      */
     @PostMapping(value = "import")
-    public ResponseResult<Collection<String>> importRule(@RequestBody MultipartFile file, @RequestParam("id") String schemaId ) {
+    public ResponseResult<String> importRule(@RequestBody MultipartFile file, @RequestParam("id") String schemaId ) {
 
         // 获取schema下的环境列表
         ResultBean<Map<String, List<DapSystemDatasourceEnvironment>>> resultBean = remoteSystemDatasourceService.getSchemaDatasourceList(schemaId);
@@ -73,16 +83,18 @@ public class ImportEncryptionRuleController {
         Map<String, List<DapSystemDatasourceEnvironment>> map = resultBean.getContent();
         ResponseResult<Boolean> result = excelShardingSchemaService.CheckShardingSchemaRule(map);
         if (result.isSuccess()){
+            String schemaName = map.keySet().stream().findFirst().get();
             // 封装数据源
-
+            Map<String, DataSourceConfiguration> maps = ImportEncryptionRuleUtils.transToDatasourceString(map.get(schemaName));
             // 封装规则结果集
             List<RuleConfiguration> ruleConfigurations = ImportEncryptionRuleUtils.transToRuleConfiguration(data.getModel());
-            // 创建schema
-
+            // 规则写入配置文件
+            configCenterService.getActivatedMetadataService().getSchemaMetaDataService().persist(schemaName, new ShardingSphereSchema());
+            configCenterService.getActivatedMetadataService().getSchemaRuleService().persist(schemaName, ruleConfigurations, true);
+            configCenterService.getActivatedMetadataService().getDataSourceService().persist(schemaName, maps);
+            return ResponseResult.ok("导入成功!");
         }
         // 获取schema列表接口
-
-        return null;
-
+        return ResponseResult.error(result.getErrorMsg());
     }
 }

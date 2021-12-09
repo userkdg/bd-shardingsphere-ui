@@ -13,9 +13,9 @@ import java.sql.*;
 
 public class ConnectionProxyUtils {
 
-    private static final String MYSQL = "jdbc:mysql://";
-    private static final String PGSQL = "jdbc:postgresql://";
-    private static String PG_DRIVER = "org.postgresql.Driver";
+    public static final String MYSQL = "jdbc:mysql://";
+    public static final String PGSQL = "jdbc:postgresql://";
+    public static String PG_DRIVER = "org.postgresql.Driver";
 
 
     public static ResponseResult<T> connectionDatabase(){
@@ -41,17 +41,11 @@ public class ConnectionProxyUtils {
 
     public static Boolean connectTest(DapSystemDatasourceEnvironment environment){
 
-        DatabaseType databaseType = environment.getDbType();
-        String prefixUrl = databaseType.equals(DatabaseType.MYSQL) ? MYSQL : PGSQL;
-        String dbName = StringUtils.isBlank(environment.getDatabaseName()) ? "" : "/"+ environment.getDatabaseName();
-        String schema = StringUtils.isBlank(environment.getDatabaseSchema()) ? "" : String.format("?searchpath=%s", environment.getDatabaseSchema());
-        String url = prefixUrl + environment.getHost()+":"+environment.getPort() + dbName + (databaseType.equals(DatabaseType.MYSQL) ? "" : schema);
-        //获取连接
         try {
-            if(databaseType.equals(DatabaseType.PGSQL)){
+            if(environment.getDbType().equals(DatabaseType.PGSQL)){
                 Class.forName(PG_DRIVER);
             }
-            Connection connection = DriverManager.getConnection(url,environment.getUsername(),environment.getPassword());
+            Connection connection = DriverManager.getConnection(getUrl(environment),environment.getUsername(),environment.getPassword());
             connection.close();
             return true;
         } catch (SQLException | ClassNotFoundException e) {
@@ -59,9 +53,14 @@ public class ConnectionProxyUtils {
         }
     }
 
-    public static void main(String[] args){
+    public static String getUrl(DapSystemDatasourceEnvironment environment){
 
-        connectionDatabase();
+        DatabaseType databaseType = environment.getDbType();
+        String prefixUrl = databaseType.equals(DatabaseType.MYSQL) ? MYSQL : PGSQL;
+        String dbName = StringUtils.isBlank(environment.getDatabaseName()) ? "" : "/"+ environment.getDatabaseName();
+        String schema = StringUtils.isBlank(environment.getDatabaseSchema()) ? "" : String.format("?searchpath=%s", environment.getDatabaseSchema());
+        String url = prefixUrl + environment.getHost()+":"+environment.getPort() + dbName + (databaseType.equals(DatabaseType.MYSQL) ? "" : schema);
+        return url;
 
     }
 

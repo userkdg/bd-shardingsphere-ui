@@ -35,7 +35,7 @@ public class ExcelShardingServiceImpl implements ExcelShardingSchemaService {
         List<DapSystemDatasourceEnvironment> environments = map.get(schemaName);
         for (DapSystemDatasourceEnvironment environment : environments) {
             Boolean flag = ConnectionProxyUtils.connectTest(environment);
-            if(flag){
+            if(!flag){
                 return ResponseResult.error(String.format("%s:%s数据源连接失败", environment.getHost(),environment.getPort()));
             }
         }
