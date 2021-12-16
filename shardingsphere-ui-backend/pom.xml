@@ -35,6 +35,11 @@
     <dependencies>
         <dependency>
             <groupId>cn.com.bluemoon</groupId>
+            <artifactId>bd-shardingsphere-custom-encrypt-algo</artifactId>
+            <version>5.0.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.bluemoon</groupId>
             <artifactId>bd-shardingsphere-custom-encrypt-shuffle-sdk</artifactId>
             <version>5.0.0-SNAPSHOT</version>
         </dependency>
@@ -323,6 +328,12 @@
     
     <build>
         <finalName>shardingsphere-ui</finalName>
+
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

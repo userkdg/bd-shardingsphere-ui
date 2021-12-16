@@ -23,6 +23,8 @@ import org.apache.shardingsphere.ui.common.domain.SensitiveInformation;
 import org.apache.shardingsphere.ui.common.dto.FiledEncryptionInfo;
 import org.apache.shardingsphere.ui.util.excel.ExcelHeadDataListener;
 import org.apache.shardingsphere.ui.util.jdbc.ConnectionProxyUtils;
+import org.apache.shardingsphere.ui.util.sql.FieldFactory;
+import org.apache.shardingsphere.ui.util.sql.MysqlFieldFactory;
 import org.apache.shardingsphere.ui.web.response.ResponseResult;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -137,12 +139,11 @@ public class ImportEncryptionRuleUtils {
 
     public static Map<QueryMetaDataRequest, List<FiledEncryptionInfo>> getCipherInfo( List<ColumnInfoVO> list, List<Map<String, ShardingSphereAlgorithmConfiguration>> encryptors,
                                                           List<QueryMetaDataRequest> requests){
-        // 获取键值对
+        // 获取键值对 字段维度
         Map<String, ColumnInfoVO> tableMap = list.stream().collect(Collectors.toMap(c -> String.format("%s_%s", c.getTableName(), c.getName()), ColumnInfoVO -> ColumnInfoVO));
         Map<String, ShardingSphereAlgorithmConfiguration> ruleMap = encryptors.stream().collect(HashMap::new, HashMap::putAll, HashMap::putAll);
-        Map<String, List<FiledEncryptionInfo>> infoMap = new HashMap<>();
+        List<FiledEncryptionInfo> fieldList = Lists.newArrayList();
         for (Map.Entry<String, ShardingSphereAlgorithmConfiguration> rule : ruleMap.entrySet()){
-            List<FiledEncryptionInfo> fieldList = Lists.newArrayList();
             if(tableMap.containsKey(rule.getKey())){
                 FiledEncryptionInfo filedEncryptionInfo = new FiledEncryptionInfo();
                 filedEncryptionInfo.setProps(rule.getValue().getProps());
@@ -150,14 +151,12 @@ public class ImportEncryptionRuleUtils {
                 filedEncryptionInfo.setColumnInfoVO(tableMap.get(rule.getKey()));
                 fieldList.add(filedEncryptionInfo);
             }
-            infoMap.put(rule.getKey(), fieldList);
         }
-        //
         Map<QueryMetaDataRequest, List<FiledEncryptionInfo>> cipherMap = new HashMap<>();
-        for (Map.Entry<String, List<FiledEncryptionInfo>> info : infoMap.entrySet()){
-            List<QueryMetaDataRequest> collect = requests.stream().filter(r -> r.getTableNames().contains(info.getKey())).collect(Collectors.toList());
+        for (QueryMetaDataRequest request : requests) {
+            List<FiledEncryptionInfo> collect = fieldList.stream().filter(f -> request.getTableNames().contains(f.getColumnInfoVO().getTableName())).collect(Collectors.toList());
             if(!collect.isEmpty()){
-                cipherMap.put(collect.stream().findFirst().get(), info.getValue());
+                cipherMap.put(request, collect);
             }
         }
         return cipherMap;
@@ -168,36 +167,19 @@ public class ImportEncryptionRuleUtils {
      * @param cipherMap
      * @return
      */
-    public static List<String> createCipherFieldSql(Map<QueryMetaDataRequest, List<FiledEncryptionInfo>> cipherMap){
+    public static Map<QueryMetaDataRequest, String> createCipherFieldSql(Map<QueryMetaDataRequest, List<FiledEncryptionInfo>> cipherMap){
 
-
+        Map<QueryMetaDataRequest, String> map = new HashMap<>();
         for (Map.Entry<QueryMetaDataRequest,List<FiledEncryptionInfo>> entry: cipherMap.entrySet()) {
             QueryMetaDataRequest key = entry.getKey();
-            DbTypeEnum dbType = key.getDbType();
-            if(dbType.equals(DbTypeEnum.MYSQL)){
-                for (FiledEncryptionInfo info : entry.getValue()) {
-                    // 获取密文字段的长度
-                    /*if(info.getColumnInfoVO().getSqlSimpleType())
-                    getEncryptionFieldLength(info.algorithmType, info.props, info.columnInfoVO.getLength());*/
-                }
-
+            StringBuffer stringBuffer = new StringBuffer();
+            for (FiledEncryptionInfo info : entry.getValue()) {
+                MysqlFieldFactory mysqlFieldFactory = FieldFactory.mysqlFieldFactory();
+                String fieldSql = mysqlFieldFactory.createFieldSql(info);
+                stringBuffer.append(fieldSql);
             }
+            map.put(key, stringBuffer.toString());
         }
-        return null;
-
-    }
-    /**
-     * 计算加密后的字段长度
-     * @return
-     */
-    public static Integer getEncryptionFieldLength(String algorithmType, Properties props, String length){
-
-        EncryptAlgorithm algorithm = ShardingSphereAlgorithmFactory
-                .createAlgorithm(new ShardingSphereAlgorithmConfiguration(algorithmType, props),
-                        EncryptAlgorithm.class);
-        List<String> list = Collections.nCopies(Integer.getInteger(length), "中");
-        String join = String.join("", list);
-        String encrypt = algorithm.encrypt(join);
-        return encrypt.length();
+        return map;
     }
 }
