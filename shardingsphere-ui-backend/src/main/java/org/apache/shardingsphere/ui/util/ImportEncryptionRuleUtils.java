@@ -1,31 +1,29 @@
 package org.apache.shardingsphere.ui.util;
 
 
-import cn.com.bluemoon.daps.common.enums.DatabaseType;
 import cn.com.bluemoon.daps.system.entity.DapSystemDatasourceEnvironment;
+import cn.com.bluemoon.metadata.common.enums.DbTypeEnum;
+import cn.com.bluemoon.metadata.inter.dto.in.QueryMetaDataRequest;
+import cn.com.bluemoon.metadata.inter.dto.out.ColumnInfoVO;
+import cn.com.bluemoon.metadata.inter.dto.out.TableInfoVO;
 import cn.hutool.core.util.RandomUtil;
+import cn.hutool.crypto.symmetric.AES;
 import com.alibaba.excel.EasyExcel;
-import com.alibaba.fastjson.JSON;
-import com.fasterxml.jackson.databind.util.JSONPObject;
-import com.google.gson.JsonArray;
-import groovy.util.Factory;
 import org.apache.commons.compress.utils.Lists;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.apache.shardingsphere.encrypt.api.config.EncryptRuleConfiguration;
 import org.apache.shardingsphere.encrypt.api.config.rule.EncryptColumnRuleConfiguration;
 import org.apache.shardingsphere.encrypt.api.config.rule.EncryptTableRuleConfiguration;
+import org.apache.shardingsphere.encrypt.spi.EncryptAlgorithm;
 import org.apache.shardingsphere.infra.config.RuleConfiguration;
+import org.apache.shardingsphere.infra.config.algorithm.ShardingSphereAlgorithm;
 import org.apache.shardingsphere.infra.config.algorithm.ShardingSphereAlgorithmConfiguration;
+import org.apache.shardingsphere.infra.config.algorithm.ShardingSphereAlgorithmFactory;
 import org.apache.shardingsphere.infra.config.datasource.DataSourceConfiguration;
 import org.apache.shardingsphere.ui.common.domain.SensitiveInformation;
-import org.apache.shardingsphere.ui.servcie.ShardingSchemaService;
-import org.apache.shardingsphere.ui.servcie.impl.ShardingSchemaServiceImpl;
+import org.apache.shardingsphere.ui.common.dto.FiledEncryptionInfo;
 import org.apache.shardingsphere.ui.util.excel.ExcelHeadDataListener;
 import org.apache.shardingsphere.ui.util.jdbc.ConnectionProxyUtils;
 import org.apache.shardingsphere.ui.web.response.ResponseResult;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.openfeign.FallbackFactory;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -135,5 +133,71 @@ public class ImportEncryptionRuleUtils {
             e.printStackTrace();
         }
         return file;
+    }
+
+    public static Map<QueryMetaDataRequest, List<FiledEncryptionInfo>> getCipherInfo( List<ColumnInfoVO> list, List<Map<String, ShardingSphereAlgorithmConfiguration>> encryptors,
+                                                          List<QueryMetaDataRequest> requests){
+        // 获取键值对
+        Map<String, ColumnInfoVO> tableMap = list.stream().collect(Collectors.toMap(c -> String.format("%s_%s", c.getTableName(), c.getName()), ColumnInfoVO -> ColumnInfoVO));
+        Map<String, ShardingSphereAlgorithmConfiguration> ruleMap = encryptors.stream().collect(HashMap::new, HashMap::putAll, HashMap::putAll);
+        Map<String, List<FiledEncryptionInfo>> infoMap = new HashMap<>();
+        for (Map.Entry<String, ShardingSphereAlgorithmConfiguration> rule : ruleMap.entrySet()){
+            List<FiledEncryptionInfo> fieldList = Lists.newArrayList();
+            if(tableMap.containsKey(rule.getKey())){
+                FiledEncryptionInfo filedEncryptionInfo = new FiledEncryptionInfo();
+                filedEncryptionInfo.setProps(rule.getValue().getProps());
+                filedEncryptionInfo.setAlgorithmType(rule.getValue().getType());
+                filedEncryptionInfo.setColumnInfoVO(tableMap.get(rule.getKey()));
+                fieldList.add(filedEncryptionInfo);
+            }
+            infoMap.put(rule.getKey(), fieldList);
+        }
+        //
+        Map<QueryMetaDataRequest, List<FiledEncryptionInfo>> cipherMap = new HashMap<>();
+        for (Map.Entry<String, List<FiledEncryptionInfo>> info : infoMap.entrySet()){
+            List<QueryMetaDataRequest> collect = requests.stream().filter(r -> r.getTableNames().contains(info.getKey())).collect(Collectors.toList());
+            if(!collect.isEmpty()){
+                cipherMap.put(collect.stream().findFirst().get(), info.getValue());
+            }
+        }
+        return cipherMap;
+    }
+
+    /**
+     * 创建密文字段脚本
+     * @param cipherMap
+     * @return
+     */
+    public static List<String> createCipherFieldSql(Map<QueryMetaDataRequest, List<FiledEncryptionInfo>> cipherMap){
+
+
+        for (Map.Entry<QueryMetaDataRequest,List<FiledEncryptionInfo>> entry: cipherMap.entrySet()) {
+            QueryMetaDataRequest key = entry.getKey();
+            DbTypeEnum dbType = key.getDbType();
+            if(dbType.equals(DbTypeEnum.MYSQL)){
+                for (FiledEncryptionInfo info : entry.getValue()) {
+                    // 获取密文字段的长度
+                    /*if(info.getColumnInfoVO().getSqlSimpleType())
+                    getEncryptionFieldLength(info.algorithmType, info.props, info.columnInfoVO.getLength());*/
+                }
+
+            }
+        }
+        return null;
+
+    }
+    /**
+     * 计算加密后的字段长度
+     * @return
+     */
+    public static Integer getEncryptionFieldLength(String algorithmType, Properties props, String length){
+
+        EncryptAlgorithm algorithm = ShardingSphereAlgorithmFactory
+                .createAlgorithm(new ShardingSphereAlgorithmConfiguration(algorithmType, props),
+                        EncryptAlgorithm.class);
+        List<String> list = Collections.nCopies(Integer.getInteger(length), "中");
+        String join = String.join("", list);
+        String encrypt = algorithm.encrypt(join);
+        return encrypt.length();
     }
 }

@@ -30,5 +30,6 @@ export default {
   putAuth: (params = {}) => API.put(`/api/authentication`, params),
   // props
   getProps: () => API.get(`/api/props`),
-  putProps: (params = {}) => API.put(`/api/props`, params)
+  putProps: (params = {}) => API.put(`/api/props`, params),
+  getSchemaList: () => API.get(`/api/config-center/schema/List`)
 }

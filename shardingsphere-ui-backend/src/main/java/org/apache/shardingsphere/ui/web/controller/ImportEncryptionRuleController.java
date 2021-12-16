@@ -4,6 +4,7 @@ package org.apache.shardingsphere.ui.web.controller;
 import cn.com.bluemoon.daps.api.sys.RemoteSystemDatasourceService;
 import cn.com.bluemoon.daps.common.domain.ResultBean;
 import cn.com.bluemoon.daps.system.entity.DapSystemDatasourceEnvironment;
+import cn.com.bluemoon.daps.system.entity.DapSystemSchema;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.fastjson.JSON;
 import com.google.gson.JsonArray;
@@ -48,6 +49,9 @@ public class ImportEncryptionRuleController {
     @Autowired
     ConfigCenterService configCenterService;
 
+    @Autowired
+    ShardingSchemaService shardingSchemaService;
+
     /**
      * 模板下载
      * @param response
@@ -89,12 +93,26 @@ public class ImportEncryptionRuleController {
             // 封装规则结果集
             List<RuleConfiguration> ruleConfigurations = ImportEncryptionRuleUtils.transToRuleConfiguration(data.getModel());
             // 规则写入配置文件
-            configCenterService.getActivatedMetadataService().getSchemaMetaDataService().persist(schemaName, new ShardingSphereSchema());
             configCenterService.getActivatedMetadataService().getSchemaRuleService().persist(schemaName, ruleConfigurations, true);
             configCenterService.getActivatedMetadataService().getDataSourceService().persist(schemaName, maps);
+            configCenterService.getActivatedMetadataService().getSchemaMetaDataService().persist(schemaName, new ShardingSphereSchema());
             return ResponseResult.ok("导入成功!");
         }
         // 获取schema列表接口
         return ResponseResult.error(result.getErrorMsg());
+    }
+
+    /**
+     * schema列表
+     * @return
+     */
+    @GetMapping("schema/List")
+    public ResponseResult<List<DapSystemSchema>> getSchemaList(){
+
+        ResultBean<List<DapSystemSchema>> schemaList = remoteSystemDatasourceService.getSchemaList();
+        if(schemaList.getCode() == 200 && schemaList.getContent() != null){
+            return ResponseResult.ok(schemaList.getContent());
+        }
+        return ResponseResult.error(schemaList.getMsg());
     }
 }

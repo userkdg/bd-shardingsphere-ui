@@ -17,11 +17,14 @@
 
 <template>
   <el-row class="box-card">
+
     <el-radio-group v-model="radioValue" @change="onChange">
       <el-radio-button :label="$t('ruleConfig.radioBtn.schema')" />
       <el-radio-button :label="$t('ruleConfig.radioBtn.authentication')" />
       <el-radio-button :label="$t('ruleConfig.radioBtn.props')" />
     </el-radio-group>
+    <el-button type="primary" class="down" @click="uploadData">导入规则</el-button>
+    <UploadPanel ref="uploadFile"></UploadPanel>
     <component :is="currentView" />
   </el-row>
 </template>
@@ -29,13 +32,14 @@
 import MSchema from './module/schema'
 import MAuthentication from './module/authentication'
 import MProps from './module/props'
+import UploadPanel from './module/uploadPanel'
 
 export default {
   name: 'RuleConfig',
   components: {
     MSchema,
     MAuthentication,
-    MProps
+    UploadPanel,
   },
   data() {
     return {
@@ -53,6 +57,10 @@ export default {
       } else if (val === radioBtn.props) {
         this.currentView = MProps
       }
+    },
+    uploadData(){
+      this.$refs.uploadFile.visibleModel(true)
+      //UploadPanel.methods.visibleModel(true)
     }
   }
 }
@@ -60,5 +68,8 @@ export default {
 <style lang='scss' scoped>
 .tree-wrap {
   margin-top: 20px;
+}
+.down{
+  margin-left: 70%;
 }
 </style>
