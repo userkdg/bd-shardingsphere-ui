@@ -9,6 +9,7 @@ import cn.com.bluemoon.metadata.inter.dto.out.TableInfoVO;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.symmetric.AES;
 import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.util.StringUtils;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.shardingsphere.encrypt.api.config.EncryptRuleConfiguration;
 import org.apache.shardingsphere.encrypt.api.config.rule.EncryptColumnRuleConfiguration;
@@ -176,7 +177,9 @@ public class ImportEncryptionRuleUtils {
             for (FiledEncryptionInfo info : entry.getValue()) {
                 MysqlFieldFactory mysqlFieldFactory = FieldFactory.mysqlFieldFactory();
                 String fieldSql = mysqlFieldFactory.createFieldSql(info);
-                stringBuffer.append(fieldSql);
+                if(StringUtils.isNotBlank(fieldSql)){
+                    stringBuffer.append(fieldSql);
+                }
             }
             map.put(key, stringBuffer.toString());
         }

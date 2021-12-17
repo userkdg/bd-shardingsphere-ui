@@ -19,6 +19,7 @@ import org.apache.shardingsphere.ui.common.dto.FiledEncryptionInfo;
 import org.apache.shardingsphere.ui.servcie.ConfigCenterService;
 import org.apache.shardingsphere.ui.servcie.CreateCipherService;
 import org.apache.shardingsphere.ui.util.ImportEncryptionRuleUtils;
+import org.apache.shardingsphere.ui.util.jdbc.ConnectionProxyUtils;
 import org.apache.shardingsphere.ui.web.response.ResponseResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -84,10 +85,9 @@ public class CreateCipherServiceImpl implements CreateCipherService {
                             .filter(c -> cipher.contains(c.getName())).map(ColumnInfoVO::getName)
                             .collect(Collectors.toList());
                     List<ColumnInfoVO> sameField = samePlainField.stream().filter(s -> !sameCipherField.contains(s.getName() + "_cipher")).collect(Collectors.toList());
-                    cipherFiled.addAll(samePlainField);
-                    /*if(!sameField.isEmpty()){
+                    if(!sameField.isEmpty()){
                         cipherFiled.addAll(sameField);
-                    }*/
+                    }
                 }
             }
             List<QueryMetaDataRequest> requests = map.keySet().stream().collect(Collectors.toList());
@@ -95,6 +95,15 @@ public class CreateCipherServiceImpl implements CreateCipherService {
             Map<QueryMetaDataRequest, List<FiledEncryptionInfo>> cipherInfo = ImportEncryptionRuleUtils.getCipherInfo(cipherFiled, encryptors, requests);
             // 创建sql
             Map<QueryMetaDataRequest, String> cipherFieldSql = ImportEncryptionRuleUtils.createCipherFieldSql(cipherInfo);
+            // 连接数据库
+            Boolean flag = false;
+            for (Map.Entry<QueryMetaDataRequest, String> entry : cipherFieldSql.entrySet()) {
+                ResponseResult<String> result = ConnectionProxyUtils.connectionDatabase(entry.getKey(), entry.getValue());
+                if(result.isSuccess()){
+                    flag = true;
+                }
+            }
+            return flag ? ResponseResult.ok("字段创建成功") : ResponseResult.error("字段创建失败");
         }
         return ResponseResult.error(String.format("数据库不存在%s表，无法创建密文字段", names));
     }

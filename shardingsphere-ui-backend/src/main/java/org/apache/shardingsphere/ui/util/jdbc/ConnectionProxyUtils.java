@@ -2,6 +2,7 @@ package org.apache.shardingsphere.ui.util.jdbc;
 
 import cn.com.bluemoon.daps.common.enums.DatabaseType;
 import cn.com.bluemoon.daps.system.entity.DapSystemDatasourceEnvironment;
+import cn.com.bluemoon.metadata.inter.dto.in.QueryMetaDataRequest;
 import com.sun.org.apache.regexp.internal.RE;
 import com.zaxxer.hikari.HikariDataSource;
 import org.apache.commons.lang.StringUtils;
@@ -18,25 +19,30 @@ public class ConnectionProxyUtils {
     public static String PG_DRIVER = "org.postgresql.Driver";
 
 
-    public static ResponseResult<T> connectionDatabase(){
-        String url = "jdbc:mysql://192.168.243.34:23308/ec_order_db?serverTimezone=UTC&useSSL=false";
-        // 查看schema
-        // String sql = "show databases";
-        // 查看schema下的数据源
-        // String sql = "SHOW SCHEMA RESOURCES";
-        // 查看规则
-        // String sql = "show encypt rules"
+    public static ResponseResult<String> connectionDatabase(QueryMetaDataRequest request, String sql){
+        String url = String.format("jdbc:mysql://%s:%s/%s", request.getIp(),request.getPort(), request.getDbName());
+        Connection connection = null;
+        PreparedStatement ps = null;
         try {
-            Connection connection = DriverManager.getConnection(url,"root", "root");
-            DatabaseMetaData metaData = connection.getMetaData();
-            ResultSet schemas = metaData.getSchemas();
-            /*Statement  statement = connection.prepareStatement(sql);
-            ResultSet resultSet = statement.executeQuery(sql);*/
+            connection = DriverManager.getConnection(url,request.getUsername(), request.getPassword());
+            ps = connection.prepareStatement(sql);
+            ps.execute();
             connection.close();
         } catch (SQLException e) {
             return ResponseResult.error(e.getMessage());
+        } finally {
+            try {
+                if(ps != null){
+                    ps.close();
+                }
+                if(connection != null){
+                    connection.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
-        return null;
+        return ResponseResult.ok("执行成功");
     }
 
     public static Boolean connectTest(DapSystemDatasourceEnvironment environment){
