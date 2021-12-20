@@ -4,11 +4,13 @@ import cn.com.bluemoon.daps.system.entity.DapSystemDatasourceEnvironment;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import org.apache.shardingsphere.infra.config.RuleConfiguration;
 import org.apache.shardingsphere.mode.metadata.persist.node.SchemaMetaDataNode;
 import org.apache.shardingsphere.mode.persist.PersistRepository;
 import org.apache.shardingsphere.ui.common.domain.SensitiveInformation;
 import org.apache.shardingsphere.ui.servcie.ConfigCenterService;
 import org.apache.shardingsphere.ui.servcie.ExcelShardingSchemaService;
+import org.apache.shardingsphere.ui.util.ConfigurationYamlConverter;
 import org.apache.shardingsphere.ui.util.jdbc.ConnectionProxyUtils;
 import org.apache.shardingsphere.ui.web.response.ResponseResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,5 +47,29 @@ public class ExcelShardingServiceImpl implements ExcelShardingSchemaService {
     @Override
     public Collection<String> loadAllSchemaName() {
         return configCenterService.getActivatedMetadataService().getSchemaMetaDataService().loadAllNames();
+    }
+
+    @Override
+    public void addRuleConfig(String schemaName) {
+
+        PersistRepository repository = configCenterService.getActivatedMetadataService().getRepository();
+        String configData = repository.get(SchemaMetaDataNode.getRulePath(schemaName));
+        Collection<RuleConfiguration> ruleConfigurations = checkRuleConfiguration(configData);
+        configCenterService.getActivatedMetadataService().getSchemaRuleService().persist(schemaName, ruleConfigurations, true);
+
+    }
+
+    private Collection<RuleConfiguration> checkRuleConfiguration(final String configData) {
+        try {
+            if (configData.contains("encryptors:\n")) {
+                return ConfigurationYamlConverter.loadEncryptRuleConfiguration(configData);
+            } else {
+                return ConfigurationYamlConverter.loadMasterSlaveRuleConfiguration(configData);
+            }
+            // CHECKSTYLE:OFF
+        } catch (final Exception ex) {
+            // CHECKSTYLE:ON
+            throw new IllegalArgumentException("rule configuration is invalid.");
+        }
     }
 }

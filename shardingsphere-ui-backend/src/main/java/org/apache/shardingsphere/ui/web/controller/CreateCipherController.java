@@ -2,6 +2,7 @@ package org.apache.shardingsphere.ui.web.controller;
 
 import org.apache.shardingsphere.ui.servcie.CreateCipherService;
 import org.apache.shardingsphere.ui.servcie.ShardingSchemaService;
+import org.apache.shardingsphere.ui.web.response.ResponseResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,8 +21,8 @@ public class CreateCipherController {
      * @param schemaName
      */
     @GetMapping("create/cipher")
-    public void createCipherField(@RequestParam("schema") String schemaName){
+    public ResponseResult<String> createCipherField(@RequestParam("schema") String schemaName){
 
-        createCipherService.createCipherField(schemaName);
+        return createCipherService.createCipherField(schemaName);
     }
 }

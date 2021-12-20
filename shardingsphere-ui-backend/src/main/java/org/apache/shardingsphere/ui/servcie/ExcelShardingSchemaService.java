@@ -13,4 +13,6 @@ public interface ExcelShardingSchemaService {
     ResponseResult<Boolean> CheckShardingSchemaRule(Map<String, List<DapSystemDatasourceEnvironment>> map);
 
     Collection<String> loadAllSchemaName();
+
+    void addRuleConfig(String rule);
 }

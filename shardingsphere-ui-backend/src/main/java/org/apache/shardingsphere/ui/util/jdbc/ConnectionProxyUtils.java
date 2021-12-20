@@ -18,7 +18,6 @@ public class ConnectionProxyUtils {
     public static final String PGSQL = "jdbc:postgresql://";
     public static String PG_DRIVER = "org.postgresql.Driver";
 
-
     public static ResponseResult<String> connectionDatabase(QueryMetaDataRequest request, String sql){
         String url = String.format("jdbc:mysql://%s:%s/%s", request.getIp(),request.getPort(), request.getDbName());
         Connection connection = null;
@@ -27,7 +26,6 @@ public class ConnectionProxyUtils {
             connection = DriverManager.getConnection(url,request.getUsername(), request.getPassword());
             ps = connection.prepareStatement(sql);
             ps.execute();
-            connection.close();
         } catch (SQLException e) {
             return ResponseResult.error(e.getMessage());
         } finally {
@@ -61,11 +59,12 @@ public class ConnectionProxyUtils {
 
     public static String getUrl(DapSystemDatasourceEnvironment environment){
 
+        String mysqlSuffix = "?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true&useSSL=false";
         DatabaseType databaseType = environment.getDbType();
         String prefixUrl = databaseType.equals(DatabaseType.MYSQL) ? MYSQL : PGSQL;
         String dbName = StringUtils.isBlank(environment.getDatabaseName()) ? "" : "/"+ environment.getDatabaseName();
         String schema = StringUtils.isBlank(environment.getDatabaseSchema()) ? "" : String.format("?searchpath=%s", environment.getDatabaseSchema());
-        String url = prefixUrl + environment.getHost()+":"+environment.getPort() + dbName + (databaseType.equals(DatabaseType.MYSQL) ? "" : schema);
+        String url = prefixUrl + environment.getHost()+":"+environment.getPort() + dbName + (databaseType.equals(DatabaseType.MYSQL) ? mysqlSuffix : schema);
         return url;
 
     }

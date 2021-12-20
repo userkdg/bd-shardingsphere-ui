@@ -14,12 +14,8 @@ import java.util.stream.Collectors;
 
 public class MysqlFieldFactory extends FieldFactory{
 
-    private final List<String> charList = Arrays.asList("char", "varchar", "varbinary", "binary");
+    private final List<String> charList = Arrays.asList("char", "varchar", "varbinary", "binary","text","tinytext","mediumtext","longtext");
     private final List<String> intList = Arrays.asList("int", "bigint", "tinyint", "smallint", "mediumint", "float", "double", "decimal");
-
-    static {
-        ShardingSphereServiceLoader.register(EncryptAlgorithm.class);
-    }
 
     @Override
     public Integer getFieldLength(String algorithmType, Properties props, String length) {
@@ -36,10 +32,16 @@ public class MysqlFieldFactory extends FieldFactory{
         String fieldSql = null;
         ColumnInfoVO vo = info.getColumnInfoVO();
         // 获取密文字段的长度
-        if(charList.contains(vo.getSqlSimpleType()) && StringUtils.isNotBlank(vo.getLength())){
-            Integer fieldLength = getFieldLength(info.algorithmType, info.props, vo.getLength());
-            // 字段脚本
-            fieldSql = String.format("alter table %s add %s_cipher %s(%s) comment'%s';", vo.getTableName(), vo.getName(), vo.getSqlSimpleType(), fieldLength, vo.getComment());
+        if(charList.contains(vo.getSqlSimpleType())){
+            // 有长度的字符串
+            if(StringUtils.isNotBlank(vo.getLength())){
+                Integer fieldLength = getFieldLength(info.algorithmType, info.props, vo.getLength());
+                // 字段脚本
+                fieldSql = String.format("alter table %s add %s_cipher %s(%s) comment'%s';", vo.getTableName(), vo.getName(), vo.getSqlSimpleType(), fieldLength, vo.getComment());
+            // 无长度字符串
+            }else {
+                fieldSql = String.format("alter table %s add %s_cipher %s comment'%s';", vo.getTableName(), vo.getName(), vo.getSqlSimpleType(), vo.getComment());
+            }
         }else if(intList.contains(vo.getSqlSimpleType())){
             fieldSql = String.format("alter table %s add %s_cipher %s(%s) comment'%s';", vo.getTableName(), vo.getName(), "varchar", "512", vo.getComment());
         }else{
@@ -48,6 +50,4 @@ public class MysqlFieldFactory extends FieldFactory{
         }
         return fieldSql;
     }
-
-
 }

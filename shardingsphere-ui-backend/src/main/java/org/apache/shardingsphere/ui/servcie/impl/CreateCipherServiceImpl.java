@@ -7,6 +7,9 @@ import cn.com.bluemoon.metadata.inter.dto.in.QueryMetaDataRequest;
 import cn.com.bluemoon.metadata.inter.dto.out.ColumnInfoVO;
 import cn.com.bluemoon.metadata.inter.dto.out.SchemaInfoVO;
 import cn.com.bluemoon.metadata.inter.dto.out.TableInfoVO;
+import cn.com.bluemoon.shardingsphere.custom.shuffle.base.EncryptGlobalConfig;
+import cn.com.bluemoon.shardingsphere.custom.shuffle.base.EncryptGlobalConfigSwapper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.shardingsphere.encrypt.api.config.EncryptRuleConfiguration;
 import org.apache.shardingsphere.encrypt.api.config.rule.EncryptColumnRuleConfiguration;
@@ -28,6 +31,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class CreateCipherServiceImpl implements CreateCipherService {
 
     @Autowired
@@ -42,7 +46,7 @@ public class CreateCipherServiceImpl implements CreateCipherService {
         MetaDataPersistService activatedMetadataService = configCenterService.getActivatedMetadataService();
         Collection<RuleConfiguration> ruleConfiguration = activatedMetadataService.getSchemaRuleService().load(schemaName);// 规则信息
         if(ruleConfiguration.isEmpty()){
-            return ResponseResult.error("规则为空!");
+            return ResponseResult.error("schema不存在或规则为空!");
         }
         // 加载数据源
         Map<String, DataSourceConfiguration> load = activatedMetadataService.getDataSourceService().load(schemaName);

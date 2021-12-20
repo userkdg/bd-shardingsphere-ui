@@ -93,9 +93,11 @@ public class ImportEncryptionRuleController {
             // 封装规则结果集
             List<RuleConfiguration> ruleConfigurations = ImportEncryptionRuleUtils.transToRuleConfiguration(data.getModel());
             // 规则写入配置文件
+            // TODO:规则生效
+            configCenterService.getActivatedMetadataService().getSchemaMetaDataService().persist(schemaName, new ShardingSphereSchema());
             configCenterService.getActivatedMetadataService().getSchemaRuleService().persist(schemaName, ruleConfigurations, true);
             configCenterService.getActivatedMetadataService().getDataSourceService().persist(schemaName, maps);
-            configCenterService.getActivatedMetadataService().getSchemaMetaDataService().persist(schemaName, new ShardingSphereSchema());
+            excelShardingSchemaService.addRuleConfig(schemaName);
             return ResponseResult.ok("导入成功!");
         }
         // 获取schema列表接口
