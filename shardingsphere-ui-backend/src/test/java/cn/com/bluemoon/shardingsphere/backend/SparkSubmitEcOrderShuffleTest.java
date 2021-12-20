@@ -28,15 +28,16 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.platform.commons.util.StringUtils;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 
 @Slf4j
-public class SparkSubmitShardingSphereTest extends BaseTest {
+public class SparkSubmitEcOrderShuffleTest extends BaseTest {
 
     private String sourceUrl;
 
@@ -47,9 +48,10 @@ public class SparkSubmitShardingSphereTest extends BaseTest {
     private String schema;
     private List<EncryptRuleConfiguration> rules;
     private Map<String, Object> dataSourceProps;
-    @Mock
+    @Autowired
     private DbMetaDataService dbMetaDataService;
     private Map<String, String> tableAndIncField;
+    private Set<String> noShuffleTableNames;
 
     private List<EncryptRuleConfiguration> readRule() {
         Collection<RuleConfiguration> collection = metaDataPersistService.getSchemaRuleService().load(schema);
@@ -80,22 +82,79 @@ public class SparkSubmitShardingSphereTest extends BaseTest {
         // 获取表与增量字段映射
         // TODO: 2021/12/18 dynamic
         Map<String, String> tableAndIncField = new HashMap<>();
+        tableAndIncField.put("oms_b2b_oper_client_base", "changed_time");
+        tableAndIncField.put("ec_oms_invoice", "last_update_time");
         tableAndIncField.put("ec_oms_order", "last_update_time");
+        tableAndIncField.put("ec_oms_plat_order_encrypt_data", "last_update_time");
+        tableAndIncField.put("ec_oms_order_import", "order_import_time");
+        tableAndIncField.put("ec_oms_plat_order_decrypt_data", "decrypt_time");
+        tableAndIncField.put("ec_oms_plat_tmall_presale_order", "last_update_time");
+        tableAndIncField.put("ec_oms_plat_address_modify_record", "last_update_time");
+        tableAndIncField.put("ec_oms_exc_reissue_order", "last_update_time");
+        tableAndIncField.put("ec_oms_address_modify_record", "last_update_time");
+        tableAndIncField.put("ec_oms_sms_management_sub", "create_time");
+        tableAndIncField.put("ec_oms_sms_management", "last_update_time");
+        tableAndIncField.put("ec_oms_exc_offline_refund_order", "last_update_time");
+        tableAndIncField.put("ec_oms_channel_shop_base", "last_update_time");
+        tableAndIncField.put("ec_oms_address_clean_record", "create_time");
+        tableAndIncField.put("oms_b2b_oper_client_account", "id");
+        tableAndIncField.put("ec_oms_self_help_query_log", "create_time");
         tableAndIncField.put("sys_user", "op_time");
+        tableAndIncField.put("oms_b2b_client_storehouse", "changed_time");
+        tableAndIncField.put("oms_b2b_client_distri_channel_charge", "changed_time");
         this.tableAndIncField = tableAndIncField;
+        // 增加提出对某些表做洗数
+        Set<String> noShuffleTableNames = new HashSet<String>() {{
+            add("oms_b2b_oper_client_base");
+            add("ec_oms_invoice");
+            add("ec_oms_order");
+            add("ec_oms_plat_order_encrypt_data");
+//            add("ec_oms_order_import");
+            add("ec_oms_plat_order_decrypt_data");
+            add("ec_oms_plat_tmall_presale_order");
+            add("ec_oms_plat_address_modify_record");
+//            add("ec_oms_exc_reissue_order");
+            add("ec_oms_address_modify_record");
+            add("ec_oms_sms_management_sub");
+            add("ec_oms_sms_management");
+            add("ec_oms_exc_offline_refund_order");
+            add("ec_oms_channel_shop_base");
+            add("ec_oms_address_clean_record");
+            add("oms_b2b_oper_client_account");
+            add("ec_oms_self_help_query_log");
+            add("sys_user");
+            add("oms_b2b_client_storehouse");
+            add("oms_b2b_client_distri_channel_charge");
+        }};
+        this.noShuffleTableNames = noShuffleTableNames;
+    }
+
+    public Map<String, Object> findConnectInfo() {
+        Matcher matcher = Pattern.compile("jdbc:(.*)://(.*):([0-9]+)/(.*)\\?(.*)").matcher(dataSourceProps.get("jdbcUrl").toString());
+        if (matcher.find()) {
+            HashMap<String, Object> res = new HashMap<>();
+            res.put("dbtype", matcher.group(1));
+            res.put("host", matcher.group(2));
+            res.put("port", matcher.group(3));
+            res.put("dbname", matcher.group(4));
+            res.put("user", dataSourceProps.get("username"));
+            res.put("password", dataSourceProps.get("password"));
+            return res;
+        }
+        return null;
     }
 
     @Test
     public void submit() {
-
+        Map<String, Object> connectInfo = findConnectInfo();
         QueryMetaDataRequest metaDataRequest = new QueryMetaDataRequest();
-        metaDataRequest.setDbType(DbTypeEnum.MYSQL);
-        metaDataRequest.setPort(String.valueOf(dataSourceProps.get("port")));
-        metaDataRequest.setIp(String.valueOf(dataSourceProps.get("host")));
-        metaDataRequest.setPassword(String.valueOf(dataSourceProps.get("password")));
-        metaDataRequest.setUsername(String.valueOf(dataSourceProps.get("user")));
-        metaDataRequest.setDbName(String.valueOf(dataSourceProps.get("database")));
-        metaDataRequest.setSchemaName(String.valueOf(dataSourceProps.get("database")));
+        metaDataRequest.setDbType(DbTypeEnum.getByCode(connectInfo.get("dbtype").toString()));
+        metaDataRequest.setPort(String.valueOf(connectInfo.get("port")));
+        metaDataRequest.setIp(String.valueOf(connectInfo.get("host")));
+        metaDataRequest.setPassword(String.valueOf(connectInfo.get("password")));
+        metaDataRequest.setUsername(String.valueOf(connectInfo.get("user")));
+        metaDataRequest.setDbName(String.valueOf(connectInfo.get("dbname")));
+        metaDataRequest.setSchemaName(String.valueOf(connectInfo.get("dbname")));
         metaDataRequest.setTableNames(tableInfos.stream().map(TableInfo::getName).collect(Collectors.joining(",")));
         ResultBean<SchemaInfoVO> metaData = dbMetaDataService.queryMetaData(metaDataRequest);
         SchemaInfoVO metaDataContent = metaData.getContent();
@@ -107,6 +166,9 @@ public class SparkSubmitShardingSphereTest extends BaseTest {
         for (EncryptRuleConfiguration rule : rules) {
             Map<String, ShardingSphereAlgorithmConfiguration> encryptorMaps = rule.getEncryptors().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
             for (EncryptTableRuleConfiguration table : rule.getTables()) {
+                if (noShuffleTableNames.contains(table.getName())) {
+                    continue;
+                }
                 GlobalConfig config = new GlobalConfig();
                 config.setSourceUrl(sourceUrl);
                 config.setTargetUrl(sourceUrl);
@@ -134,8 +196,8 @@ public class SparkSubmitShardingSphereTest extends BaseTest {
                 for (EncryptColumnRuleConfiguration column : table.getColumns()) {
                     String encryptorName = column.getEncryptorName();
                     ShardingSphereAlgorithmConfiguration aglo = encryptorMaps.get(encryptorName);
-                    FieldInfo extractCol = new FieldInfo(Optional.ofNullable(column.getPlainColumn()).orElse(column.getLogicColumn()), new GlobalConfig.EncryptRule(aglo.getType(), aglo.getProps()));
-                    FieldInfo targetCol = new FieldInfo(column.getCipherColumn());
+                    FieldInfo extractCol = new FieldInfo(Optional.ofNullable(column.getPlainColumn()).orElse(column.getLogicColumn()));
+                    FieldInfo targetCol = new FieldInfo(column.getCipherColumn(), new GlobalConfig.EncryptRule(aglo.getType(), aglo.getProps()));
                     shuffleCols.add(new Tuple2<>(extractCol, targetCol));
                 }
                 config.setShuffleCols(shuffleCols);
@@ -149,6 +211,7 @@ public class SparkSubmitShardingSphereTest extends BaseTest {
                 .ifPresent(cs -> {
                     for (GlobalConfig c : cs) {
                         String json = GlobalConfigSwapper.gson.toJson(c);
+                        log.info("提交作业入参：表：{}，params：{}", c.getRuleTableName(), json);
                         SparkSubmitEncryptShuffleMain.main(new String[]{json, c.getRuleTableName()});
                     }
                 });
