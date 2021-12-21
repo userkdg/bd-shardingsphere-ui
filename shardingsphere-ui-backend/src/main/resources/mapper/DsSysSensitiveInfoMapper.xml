@@ -7,7 +7,7 @@
         <id column="id" property="id"/>
         <result column="schema" property="schemaName"/>
         <result column="schema_id" property="schemaId"/>
-        <result column="dbname" property="databaseName"/>
+        <result column="dbname" property="dbname"/>
         <result column="table_name" property="tableName"/>
         <result column="field_name" property="fieldName"/>
         <result column="data_type" property="dataType"/>
