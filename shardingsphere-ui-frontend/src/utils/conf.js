@@ -17,6 +17,7 @@
 
 // npm run build 部署对应后端地址
 // const HOST = 'http://192.168.243.34:18088'
+// const HOST = ''
 const HOST = 'https://dompapi.bluemoon.com.cn/bd-data-security-proxy-app'
 const OTHERHOST = ''
 

@@ -8,7 +8,7 @@ server:
 user:
   admin:
     username: admin
-    password: admin
+    password: admin@bm123
 
 
 mybatis-plus:
