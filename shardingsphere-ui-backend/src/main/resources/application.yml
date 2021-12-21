@@ -10,15 +10,3 @@ user:
     username: admin
     password: admin@bm123
 
-
-mybatis-plus:
-  typeEnumsPackage: cn.com.bluemoon.daps.*.enums
-  global-config:
-    db-config:
-      logic-delete-value: 1
-      logic-not-delete-value: 0
-      id-type: id_worker_str
-  # 扫描 mapper.xml
-  mapper-locations: classpath:/mapper/*Mapper.xml
-  configuration:
-    jdbc-type-for-null: 'null'
