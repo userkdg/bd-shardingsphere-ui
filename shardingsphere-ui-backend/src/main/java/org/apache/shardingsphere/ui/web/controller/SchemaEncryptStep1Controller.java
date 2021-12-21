@@ -31,25 +31,28 @@ import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 业务系统上报入口-步骤1
+ * 1.提供上报模板
+ * 2.提供上报入口：解析->转换->入库（db、zk）
+ * 3.获取schema列表
+ */
 @RestController
 @RequestMapping("/api/config-center")
-public class ImportEncryptionRuleController {
-
-    @Autowired
-    private RemoteSystemDatasourceService remoteSystemDatasourceService;
-
-    @Resource
-    private ExcelShardingSchemaService excelShardingSchemaService;
+public class SchemaEncryptStep1Controller {
 
     @Autowired
     ConfigCenterService configCenterService;
-
     @Autowired
     ShardingSchemaService shardingSchemaService;
+    @Autowired
+    private RemoteSystemDatasourceService remoteSystemDatasourceService;
+    @Resource
+    private ExcelShardingSchemaService excelShardingSchemaService;
 
     /**
      * 模板下载
-     * @param response
+     *
      * @throws IOException
      */
     @GetMapping(value = "download")
@@ -71,25 +74,23 @@ public class ImportEncryptionRuleController {
 
     /**
      * 模板导入
-     * @param file
-     * @return
      */
     @PostMapping(value = "import")
-    public ResponseResult<String> importRule(@RequestBody MultipartFile file, @RequestParam("id") String schemaId ) {
+    public ResponseResult<String> importRule(@RequestBody MultipartFile file, @RequestParam("id") String schemaId) {
 
         // 获取schema下的环境列表
         ResultBean<Map<String, List<DapSystemDatasourceEnvironment>>> resultBean = remoteSystemDatasourceService.getSchemaDatasourceList(schemaId);
-        if(resultBean.getCode() == 500 || resultBean.getContent() == null){
+        if (resultBean.getCode() == 500 || resultBean.getContent() == null) {
             return ResponseResult.error("获取schema失败");
         }
         // 解析excel规则数据
         ResponseResult<List<SensitiveInformation>> data = ImportEncryptionRuleUtils.getData(file);
-        if(!data.isSuccess()){
+        if (!data.isSuccess()) {
             return ResponseResult.error(data.getErrorMsg());
         }
         Map<String, List<DapSystemDatasourceEnvironment>> map = resultBean.getContent();
         ResponseResult<Boolean> result = excelShardingSchemaService.CheckShardingSchemaRule(map);
-        if (result.isSuccess()){
+        if (result.isSuccess()) {
             String schemaName = map.keySet().stream().findFirst().get();
             // 封装数据源
             Map<String, DataSourceConfiguration> maps = ConnectionProxyUtils.transToDatasourceString(map.get(schemaName));
@@ -108,13 +109,12 @@ public class ImportEncryptionRuleController {
 
     /**
      * schema列表
-     * @return
      */
     @GetMapping("schema/List")
-    public ResponseResult<List<DapSystemSchema>> getSchemaList(){
+    public ResponseResult<List<DapSystemSchema>> getSchemaList() {
 
         ResultBean<List<DapSystemSchema>> schemaList = remoteSystemDatasourceService.getSchemaList();
-        if(schemaList.getCode() == 200 && schemaList.getContent() != null){
+        if (schemaList.getCode() == 200 && schemaList.getContent() != null) {
             return ResponseResult.ok(schemaList.getContent());
         }
         return ResponseResult.error(schemaList.getMsg());
