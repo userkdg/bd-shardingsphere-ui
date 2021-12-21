@@ -11,6 +11,7 @@ import org.apache.shardingsphere.infra.config.datasource.DataSourceConfiguration
 import org.apache.shardingsphere.infra.metadata.schema.ShardingSphereSchema;
 import org.apache.shardingsphere.ui.common.domain.SensitiveInformation;
 import org.apache.shardingsphere.ui.servcie.ConfigCenterService;
+import org.apache.shardingsphere.ui.servcie.DsSySensitiveInfoService;
 import org.apache.shardingsphere.ui.servcie.ExcelShardingSchemaService;
 import org.apache.shardingsphere.ui.servcie.ShardingSchemaService;
 import org.apache.shardingsphere.ui.util.ImportEncryptionRuleUtils;
@@ -49,6 +50,8 @@ public class SchemaEncryptStep1Controller {
     private RemoteSystemDatasourceService remoteSystemDatasourceService;
     @Resource
     private ExcelShardingSchemaService excelShardingSchemaService;
+    @Autowired
+    DsSySensitiveInfoService dsSySensitiveInfoService;
 
     /**
      * 模板下载
@@ -103,7 +106,8 @@ public class SchemaEncryptStep1Controller {
             excelShardingSchemaService.addRuleConfig(schemaName);
             return ResponseResult.ok("导入成功!");
         }
-        // 获取schema列表接口
+        // 数据入库
+        dsSySensitiveInfoService.insertRuleConfig(data.getModel());
         return ResponseResult.error(result.getErrorMsg());
     }
 
