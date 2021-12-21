@@ -69,7 +69,7 @@ public class CreateCipherServiceImpl implements CreateCipherService {
         }else {
             return ResponseResult.error("数据源不存在");
         }
-        // 筛选表存在的密文字段
+        // 筛选表字段
         if(!map.isEmpty()){
             AbsScreenTableFactory absScreenTableFactory = AbsScreenTableFactory.screenMysqlFieldFactory();
             List<ColumnInfoVO> fieldList = absScreenTableFactory.screenSameField(map, tables, isCipher);
@@ -77,13 +77,15 @@ public class CreateCipherServiceImpl implements CreateCipherService {
             FieldFactory mysqlFieldFactory = FieldFactory.mysqlFieldFactory(DbType.MYSQL);
             List<String> sqlList = null;
             // 密文字段处理
-            if(isCipher){
+            if(isCipher && !fieldList.isEmpty()){
                 List<FiledEncryptionInfo> cipherInfo = absScreenTableFactory.getCipherInfo(fieldList, encryptors);
                 // 创建sql
                 sqlList = cipherInfo.stream().map(l -> mysqlFieldFactory.createCipherFieldSql(l)).collect(Collectors.toList());
-            }else {
+            }else if(!isCipher && !fieldList.isEmpty()) {
                 // 明文字段处理
                 sqlList = fieldList.stream().map(f -> mysqlFieldFactory.renamePlainFieldSql(f)).collect(Collectors.toList());
+            }else {
+                return ResponseResult.error("字段已创建或不存在");
             }
             // 连接数据库
             ResponseResult<String> result = ConnectionProxyUtils.connectionDatabase(request, sqlList);

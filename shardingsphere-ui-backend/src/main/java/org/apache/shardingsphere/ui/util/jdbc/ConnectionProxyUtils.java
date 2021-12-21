@@ -36,7 +36,7 @@ public class ConnectionProxyUtils {
                 st.addBatch(sql);
             }
             int[] nums = st.executeBatch();
-            long count = Arrays.stream(nums).filter(n -> n == 1).count();
+            long count = Arrays.stream(nums).filter(n -> n >= 0).count();
             // todo:记录日志，成功条数以及失败条数
             log.info("共{}条数据，执行成功{}", list.size(), count);
         } catch (SQLException  e) {

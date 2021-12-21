@@ -41,7 +41,7 @@ public class ScreenMysqlFieldFactory extends AbsScreenTableFactory{
         List<String> sameCipherField = columnInfoVOS.stream()
                 .filter(c -> cipher.contains(c.getName())).map(ColumnInfoVO::getName)
                 .collect(Collectors.toList());
-        log.info("表{}密文字段已经创建{}", tableName, sameCipherField);
+        log.info("表{}密文字段{}已经创建", tableName, sameCipherField);
         List<ColumnInfoVO> sameField = samePlainField.stream().filter(s -> !sameCipherField.contains(s.getName() + "_cipher")).collect(Collectors.toList());
         return sameField;
     }
