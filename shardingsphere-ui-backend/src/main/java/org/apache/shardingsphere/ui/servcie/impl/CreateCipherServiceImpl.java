@@ -7,8 +7,7 @@ import cn.com.bluemoon.metadata.inter.dto.in.QueryMetaDataRequest;
 import cn.com.bluemoon.metadata.inter.dto.out.ColumnInfoVO;
 import cn.com.bluemoon.metadata.inter.dto.out.SchemaInfoVO;
 import cn.com.bluemoon.metadata.inter.dto.out.TableInfoVO;
-import cn.com.bluemoon.shardingsphere.custom.shuffle.base.EncryptGlobalConfig;
-import cn.com.bluemoon.shardingsphere.custom.shuffle.base.EncryptGlobalConfigSwapper;
+import com.baomidou.mybatisplus.annotation.DbType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.shardingsphere.encrypt.api.config.EncryptRuleConfiguration;
@@ -22,7 +21,9 @@ import org.apache.shardingsphere.ui.common.dto.FiledEncryptionInfo;
 import org.apache.shardingsphere.ui.servcie.ConfigCenterService;
 import org.apache.shardingsphere.ui.servcie.CreateCipherService;
 import org.apache.shardingsphere.ui.util.ImportEncryptionRuleUtils;
+import org.apache.shardingsphere.ui.util.check.AbsScreenTableFactory;
 import org.apache.shardingsphere.ui.util.jdbc.ConnectionProxyUtils;
+import org.apache.shardingsphere.ui.util.sql.FieldFactory;
 import org.apache.shardingsphere.ui.web.response.ResponseResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,7 +42,7 @@ public class CreateCipherServiceImpl implements CreateCipherService {
     DbMetaDataService dbMetaDataService;
 
     @Override
-    public ResponseResult<String> createCipherField(String schemaName) {
+    public ResponseResult<String> createCipherPlainField(String schemaName, Boolean isCipher) {
 
         MetaDataPersistService activatedMetadataService = configCenterService.getActivatedMetadataService();
         Collection<RuleConfiguration> ruleConfiguration = activatedMetadataService.getSchemaRuleService().load(schemaName);// 规则信息
@@ -56,58 +57,38 @@ public class CreateCipherServiceImpl implements CreateCipherService {
         List<Map<String, ShardingSphereAlgorithmConfiguration>> encryptors = encryptionList.stream().map(EncryptRuleConfiguration::getEncryptors).collect(Collectors.toList());
         List<Collection<EncryptTableRuleConfiguration>> configList = encryptionList.stream().map(EncryptRuleConfiguration::getTables).collect(Collectors.toList());
         List<EncryptTableRuleConfiguration> tables = configList.stream().collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll);
+        // 所有表名
         String names = tables.stream().map(e -> e.getName()).collect(Collectors.joining(","));
         // 获取数据源名称
         Collection<DataSourceConfiguration> values = load.values();
+        // 只需获取第一个数据源
+        Optional<DataSourceConfiguration> first = values.stream().findFirst();
         Map<QueryMetaDataRequest, List<TableInfoVO>> map = new HashMap<>();
-        for (DataSourceConfiguration config : values) {
-            getMetaInfo(config, names, map);
+        if(first.isPresent()){
+            getMetaInfo(first.get(), names, map);
+        }else {
+            return ResponseResult.error("数据源不存在");
         }
         // 筛选表存在的密文字段
         if(!map.isEmpty()){
-            List<TableInfoVO> voList = map.values().stream().collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll);
-            // 获取表名
-            List<String> getNames = voList.stream().map(TableInfoVO::getName).collect(Collectors.toList());
-            // 存在的表规则
-            List<EncryptTableRuleConfiguration> ruleTable = tables.stream().filter(e -> getNames.contains(e.getName())).collect(Collectors.toList());
-            // 已经配置的字段信息
-            Map<String, Collection<EncryptColumnRuleConfiguration>> collect = ruleTable.stream().collect(Collectors.toMap(EncryptTableRuleConfiguration::getName, EncryptTableRuleConfiguration::getColumns));
-            // 获取配置字段信息的源字段
-            Map<String, List<ColumnInfoVO>> tableMap = voList.stream().collect(Collectors.toMap(TableInfoVO::getName, TableInfoVO::getColumns));
-            List<ColumnInfoVO> cipherFiled = Lists.newArrayList();
-            for (Map.Entry<String, Collection<EncryptColumnRuleConfiguration>> encrypt : collect.entrySet()) {
-                if(tableMap.containsKey(encrypt.getKey())){
-                    // 明文列字段
-                    List<String> plain = encrypt.getValue().stream().map(e -> e.getPlainColumn()).collect(Collectors.toList());
-                    // 密文列字段
-                    List<String> cipher = encrypt.getValue().stream().map(e -> e.getCipherColumn()).collect(Collectors.toList());
-                    List<ColumnInfoVO> columnInfoVOS = tableMap.get(encrypt.getKey());
-                    // 筛选两者共有的字段数据
-                    List<ColumnInfoVO> samePlainField = columnInfoVOS.stream().filter(c -> plain.contains(c.getName())).collect(Collectors.toList());
-                    // 筛选出已经创建的密文字段
-                    List<String> sameCipherField = columnInfoVOS.stream()
-                            .filter(c -> cipher.contains(c.getName())).map(ColumnInfoVO::getName)
-                            .collect(Collectors.toList());
-                    List<ColumnInfoVO> sameField = samePlainField.stream().filter(s -> !sameCipherField.contains(s.getName() + "_cipher")).collect(Collectors.toList());
-                    if(!sameField.isEmpty()){
-                        cipherFiled.addAll(sameField);
-                    }
-                }
+            AbsScreenTableFactory absScreenTableFactory = AbsScreenTableFactory.screenMysqlFieldFactory();
+            List<ColumnInfoVO> fieldList = absScreenTableFactory.screenSameField(map, tables, isCipher);
+            QueryMetaDataRequest request = map.keySet().stream().findFirst().get();
+            FieldFactory mysqlFieldFactory = FieldFactory.mysqlFieldFactory(DbType.MYSQL);
+            List<String> sqlList = null;
+            // 密文字段处理
+            if(isCipher){
+                List<FiledEncryptionInfo> cipherInfo = absScreenTableFactory.getCipherInfo(fieldList, encryptors);
+                // 创建sql
+                sqlList = cipherInfo.stream().map(l -> mysqlFieldFactory.createCipherFieldSql(l)).collect(Collectors.toList());
+            }else {
+                // 明文字段处理
+                sqlList = fieldList.stream().map(f -> mysqlFieldFactory.renamePlainFieldSql(f)).collect(Collectors.toList());
             }
-            List<QueryMetaDataRequest> requests = map.keySet().stream().collect(Collectors.toList());
-            // 字段处理
-            Map<QueryMetaDataRequest, List<FiledEncryptionInfo>> cipherInfo = ImportEncryptionRuleUtils.getCipherInfo(cipherFiled, encryptors, requests);
-            // 创建sql
-            Map<QueryMetaDataRequest, String> cipherFieldSql = ImportEncryptionRuleUtils.createCipherFieldSql(cipherInfo);
             // 连接数据库
-            Boolean flag = false;
-            for (Map.Entry<QueryMetaDataRequest, String> entry : cipherFieldSql.entrySet()) {
-                ResponseResult<String> result = ConnectionProxyUtils.connectionDatabase(entry.getKey(), entry.getValue());
-                if(result.isSuccess()){
-                    flag = true;
-                }
-            }
-            return flag ? ResponseResult.ok("字段创建成功") : ResponseResult.error("字段创建失败");
+            ResponseResult<String> result = ConnectionProxyUtils.connectionDatabase(request, sqlList);
+            return result.isSuccess() ? ResponseResult.ok("执行成功") : ResponseResult.error("执行失败");
+
         }
         return ResponseResult.error(String.format("数据库不存在%s表，无法创建密文字段", names));
     }
@@ -123,7 +104,7 @@ public class CreateCipherServiceImpl implements CreateCipherService {
         queryMetaDataRequest.setTableNames(names);
         Map<String, Object> allProps = dataSourceConfiguration.getAllProps();
         String url = (String) allProps.get("jdbcUrl");
-        getRequest(url, queryMetaDataRequest);
+        ConnectionProxyUtils.getRequest(url, queryMetaDataRequest);
         queryMetaDataRequest.setUsername((String)allProps.get("username"));
         queryMetaDataRequest.setPassword((String)allProps.get("password"));
         ResultBean<SchemaInfoVO> bean = dbMetaDataService.queryMetaData(queryMetaDataRequest);
@@ -132,26 +113,5 @@ public class CreateCipherServiceImpl implements CreateCipherService {
             queryMetaDataRequest.setTableNames(nameList);
             map.put(queryMetaDataRequest, bean.getContent().getTables());
         }
-    }
-
-    private void getRequest(String url,QueryMetaDataRequest queryMetaDataRequest){
-
-        String[] split = url.split("\\?");
-        String simpleUrl = split[0];
-        String[] simpleUrlSplit = simpleUrl.split("://");
-        String jdbc = simpleUrlSplit[0];
-        String[] jdbcSplit = jdbc.split(":");
-        String dbType = jdbcSplit[jdbcSplit.length - 1];
-        String urlPortDbname = simpleUrlSplit[simpleUrlSplit.length - 1];
-        String[] urlPortDbnameSplit = urlPortDbname.split("/");
-        String dbname = urlPortDbnameSplit[urlPortDbnameSplit.length - 1];
-        String[] urlAndPort = urlPortDbnameSplit[0].split(":");
-        String ip = urlAndPort[0];
-        String port = urlAndPort[urlAndPort.length-1];
-        queryMetaDataRequest.setIp(ip);
-        queryMetaDataRequest.setPort(port);
-        queryMetaDataRequest.setDbName(dbname);
-        queryMetaDataRequest.setSchemaName(dbname);
-        queryMetaDataRequest.setDbType(dbType.equals("mysql") ? DbTypeEnum.MYSQL : DbTypeEnum.PGSQL);
     }
 }

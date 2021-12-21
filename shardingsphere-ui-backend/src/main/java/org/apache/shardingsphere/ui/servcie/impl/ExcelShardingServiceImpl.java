@@ -29,10 +29,6 @@ public class ExcelShardingServiceImpl implements ExcelShardingSchemaService {
 
         Collection<String> schemaList = loadAllSchemaName();
         String schemaName = map.keySet().stream().findFirst().get();
-        // 判断schema是否存在
-        if(schemaList.contains(schemaName)){
-            return ResponseResult.error(String.format("%s已存在",schemaName));
-        }
         // 检查数据源是否能进行连接
         List<DapSystemDatasourceEnvironment> environments = map.get(schemaName);
         for (DapSystemDatasourceEnvironment environment : environments) {
@@ -40,6 +36,10 @@ public class ExcelShardingServiceImpl implements ExcelShardingSchemaService {
             if(!flag){
                 return ResponseResult.error(String.format("%s:%s数据源连接失败", environment.getHost(),environment.getPort()));
             }
+        }
+        // 判断schema是否存在,存在的话覆盖规则
+        if(schemaList.contains(schemaName)){
+            return ResponseResult.error(String.format("%s已存在",schemaName));
         }
         return ResponseResult.ok(true);
     }

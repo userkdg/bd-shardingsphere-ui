@@ -27,27 +27,32 @@ public class MysqlFieldFactory extends FieldFactory{
     }
 
     @Override
-    public String createFieldSql(FiledEncryptionInfo info) {
+    public String createCipherFieldSql(FiledEncryptionInfo info) {
 
         String fieldSql = null;
         ColumnInfoVO vo = info.getColumnInfoVO();
         // 获取密文字段的长度
         if(charList.contains(vo.getSqlSimpleType())){
-            // 有长度的字符串
-            if(StringUtils.isNotBlank(vo.getLength())){
-                Integer fieldLength = getFieldLength(info.algorithmType, info.props, vo.getLength());
-                // 字段脚本
-                fieldSql = String.format("alter table %s add %s_cipher %s(%s) comment'%s';", vo.getTableName(), vo.getName(), vo.getSqlSimpleType(), fieldLength, vo.getComment());
-            // 无长度字符串
-            }else {
-                fieldSql = String.format("alter table %s add %s_cipher %s comment'%s';", vo.getTableName(), vo.getName(), vo.getSqlSimpleType(), vo.getComment());
-            }
+            String fieldLength = StringUtils.isNotBlank(vo.getLength()) ? String.format("(%s)", getFieldLength(info.algorithmType, info.props, vo.getLength())) : "";
+            // 字段脚本
+            fieldSql = String.format("alter table %s add %s_cipher %s%s comment'%s' after %s;",
+                    vo.getTableName(), vo.getName(), vo.getSqlSimpleType(), fieldLength, vo.getComment(), vo.getName());
         }else if(intList.contains(vo.getSqlSimpleType())){
-            fieldSql = String.format("alter table %s add %s_cipher %s(%s) comment'%s';", vo.getTableName(), vo.getName(), "varchar", "512", vo.getComment());
+            fieldSql = String.format("alter table %s add %s_cipher %s(%s) comment'%s' after %s;",
+                    vo.getTableName(), vo.getName(), "varchar", "512", vo.getComment(), vo.getName());
         }else{
-            String testFormat = "alter table %s add %s_cipher %s comment'%s';";
-            fieldSql = String.format(testFormat, vo.getTableName(), vo.getName(), "text", vo.getComment());
+            String testFormat = "alter table %s add %s_cipher %s comment'%s' after %s;";
+            fieldSql = String.format(testFormat, vo.getTableName(), vo.getName(), "text", vo.getComment(), vo.getName());
         }
         return fieldSql;
+    }
+
+    @Override
+    public String renamePlainFieldSql(ColumnInfoVO vo) {
+        // alter table <表名> change <字段名> <字段新名称> <字段的类型>。
+        String length = StringUtils.isBlank(vo.getLength()) ? "" : "("+vo.getLength()+")";
+        String rename = String.format("alter table %s change %s %s_plain %s%s default null comment '%s';",
+                vo.getTableName(), vo.getName(), vo.getName(), vo.getSqlSimpleType(), length, vo.getComment());
+        return rename;
     }
 }

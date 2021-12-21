@@ -70,6 +70,6 @@ export default {
   margin-top: 20px;
 }
 .down{
-  margin-left: 70%;
+  margin-left: 65%;
 }
 </style>

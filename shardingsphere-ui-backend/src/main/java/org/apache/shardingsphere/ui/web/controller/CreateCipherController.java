@@ -23,6 +23,12 @@ public class CreateCipherController {
     @GetMapping("create/cipher")
     public ResponseResult<String> createCipherField(@RequestParam("schema") String schemaName){
 
-        return createCipherService.createCipherField(schemaName);
+        return createCipherService.createCipherPlainField(schemaName, true);
+    }
+
+    @GetMapping("rename/plain")
+    public ResponseResult<String> renamePlainField(@RequestParam("schema") String schemaName){
+
+        return createCipherService.createCipherPlainField(schemaName, false);
     }
 }

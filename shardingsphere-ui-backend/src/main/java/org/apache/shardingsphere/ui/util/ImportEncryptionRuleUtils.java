@@ -10,6 +10,7 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.symmetric.AES;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.util.StringUtils;
+import com.baomidou.mybatisplus.annotation.DbType;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.shardingsphere.encrypt.api.config.EncryptRuleConfiguration;
 import org.apache.shardingsphere.encrypt.api.config.rule.EncryptColumnRuleConfiguration;
@@ -33,6 +34,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ImportEncryptionRuleUtils {
 
@@ -73,7 +75,7 @@ public class ImportEncryptionRuleUtils {
             List<EncryptColumnRuleConfiguration> configurations = new ArrayList<>();
             for (SensitiveInformation information : value){
                 Properties properties = new Properties();
-                properties.setProperty("aes-key-value",   "wlf1d5mmal2xsttr");
+                properties.setProperty("aes-key-value", information.getCipherKey());
                 String algorithmType = SensitiveInformation.ALGORITHM_LIST.contains(information.getAlgorithmType()) ? information.getAlgorithmType() : "AES";
                 ShardingSphereAlgorithmConfiguration shardingSphereAlgorithmConfiguration = new ShardingSphereAlgorithmConfiguration(algorithmType, properties);
                 EncryptColumnRuleConfiguration encrypt = new EncryptColumnRuleConfiguration
@@ -90,39 +92,6 @@ public class ImportEncryptionRuleUtils {
         return encryptRuleConfigurations;
     }
 
-    public static Map<String, DataSourceConfiguration> transToDatasourceString(List<DapSystemDatasourceEnvironment> list){
-
-        // 生成
-        Map<String, DataSourceConfiguration> dataSourceConfigurations = new HashMap<>();
-        for (DapSystemDatasourceEnvironment environment:list) {
-            DataSourceConfiguration dataSourceConfiguration = new DataSourceConfiguration("com.zaxxer.hikari.HikariDataSource");
-            Properties customPoolProps = dataSourceConfiguration.getCustomPoolProps();
-            String url = ConnectionProxyUtils.getUrl(environment);
-            customPoolProps.setProperty("connectionTimeoutMilliseconds", "3000");
-            customPoolProps.setProperty("idleTimeoutMilliseconds", "60000");
-            customPoolProps.setProperty("maxPoolSize", "50");
-            customPoolProps.setProperty("minPoolSize", "1");
-            customPoolProps.setProperty("maxLifetimeMilliseconds", "1800000");
-            Map<String, Object> props = dataSourceConfiguration.getProps();
-            props.put("customPoolProps", customPoolProps);
-            props.put("readOnly", false);
-            props.put("maxLifetime", 1800000);
-            props.put("minimumIdle", 1);
-            props.put("password", environment.getPassword());
-            props.put("minPoolSize", 1);
-            props.put("idleTimeout", 60000);
-            props.put("jdbcUrl",url);
-            props.put("dataSourceClassName", dataSourceConfiguration.getDataSourceClassName());
-            props.put("maximumPoolSize", 50);
-            props.put("connectionTimeout", 30000);
-            props.put("maxPoolSize", 50);
-            props.put("username", environment.getUsername());
-            dataSourceConfigurations.put(environment.getDatabaseName()+RandomUtil.randomString(3), dataSourceConfiguration);
-        }
-        return dataSourceConfigurations;
-    }
-
-
     private static File transferToFile(MultipartFile multipartFile) {
 
         File file = null;
@@ -136,53 +105,5 @@ public class ImportEncryptionRuleUtils {
             e.printStackTrace();
         }
         return file;
-    }
-
-    public static Map<QueryMetaDataRequest, List<FiledEncryptionInfo>> getCipherInfo( List<ColumnInfoVO> list, List<Map<String, ShardingSphereAlgorithmConfiguration>> encryptors,
-                                                          List<QueryMetaDataRequest> requests){
-        // 获取键值对 字段维度
-        Map<String, ColumnInfoVO> tableMap = list.stream().collect(Collectors.toMap(c -> String.format("%s_%s", c.getTableName(), c.getName()), ColumnInfoVO -> ColumnInfoVO));
-        Map<String, ShardingSphereAlgorithmConfiguration> ruleMap = encryptors.stream().collect(HashMap::new, HashMap::putAll, HashMap::putAll);
-        List<FiledEncryptionInfo> fieldList = Lists.newArrayList();
-        for (Map.Entry<String, ShardingSphereAlgorithmConfiguration> rule : ruleMap.entrySet()){
-            if(tableMap.containsKey(rule.getKey())){
-                FiledEncryptionInfo filedEncryptionInfo = new FiledEncryptionInfo();
-                filedEncryptionInfo.setProps(rule.getValue().getProps());
-                filedEncryptionInfo.setAlgorithmType(rule.getValue().getType());
-                filedEncryptionInfo.setColumnInfoVO(tableMap.get(rule.getKey()));
-                fieldList.add(filedEncryptionInfo);
-            }
-        }
-        Map<QueryMetaDataRequest, List<FiledEncryptionInfo>> cipherMap = new HashMap<>();
-        for (QueryMetaDataRequest request : requests) {
-            List<FiledEncryptionInfo> collect = fieldList.stream().filter(f -> request.getTableNames().contains(f.getColumnInfoVO().getTableName())).collect(Collectors.toList());
-            if(!collect.isEmpty()){
-                cipherMap.put(request, collect);
-            }
-        }
-        return cipherMap;
-    }
-
-    /**
-     * 创建密文字段脚本
-     * @param cipherMap
-     * @return
-     */
-    public static Map<QueryMetaDataRequest, String> createCipherFieldSql(Map<QueryMetaDataRequest, List<FiledEncryptionInfo>> cipherMap){
-
-        Map<QueryMetaDataRequest, String> map = new HashMap<>();
-        for (Map.Entry<QueryMetaDataRequest,List<FiledEncryptionInfo>> entry: cipherMap.entrySet()) {
-            QueryMetaDataRequest key = entry.getKey();
-            StringBuffer stringBuffer = new StringBuffer();
-            for (FiledEncryptionInfo info : entry.getValue()) {
-                MysqlFieldFactory mysqlFieldFactory = FieldFactory.mysqlFieldFactory();
-                String fieldSql = mysqlFieldFactory.createFieldSql(info);
-                if(StringUtils.isNotBlank(fieldSql)){
-                    stringBuffer.append(fieldSql);
-                }
-            }
-            map.put(key, stringBuffer.toString());
-        }
-        return map;
     }
 }

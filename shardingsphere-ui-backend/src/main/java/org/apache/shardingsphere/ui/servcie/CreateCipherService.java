@@ -4,5 +4,6 @@ import org.apache.shardingsphere.ui.web.response.ResponseResult;
 
 public interface CreateCipherService {
 
-    ResponseResult<String> createCipherField(String schemaName);
+    ResponseResult<String> createCipherPlainField(String schemaName, Boolean isCipher);
+
 }

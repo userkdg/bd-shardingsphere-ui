@@ -26,6 +26,9 @@ public class SensitiveInformation {
     @ExcelProperty("数据库字段类型")
     private String datatype;
 
+    @ExcelProperty("表增量字段(默认为否)")
+    private String tableIncrField;
+
     @ExcelProperty("算法类型(默认AES)")
     private String algorithmType;
 

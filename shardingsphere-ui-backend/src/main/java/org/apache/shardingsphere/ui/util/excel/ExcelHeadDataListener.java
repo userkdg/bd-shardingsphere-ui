@@ -10,6 +10,7 @@ import com.alibaba.excel.util.StringUtils;
 import com.alibaba.fastjson.JSON;
 import groovy.util.logging.Slf4j;
 import org.apache.shardingsphere.ui.common.domain.SensitiveInformation;
+import org.apache.shardingsphere.ui.util.ImportEncryptionRuleUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +19,10 @@ import java.util.Map;
 
 @Slf4j
 public class ExcelHeadDataListener extends AnalysisEventListener<SensitiveInformation> {
+
     private static final Logger log = LoggerFactory.getLogger(ExcelHeadDataListener.class);
+
+    public static final String KEY = "wlf1d5mmal2xsttr";
     /**
      * 每隔5条存储数据库，实际使用中可以100条，然后清理list ，方便内存回收
      */
@@ -65,6 +69,10 @@ public class ExcelHeadDataListener extends AnalysisEventListener<SensitiveInform
             log.info(error);
             errorList.add(error);
         }else {
+            if(StringUtils.isBlank(data.getAlgorithmType())){
+                data.setAlgorithmType("AES");
+            }
+            data.setCipherKey(KEY);
             cachedDataList.add(data);
         }
     }

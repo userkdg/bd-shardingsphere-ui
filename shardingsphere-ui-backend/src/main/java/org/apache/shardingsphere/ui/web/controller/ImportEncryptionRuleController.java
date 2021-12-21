@@ -5,34 +5,29 @@ import cn.com.bluemoon.daps.api.sys.RemoteSystemDatasourceService;
 import cn.com.bluemoon.daps.common.domain.ResultBean;
 import cn.com.bluemoon.daps.system.entity.DapSystemDatasourceEnvironment;
 import cn.com.bluemoon.daps.system.entity.DapSystemSchema;
-import com.alibaba.excel.EasyExcel;
-import com.alibaba.fastjson.JSON;
-import com.google.gson.JsonArray;
 import org.apache.poi.util.IOUtils;
 import org.apache.shardingsphere.infra.config.RuleConfiguration;
 import org.apache.shardingsphere.infra.config.datasource.DataSourceConfiguration;
 import org.apache.shardingsphere.infra.metadata.schema.ShardingSphereSchema;
-import org.apache.shardingsphere.ui.common.domain.DatasourceInfo;
-import org.apache.shardingsphere.ui.common.domain.FormWorkConstant;
 import org.apache.shardingsphere.ui.common.domain.SensitiveInformation;
 import org.apache.shardingsphere.ui.servcie.ConfigCenterService;
 import org.apache.shardingsphere.ui.servcie.ExcelShardingSchemaService;
 import org.apache.shardingsphere.ui.servcie.ShardingSchemaService;
 import org.apache.shardingsphere.ui.util.ImportEncryptionRuleUtils;
+import org.apache.shardingsphere.ui.util.jdbc.ConnectionProxyUtils;
 import org.apache.shardingsphere.ui.web.response.ResponseResult;
-import org.apache.shardingsphere.ui.web.response.ResponseResultUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -58,12 +53,20 @@ public class ImportEncryptionRuleController {
      * @throws IOException
      */
     @GetMapping(value = "download")
-    public void downloadRuleMould(HttpServletResponse response) throws IOException {
-        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        response.setCharacterEncoding("utf-8");
-        String fileName = URLEncoder.encode("系统敏感信息采集表模板", "UTF-8").replaceAll("\\+", "%20");
-        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
-        EasyExcel.write(response.getOutputStream()).sheet("系统敏感信息采集表").doWrite(FormWorkConstant.getData());
+    public void downloadRuleMould(HttpServletResponse response, HttpServletRequest request) throws IOException {
+
+        // String file_name = "系统敏感信息采集表模板.xlsx";
+        InputStream inputStream = new FileInputStream(new File(ResourceUtils.getURL(
+                "classpath:").getPath() + "/template/系统敏感信息采集表模板.xlsx"));
+        byte[] buffer = IOUtils.toByteArray(inputStream);
+        response.setContentType("application/force-download;" + "charset = UTF-8");
+        String name = "系统敏感信息采集表模板";
+        name = new String(name.getBytes(), "ISO-8859-1");
+        response.setHeader("Content-Disposition", "attachment; filename=" + name + ".xlsx");
+        OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
+        toClient.write(buffer);
+        toClient.flush();
+        toClient.close();
     }
 
     /**
@@ -89,10 +92,9 @@ public class ImportEncryptionRuleController {
         if (result.isSuccess()){
             String schemaName = map.keySet().stream().findFirst().get();
             // 封装数据源
-            Map<String, DataSourceConfiguration> maps = ImportEncryptionRuleUtils.transToDatasourceString(map.get(schemaName));
+            Map<String, DataSourceConfiguration> maps = ConnectionProxyUtils.transToDatasourceString(map.get(schemaName));
             // 封装规则结果集
             List<RuleConfiguration> ruleConfigurations = ImportEncryptionRuleUtils.transToRuleConfiguration(data.getModel());
-            // 规则写入配置文件
             // TODO:规则生效
             configCenterService.getActivatedMetadataService().getSchemaMetaDataService().persist(schemaName, new ShardingSphereSchema());
             configCenterService.getActivatedMetadataService().getSchemaRuleService().persist(schemaName, ruleConfigurations, true);
