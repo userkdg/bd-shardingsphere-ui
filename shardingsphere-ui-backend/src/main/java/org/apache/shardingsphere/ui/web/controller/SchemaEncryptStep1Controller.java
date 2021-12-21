@@ -5,6 +5,7 @@ import cn.com.bluemoon.daps.api.sys.RemoteSystemDatasourceService;
 import cn.com.bluemoon.daps.common.domain.ResultBean;
 import cn.com.bluemoon.daps.system.entity.DapSystemDatasourceEnvironment;
 import cn.com.bluemoon.daps.system.entity.DapSystemSchema;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.util.IOUtils;
 import org.apache.shardingsphere.infra.config.RuleConfiguration;
 import org.apache.shardingsphere.infra.config.datasource.DataSourceConfiguration;
@@ -18,6 +19,7 @@ import org.apache.shardingsphere.ui.util.ImportEncryptionRuleUtils;
 import org.apache.shardingsphere.ui.util.jdbc.ConnectionProxyUtils;
 import org.apache.shardingsphere.ui.web.response.ResponseResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,6 +42,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/config-center")
+@Slf4j
 public class SchemaEncryptStep1Controller {
 
     @Autowired
@@ -59,11 +62,44 @@ public class SchemaEncryptStep1Controller {
      * @throws IOException
      */
     @GetMapping(value = "download")
-    public void downloadRuleMould(HttpServletResponse response, HttpServletRequest request) throws IOException {
+    public void downloadRuleMould(HttpServletResponse response) throws IOException {
 
-        // String file_name = "系统敏感信息采集表模板.xlsx";
+        InputStream inputStream = null;
+        BufferedInputStream bis = null;
+        OutputStream outputStream = null;
+        try {
+            ClassPathResource classPathResource = new ClassPathResource("template/系统敏感信息采集表模板.xlsx");
+            inputStream = classPathResource.getInputStream();
+
+            response.setContentType("application/octet-stream");
+            response.setHeader("content-type", "application/octet-stream");
+            //待下载文件名
+            String fileName = URLEncoder.encode("系统敏感信息采集表模板.xlsx","utf8");
+            response.setHeader("Content-Disposition", "attachment;fileName=" + fileName);
+            //加上设置大小 下载下来的excel文件才不会在打开前提示修复
+            response.addHeader("Content-Length",String.valueOf(classPathResource.getFile().length()));
+
+            byte[] buff = new byte[1024];
+            outputStream = response.getOutputStream();
+            bis = new BufferedInputStream(inputStream);
+            int read = bis.read(buff);
+            while (read != -1) {
+                outputStream.write(buff, 0, buff.length);
+                outputStream.flush();
+                read = bis.read(buff);
+            }
+        } catch ( IOException e ) {
+            log.error("文件下载失败,e");
+        } finally {
+            IOUtils.closeQuietly(outputStream);
+            IOUtils.closeQuietly(inputStream);
+            IOUtils.closeQuietly(bis);
+        }
+
+       /* // String file_name = "系统敏感信息采集表模板.xlsx";
         InputStream inputStream = new FileInputStream(new File(ResourceUtils.getURL(
                 "classpath:").getPath() + "/template/系统敏感信息采集表模板.xlsx"));
+        ClassPathResource classPathResource = new ClassPathResource("template/系统敏感信息采集表模板.xlsx");
         byte[] buffer = IOUtils.toByteArray(inputStream);
         response.setContentType("application/force-download;" + "charset = UTF-8");
         String name = "系统敏感信息采集表模板";
@@ -72,7 +108,7 @@ public class SchemaEncryptStep1Controller {
         OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
         toClient.write(buffer);
         toClient.flush();
-        toClient.close();
+        toClient.close();*/
     }
 
     /**

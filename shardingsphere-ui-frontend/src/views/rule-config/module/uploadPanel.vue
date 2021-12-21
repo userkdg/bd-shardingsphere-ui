@@ -44,6 +44,7 @@
 <script>
 import axios from 'axios'
 import Api from '../api'
+import conf from '../../../utils/conf'
 var token = window.localStorage.getItem('Access-Token')
 export default {
   name: "uploadPanel",
@@ -66,7 +67,7 @@ export default {
   },
   methods: {
     handleSelect(){
-      this.uploadUrl = "http://localhost:8080/api/config-center/import?id="+this.id
+      this.uploadUrl = conf.HOST+"/api/config-center/import?id="+this.id
     },
     upSuccess(res, f, fl){
       if(res.success){
@@ -114,14 +115,10 @@ export default {
       }
       return isLt2M;
     },
-    /*initUpload() {
-     this.uploadUrl =
-        "http://localhost:8080/api/config-center/import?id="
-    },*/
     downloadFile() {
       axios({
         method: 'get',
-        url: 'http://localhost:8080/api/config-center/download',
+        url: conf.HOST+'/api/config-center/download',
         headers: {
           'Access-Token': token
         },
