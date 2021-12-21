@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.apache.shardingsphere.ui.mapper.DsSySensitiveInfoMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="org.apache.shardingsphere.ui.common.domain.DsSysSensitiveInfo">
+        <id column="id" property="id"/>
+        <result column="schema" property="schemaName"/>
+        <result column="schema_id" property="schemaId"/>
+        <result column="dbname" property="databaseName"/>
+        <result column="table_name" property="tableName"/>
+        <result column="field_name" property="fieldName"/>
+        <result column="data_type" property="dataType"/>
+        <result column="incr_field" property="incrField"/>
+        <result column="algorithm_type" property="algorithmType"/>
+        <result column="cipher_key" property="cipherKey"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+</mapper>

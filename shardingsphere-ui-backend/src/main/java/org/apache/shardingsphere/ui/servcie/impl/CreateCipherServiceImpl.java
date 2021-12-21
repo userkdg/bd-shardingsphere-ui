@@ -90,7 +90,6 @@ public class CreateCipherServiceImpl implements CreateCipherService {
             // 连接数据库
             ResponseResult<String> result = ConnectionProxyUtils.connectionDatabase(request, sqlList);
             return result.isSuccess() ? ResponseResult.ok("执行成功") : ResponseResult.error("执行失败");
-
         }
         return ResponseResult.error(String.format("数据库不存在%s表，无法创建密文字段", names));
     }

@@ -17,6 +17,7 @@
 
 package org.apache.shardingsphere.ui;
 
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
@@ -28,11 +29,9 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
  */
 
 @EnableEurekaClient
-// @EnableHystrix
 @SpringBootApplication
-// @EnableCustomConfig
 @EnableFeignClients(basePackages = "cn.com.bluemoon")
-// @EnableHystrix
+@MapperScan("org.apache.shardingsphere.ui.mapper")
 public class Bootstrap {
 
     /**
