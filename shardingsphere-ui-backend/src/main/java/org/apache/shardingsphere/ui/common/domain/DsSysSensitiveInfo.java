@@ -18,7 +18,7 @@ public class DsSysSensitiveInfo {
 
     private String dbname;
 
-    private String schema;
+    private String schemaName;
 
     private String schemaId;
 
