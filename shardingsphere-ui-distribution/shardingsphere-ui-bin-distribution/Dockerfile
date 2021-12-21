@@ -18,7 +18,7 @@
 FROM java:8
 MAINTAINER ShardingSphere "dev@shardingsphere.apache.org"
 
-ARG APP_NAME=apache-shardingsphere-4.1.1-shardingsphere-ui-bin
+ARG APP_NAME=apache-shardingsphere-5.0.0-shardingsphere-ui-bin
 ENV LOCAL_PATH /opt/shardingsphere-ui
 
 ADD target/${APP_NAME}.tar.gz /opt

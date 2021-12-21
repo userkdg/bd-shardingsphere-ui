@@ -33,7 +33,9 @@
         <fileSet>
             <directory>src/main/resources</directory>
             <includes>
-                <include>application.properties</include>
+<!--                <include>application.properties</include>-->
+                <include>application.yml</include>
+                <include>application-test-docker.yml</include>
                 <include>logback.xml</include>
             </includes>
             <outputDirectory>conf</outputDirectory>

@@ -33,12 +33,6 @@ spring:
     username: dsmanager
     password: 'ufxErKTi'
 
-mybatis-plus:
-  configuration:
-    map-underscore-to-camel-case: true
-    auto-mapping-behavior: full
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-  mapper-locations: classpath*:mapper/**/*Mapper.xml
 
 # Logger Config
 logging:
@@ -60,7 +54,10 @@ eureka:
     prefer-ip-address: true
     metadata-map:
       weight: 11
-
+    non-secure-port: 18088
+    instance-id: ${eureka.instance.ip-address}:${spring.application.name}:${eureka.instance.non-secure-port}
+    ip-address: ${SPRING_CLOUD_K8S_EXPOSE_IP:192.168.243.34}
+    status-page-url: http://${eureka.instance.ip-address}:${eureka.instance.non-secure-port}${server.servlet.context-path}/actuator/health
 
 hystrix:
   command:
