@@ -1,5 +1,6 @@
 package org.apache.shardingsphere.ui.servcie.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.shardingsphere.ui.common.domain.DsSysSensitiveInfo;
@@ -15,6 +16,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class DsSySensitiveInfoServiceImpl extends ServiceImpl<DsSySensitiveInfoMapper, DsSysSensitiveInfo> implements DsSySensitiveInfoService {
@@ -35,5 +39,15 @@ public class DsSySensitiveInfoServiceImpl extends ServiceImpl<DsSySensitiveInfoM
             infos.add(information);
         }
         this.saveBatch(infos);
+    }
+
+    @Override
+    public Map<String, String> getTableNameAndIncFieldMap(String schema) {
+        Objects.requireNonNull(schema, "不可为空");
+        LambdaQueryWrapper<DsSysSensitiveInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(DsSysSensitiveInfo::getSchemaName, schema)
+        .eq(DsSysSensitiveInfo::getIncrField, Boolean.TRUE);
+        List<DsSysSensitiveInfo> res = list(queryWrapper);
+        return res.stream().collect(Collectors.toMap(DsSysSensitiveInfo::getTableName, DsSysSensitiveInfo::getFieldName));
     }
 }

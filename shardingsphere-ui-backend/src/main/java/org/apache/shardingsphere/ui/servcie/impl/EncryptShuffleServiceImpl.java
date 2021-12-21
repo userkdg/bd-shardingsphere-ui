@@ -24,6 +24,7 @@ import org.apache.shardingsphere.infra.config.algorithm.ShardingSphereAlgorithmC
 import org.apache.shardingsphere.infra.config.datasource.DataSourceConfiguration;
 import org.apache.shardingsphere.mode.metadata.persist.MetaDataPersistService;
 import org.apache.shardingsphere.ui.servcie.ConfigCenterService;
+import org.apache.shardingsphere.ui.servcie.DsSySensitiveInfoService;
 import org.apache.shardingsphere.ui.servcie.EncryptShuffleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -44,12 +45,18 @@ import java.util.stream.Collectors;
 @Scope(value = "prototype")
 public class EncryptShuffleServiceImpl implements EncryptShuffleService {
     private static final String JOB_NAME_PREFIX = "bd-spark-kms-shuffle-";
+    @Autowired
+    private ConfigCenterService configCenterService;
+
+    @Autowired
+    private DbMetaDataService dbMetaDataService;
+
+    @Autowired
+    private DsSySensitiveInfoService dsSySensitiveInfoService;
 
     private String sourceUrl;
 
     private List<TableInfo> encryptTablesByRule;
-    @Autowired
-    private ConfigCenterService configCenterService;
 
     private MetaDataPersistService metaDataPersistService;
 
@@ -58,9 +65,6 @@ public class EncryptShuffleServiceImpl implements EncryptShuffleService {
     private List<EncryptRuleConfiguration> encryptRules;
 
     private Map<String, Object> dataSourceProps;
-
-    @Autowired
-    private DbMetaDataService dbMetaDataService;
 
     private Map<String, String> tableAndIncField;
 
@@ -118,9 +122,11 @@ public class EncryptShuffleServiceImpl implements EncryptShuffleService {
                 String incFieldName = tableAndIncField.get(table.getName());
                 if (StringUtils.isBlank(incFieldName)) {
                     config.setExtractMode(ExtractMode.All);
+                    log.info("全量一次抽取数据进行洗数");
                 } else {
                     config.setExtractMode(ExtractMode.WithIncField);
                     config.setIncrTimestampCol(incFieldName);
+                    log.info("增量抽取数据进行洗数, 表{}，增量字段为{}", table.getName(), incFieldName);
                 }
                 config.setCustomExtractWhereSql(null);
                 config.setOnYarn(true);
@@ -154,8 +160,8 @@ public class EncryptShuffleServiceImpl implements EncryptShuffleService {
         this.encryptRules = readRule();
         this.encryptTablesByRule = findEncryptTablesByRule(encryptRules);
         this.tableAndPrimaryCols = tableAndPrimaryCols();
-        // TODO: 2021/12/21 获取导入的表与增量字段关系
-        this.tableAndIncField = null;
+        //获取导入的表与增量字段关系
+        this.tableAndIncField = dsSySensitiveInfoService.getTableNameAndIncFieldMap(schema);
     }
 
     private List<TableInfo> findEncryptTablesByRule(List<EncryptRuleConfiguration> encryptRules) {
@@ -182,10 +188,9 @@ public class EncryptShuffleServiceImpl implements EncryptShuffleService {
         metaDataRequest.setTableNames(encryptTablesByRule.stream().map(TableInfo::getName).collect(Collectors.joining(",")));
         ResultBean<SchemaInfoVO> metaData = dbMetaDataService.queryMetaData(metaDataRequest);
         SchemaInfoVO metaDataContent = metaData.getContent();
-        Map<String, List<ColumnInfoVO>> tableAndPrimaryCols = metaDataContent.getTables().stream().flatMap(t -> t.getColumns().stream())
+        return metaDataContent.getTables().stream().flatMap(t -> t.getColumns().stream())
                 .filter(c -> c.getIsPrimary().equals(JudgeEnum.YES))
                 .collect(Collectors.groupingBy(ColumnInfoVO::getTableName));
-        return tableAndPrimaryCols;
 
     }
 
