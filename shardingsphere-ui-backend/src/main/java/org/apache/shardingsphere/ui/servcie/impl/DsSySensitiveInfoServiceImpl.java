@@ -26,9 +26,6 @@ public class DsSySensitiveInfoServiceImpl extends ServiceImpl<DsSySensitiveInfoM
     @Override
     public void insertRuleConfig(List<SensitiveInformation> list, String schemaName) {
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String three_days_after = sdf.format(new Date());
-        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         List<DsSysSensitiveInfo> infos = Lists.newArrayList();
         for (SensitiveInformation info : list) {
             DsSysSensitiveInfo information = new DsSysSensitiveInfo();
@@ -40,7 +37,7 @@ public class DsSySensitiveInfoServiceImpl extends ServiceImpl<DsSySensitiveInfoM
                 information.setCipherKey("");
             }
             information.setSchemaName(schemaName);
-            information.setCreateTime(LocalDateTime.parse(three_days_after, df));
+            information.setCreateTime(LocalDateTime.now());
             infos.add(information);
         }
         this.saveBatch(infos);
