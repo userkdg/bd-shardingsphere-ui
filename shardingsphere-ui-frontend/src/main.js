@@ -34,7 +34,7 @@ Vue.use(VueI18n)
 Vue.use(Vuex)
 
 // language setting init
-const lang = localStorage.getItem('language') || 'en-US'
+const lang = localStorage.getItem('language') || 'zh-CN'
 Vue.config.lang = lang
 
 // language setting
