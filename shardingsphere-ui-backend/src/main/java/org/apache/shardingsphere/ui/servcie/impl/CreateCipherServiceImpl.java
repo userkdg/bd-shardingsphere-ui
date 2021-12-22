@@ -99,7 +99,8 @@ public class CreateCipherServiceImpl implements CreateCipherService {
      * @param dataSourceConfiguration
      * @return
      */
-    private void getMetaInfo(DataSourceConfiguration dataSourceConfiguration, String names, Map<QueryMetaDataRequest, List<TableInfoVO>> map){
+    @Override
+    public void getMetaInfo(DataSourceConfiguration dataSourceConfiguration, String names, Map<QueryMetaDataRequest, List<TableInfoVO>> map){
 
         QueryMetaDataRequest queryMetaDataRequest = new QueryMetaDataRequest();
         queryMetaDataRequest.setTableNames(names);

@@ -11,6 +11,7 @@ import cn.hutool.crypto.symmetric.AES;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.util.StringUtils;
 import com.baomidou.mybatisplus.annotation.DbType;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.shardingsphere.encrypt.api.config.EncryptRuleConfiguration;
 import org.apache.shardingsphere.encrypt.api.config.rule.EncryptColumnRuleConfiguration;
@@ -36,6 +37,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Slf4j
 public class ImportEncryptionRuleUtils {
 
     public static final List<String> EXCEL_SUFFER = Arrays.asList("xls","xlsx","xlsm");
@@ -50,18 +52,40 @@ public class ImportEncryptionRuleUtils {
         return EXCEL_SUFFER.contains(split[split.length-1]);
     }
 
-    public static ResponseResult<List<SensitiveInformation>> getData(MultipartFile file){
+    public static ResponseResult<List<SensitiveInformation>> getData(MultipartFile file, List<TableInfoVO> voList) throws IOException {
 
         // 文件格式校验
         if(file == null || !isExcel(file.getOriginalFilename())){
             return ResponseResult.error("文件为空或格式不正确");
         }
         ExcelHeadDataListener excelHeadDataListener = new ExcelHeadDataListener();
-        EasyExcel.read(transferToFile(file), SensitiveInformation.class, excelHeadDataListener).sheet().doRead();
+        EasyExcel.read(file.getInputStream(), SensitiveInformation.class, excelHeadDataListener).sheet().doRead();
         if(!excelHeadDataListener.errorList.isEmpty()){
             return ResponseResult.error(excelHeadDataListener.errorList.toString());
+        }
+        List<SensitiveInformation> cachedDataList = excelHeadDataListener.cachedDataList;
+        List<String> collect = voList.stream().map(TableInfoVO::getName).collect(Collectors.toList());
+        List<String> unExistTable = cachedDataList.stream().filter(c -> !collect.contains(c.getTableName()))
+                .map(SensitiveInformation::getTableName).collect(Collectors.toList());
+        if(unExistTable.isEmpty()){
+            // 字段校验
+            Map<String, List<SensitiveInformation>> map = cachedDataList.stream().collect(Collectors.groupingBy(SensitiveInformation::getTableName));
+            voList.forEach( v -> {
+                if(map.containsKey(v.getName())){
+                    List<String> voField = v.getColumns().stream().map(ColumnInfoVO::getName).collect(Collectors.toList());
+                    String unExistField = map.get(v.getName()).stream().filter(m -> !voField.contains(m.getFieldName()))
+                            .map(SensitiveInformation::getFieldName).collect(Collectors.joining(","));
+                    String error = String.format("表%s字段%s不存在", v.getName(), unExistField);
+                    log.info(error);
+                    excelHeadDataListener.errorList.add(error);
+                }
+            });
+            return excelHeadDataListener.errorList.isEmpty() ? ResponseResult.ok(excelHeadDataListener.cachedDataList)
+                    : ResponseResult.error(excelHeadDataListener.errorList.toString());
         }else {
-            return ResponseResult.ok(excelHeadDataListener.cachedDataList);
+            String format = String.format("表%不存在", unExistTable);
+            log.info(format);
+            return ResponseResult.error(format);
         }
     }
 
@@ -92,7 +116,7 @@ public class ImportEncryptionRuleUtils {
         return encryptRuleConfigurations;
     }
 
-    private static File transferToFile(MultipartFile multipartFile) {
+    public static File transferToFile(MultipartFile multipartFile) {
 
         File file = null;
         try {

@@ -5,24 +5,44 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.apache.shardingsphere.infra.config.RuleConfiguration;
+import org.apache.shardingsphere.infra.config.datasource.DataSourceConfiguration;
+import org.apache.shardingsphere.infra.metadata.schema.ShardingSphereSchema;
 import org.apache.shardingsphere.mode.metadata.persist.node.SchemaMetaDataNode;
 import org.apache.shardingsphere.mode.persist.PersistRepository;
 import org.apache.shardingsphere.ui.common.domain.SensitiveInformation;
 import org.apache.shardingsphere.ui.servcie.ConfigCenterService;
 import org.apache.shardingsphere.ui.servcie.ExcelShardingSchemaService;
 import org.apache.shardingsphere.ui.util.ConfigurationYamlConverter;
+import org.apache.shardingsphere.ui.util.ImportEncryptionRuleUtils;
 import org.apache.shardingsphere.ui.util.jdbc.ConnectionProxyUtils;
 import org.apache.shardingsphere.ui.web.response.ResponseResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ExcelShardingServiceImpl implements ExcelShardingSchemaService {
 
     @Autowired
     ConfigCenterService configCenterService;
+
+    @Override
+    public void ruleImport(String schemaName, List<SensitiveInformation> infoList, Map<String, DataSourceConfiguration> maps) {
+
+      /*  // 封装数据源
+        Map<String, DataSourceConfiguration> maps = ConnectionProxyUtils.transToDatasourceString(map.get(schemaName));*/
+        // 筛选出增量字段
+        List<SensitiveInformation> list = infoList.stream().filter(d -> !d.getTableIncrField().equals("是")).collect(Collectors.toList());
+        // 封装规则结果集
+        List<RuleConfiguration> ruleConfigurations = ImportEncryptionRuleUtils.transToRuleConfiguration(list);
+        // TODO:规则生效
+        configCenterService.getActivatedMetadataService().getSchemaMetaDataService().persist(schemaName, new ShardingSphereSchema());
+        configCenterService.getActivatedMetadataService().getSchemaRuleService().persist(schemaName, ruleConfigurations, true);
+        configCenterService.getActivatedMetadataService().getDataSourceService().persist(schemaName, maps);
+        addRuleConfig(schemaName);
+    }
 
     @Override
     public ResponseResult<Boolean> CheckShardingSchemaRule(Map<String, List<DapSystemDatasourceEnvironment>> map) {

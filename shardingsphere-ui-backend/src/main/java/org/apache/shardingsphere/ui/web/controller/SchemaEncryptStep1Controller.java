@@ -5,16 +5,16 @@ import cn.com.bluemoon.daps.api.sys.RemoteSystemDatasourceService;
 import cn.com.bluemoon.daps.common.domain.ResultBean;
 import cn.com.bluemoon.daps.system.entity.DapSystemDatasourceEnvironment;
 import cn.com.bluemoon.daps.system.entity.DapSystemSchema;
+import cn.com.bluemoon.metadata.inter.dto.in.QueryMetaDataRequest;
+import cn.com.bluemoon.metadata.inter.dto.out.TableInfoVO;
+import com.alibaba.excel.EasyExcel;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.util.IOUtils;
 import org.apache.shardingsphere.infra.config.RuleConfiguration;
 import org.apache.shardingsphere.infra.config.datasource.DataSourceConfiguration;
 import org.apache.shardingsphere.infra.metadata.schema.ShardingSphereSchema;
 import org.apache.shardingsphere.ui.common.domain.SensitiveInformation;
-import org.apache.shardingsphere.ui.servcie.ConfigCenterService;
-import org.apache.shardingsphere.ui.servcie.DsSySensitiveInfoService;
-import org.apache.shardingsphere.ui.servcie.ExcelShardingSchemaService;
-import org.apache.shardingsphere.ui.servcie.ShardingSchemaService;
+import org.apache.shardingsphere.ui.servcie.*;
 import org.apache.shardingsphere.ui.util.ImportEncryptionRuleUtils;
 import org.apache.shardingsphere.ui.util.jdbc.ConnectionProxyUtils;
 import org.apache.shardingsphere.ui.web.response.ResponseResult;
@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -56,6 +57,8 @@ public class SchemaEncryptStep1Controller {
     private ExcelShardingSchemaService excelShardingSchemaService;
     @Autowired
     DsSySensitiveInfoService dsSySensitiveInfoService;
+    @Autowired
+    CreateCipherService createCipherService;
 
     /**
      * 模板下载
@@ -88,28 +91,39 @@ public class SchemaEncryptStep1Controller {
         if (resultBean.getCode() == 500 || resultBean.getContent() == null) {
             return ResponseResult.error("获取schema失败");
         }
-        // 解析excel规则数据
-        ResponseResult<List<SensitiveInformation>> data = ImportEncryptionRuleUtils.getData(file);
-        if (!data.isSuccess()) {
-            return ResponseResult.error(data.getErrorMsg());
-        }
+        // 判断schema是否存在 以及数据源连接信息
         Map<String, List<DapSystemDatasourceEnvironment>> map = resultBean.getContent();
         ResponseResult<Boolean> result = excelShardingSchemaService.CheckShardingSchemaRule(map);
         if (result.isSuccess()) {
-            String schemaName = map.keySet().stream().findFirst().get();
             // 封装数据源
+            String schemaName = map.keySet().stream().findFirst().get();
             Map<String, DataSourceConfiguration> maps = ConnectionProxyUtils.transToDatasourceString(map.get(schemaName));
-            // 筛选出增量字段
-            List<SensitiveInformation> list = data.getModel().stream().filter(d -> !d.getTableIncrField().equals("是")).collect(Collectors.toList());
-            // 封装规则结果集
-            List<RuleConfiguration> ruleConfigurations = ImportEncryptionRuleUtils.transToRuleConfiguration(list);
-            // TODO:规则生效
-            configCenterService.getActivatedMetadataService().getSchemaMetaDataService().persist(schemaName, new ShardingSphereSchema());
-            configCenterService.getActivatedMetadataService().getSchemaRuleService().persist(schemaName, ruleConfigurations, true);
-            configCenterService.getActivatedMetadataService().getDataSourceService().persist(schemaName, maps);
-            excelShardingSchemaService.addRuleConfig(schemaName);
-            // 数据入库
-            dsSySensitiveInfoService.insertRuleConfig(data.getModel(),schemaName);
+            List<SensitiveInformation> list = null;
+            try {
+                list = EasyExcel.read(file.getInputStream()).head(SensitiveInformation.class).sheet().doReadSync();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Map<QueryMetaDataRequest, List<TableInfoVO>> voMap = new HashMap<>();
+            String names = list.stream().map(SensitiveInformation::getTableName).collect(Collectors.joining(","));
+            createCipherService.getMetaInfo(maps.values().stream().findFirst().get(), names, voMap);
+            // 解析excel规则数据
+            if(voMap.isEmpty()){
+                return ResponseResult.error("数据库不存在excel表信息");
+            }
+            ResponseResult<List<SensitiveInformation>> data = null;
+            try {
+                data = ImportEncryptionRuleUtils.getData(file,voMap.values().stream().findFirst().get());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (!data.isSuccess()) {
+                return ResponseResult.error(data.getErrorMsg());
+            }
+             // 规则入库
+             excelShardingSchemaService.ruleImport(schemaName, data.getModel(), maps);
+             // 数据入库
+             dsSySensitiveInfoService.insertRuleConfig(data.getModel(),schemaName);
             return ResponseResult.ok("导入成功!");
         }
         return ResponseResult.error(result.getErrorMsg());
