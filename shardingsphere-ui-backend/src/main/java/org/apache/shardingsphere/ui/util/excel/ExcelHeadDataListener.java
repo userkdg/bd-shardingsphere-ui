@@ -69,7 +69,7 @@ public class ExcelHeadDataListener extends AnalysisEventListener<SensitiveInform
             log.info(error);
             errorList.add(error);
         }else {
-            if(!data.getTableIncrField().equals("是")){
+            if(StringUtils.isBlank(data.getTableIncrField())){
                 data.setTableIncrField("否");
             }
             if(StringUtils.isBlank(data.getAlgorithmType())){

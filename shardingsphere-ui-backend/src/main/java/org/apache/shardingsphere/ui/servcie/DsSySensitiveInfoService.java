@@ -10,7 +10,7 @@ import java.util.Map;
 
 public interface DsSySensitiveInfoService extends IService<DsSysSensitiveInfo> {
 
-    void insertRuleConfig(List<SensitiveInformation> list);
+    void insertRuleConfig(List<SensitiveInformation> list, String schemaName);
 
     Map<String, String> getTableNameAndIncFieldMap(String schema);
 }

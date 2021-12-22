@@ -100,7 +100,7 @@ public class SchemaEncryptStep1Controller {
             // 封装数据源
             Map<String, DataSourceConfiguration> maps = ConnectionProxyUtils.transToDatasourceString(map.get(schemaName));
             // 筛选出增量字段
-            List<SensitiveInformation> list = data.getModel().stream().filter(d -> d.getTableIncrField().equals("是")).collect(Collectors.toList());
+            List<SensitiveInformation> list = data.getModel().stream().filter(d -> !d.getTableIncrField().equals("是")).collect(Collectors.toList());
             // 封装规则结果集
             List<RuleConfiguration> ruleConfigurations = ImportEncryptionRuleUtils.transToRuleConfiguration(list);
             // TODO:规则生效
@@ -108,23 +108,23 @@ public class SchemaEncryptStep1Controller {
             configCenterService.getActivatedMetadataService().getSchemaRuleService().persist(schemaName, ruleConfigurations, true);
             configCenterService.getActivatedMetadataService().getDataSourceService().persist(schemaName, maps);
             excelShardingSchemaService.addRuleConfig(schemaName);
+            // 数据入库
+            dsSySensitiveInfoService.insertRuleConfig(data.getModel(),schemaName);
             return ResponseResult.ok("导入成功!");
         }
-        // 数据入库
-        dsSySensitiveInfoService.insertRuleConfig(data.getModel());
         return ResponseResult.error(result.getErrorMsg());
     }
 
     /**
      * schema列表
      */
-    @GetMapping("schema/List")
-    public ResponseResult<List<DapSystemSchema>> getSchemaList() {
+        @GetMapping("schema/List")
+        public ResponseResult<List<DapSystemSchema>> getSchemaList() {
 
-        ResultBean<List<DapSystemSchema>> schemaList = remoteSystemDatasourceService.getSchemaList();
-        if (schemaList.getCode() == 200 && schemaList.getContent() != null) {
-            return ResponseResult.ok(schemaList.getContent());
+            ResultBean<List<DapSystemSchema>> schemaList = remoteSystemDatasourceService.getSchemaList();
+            if (schemaList.getCode() == 200 && schemaList.getContent() != null) {
+                return ResponseResult.ok(schemaList.getContent());
+            }
+            return ResponseResult.error(schemaList.getMsg());
         }
-        return ResponseResult.error(schemaList.getMsg());
-    }
 }

@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class DsSySensitiveInfoServiceImpl extends ServiceImpl<DsSySensitiveInfoMapper, DsSysSensitiveInfo> implements DsSySensitiveInfoService {
 
     @Override
-    public void insertRuleConfig(List<SensitiveInformation> list) {
+    public void insertRuleConfig(List<SensitiveInformation> list, String schemaName) {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String three_days_after = sdf.format(new Date());
@@ -35,6 +35,11 @@ public class DsSySensitiveInfoServiceImpl extends ServiceImpl<DsSySensitiveInfoM
             BeanUtils.copyProperties(info, information);
             information.setDataType(info.getDatatype());
             information.setIncrField(info.getTableIncrField().equals("是"));
+            if(info.getTableIncrField().equals("是")){
+                information.setAlgorithmType("");
+                information.setCipherKey("");
+            }
+            information.setSchemaName(schemaName);
             information.setCreateTime(LocalDateTime.parse(three_days_after, df));
             infos.add(information);
         }
