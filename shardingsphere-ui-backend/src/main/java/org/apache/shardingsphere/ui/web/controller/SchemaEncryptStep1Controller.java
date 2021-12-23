@@ -98,12 +98,7 @@ public class SchemaEncryptStep1Controller {
             // 封装数据源
             String schemaName = map.keySet().stream().findFirst().get();
             Map<String, DataSourceConfiguration> maps = ConnectionProxyUtils.transToDatasourceString(map.get(schemaName));
-            List<SensitiveInformation> list = null;
-            try {
-                list = EasyExcel.read(file.getInputStream()).head(SensitiveInformation.class).sheet().doReadSync();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            List<SensitiveInformation> list = EasyExcel.read(ImportEncryptionRuleUtils.transferToFile(file)).head(SensitiveInformation.class).sheet().doReadSync();
             Map<QueryMetaDataRequest, List<TableInfoVO>> voMap = new HashMap<>();
             String names = list.stream().map(SensitiveInformation::getTableName).collect(Collectors.joining(","));
             createCipherService.getMetaInfo(maps.values().stream().findFirst().get(), names, voMap);
@@ -111,20 +106,15 @@ public class SchemaEncryptStep1Controller {
             if(voMap.isEmpty()){
                 return ResponseResult.error("数据库不存在excel表信息");
             }
-            ResponseResult<List<SensitiveInformation>> data = null;
-            try {
-                data = ImportEncryptionRuleUtils.getData(file,voMap.values().stream().findFirst().get());
-            } catch (IOException e) {
-                e.printStackTrace();
+            ResponseResult<List<SensitiveInformation>>  data = ImportEncryptionRuleUtils.getData(file,voMap.values().stream().findFirst().get());
+            if (data.isSuccess()) {
+                // 规则入库
+                excelShardingSchemaService.ruleImport(schemaName, data.getModel(), maps);
+                // 数据入库
+                dsSySensitiveInfoService.insertRuleConfig(data.getModel(),schemaName);
+                return ResponseResult.ok("导入成功!");
             }
-            if (!data.isSuccess()) {
-                return ResponseResult.error(data.getErrorMsg());
-            }
-             // 规则入库
-             excelShardingSchemaService.ruleImport(schemaName, data.getModel(), maps);
-             // 数据入库
-             dsSySensitiveInfoService.insertRuleConfig(data.getModel(),schemaName);
-            return ResponseResult.ok("导入成功!");
+            return ResponseResult.error(data.getErrorMsg());
         }
         return ResponseResult.error(result.getErrorMsg());
     }

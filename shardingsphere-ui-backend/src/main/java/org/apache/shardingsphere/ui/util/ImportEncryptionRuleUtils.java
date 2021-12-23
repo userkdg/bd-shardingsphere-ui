@@ -1,41 +1,24 @@
 package org.apache.shardingsphere.ui.util;
 
 
-import cn.com.bluemoon.daps.system.entity.DapSystemDatasourceEnvironment;
-import cn.com.bluemoon.metadata.common.enums.DbTypeEnum;
-import cn.com.bluemoon.metadata.inter.dto.in.QueryMetaDataRequest;
 import cn.com.bluemoon.metadata.inter.dto.out.ColumnInfoVO;
 import cn.com.bluemoon.metadata.inter.dto.out.TableInfoVO;
-import cn.hutool.core.util.RandomUtil;
-import cn.hutool.crypto.symmetric.AES;
 import com.alibaba.excel.EasyExcel;
-import com.alibaba.excel.util.StringUtils;
-import com.baomidou.mybatisplus.annotation.DbType;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.compress.utils.Lists;
 import org.apache.shardingsphere.encrypt.api.config.EncryptRuleConfiguration;
 import org.apache.shardingsphere.encrypt.api.config.rule.EncryptColumnRuleConfiguration;
 import org.apache.shardingsphere.encrypt.api.config.rule.EncryptTableRuleConfiguration;
-import org.apache.shardingsphere.encrypt.spi.EncryptAlgorithm;
 import org.apache.shardingsphere.infra.config.RuleConfiguration;
-import org.apache.shardingsphere.infra.config.algorithm.ShardingSphereAlgorithm;
 import org.apache.shardingsphere.infra.config.algorithm.ShardingSphereAlgorithmConfiguration;
-import org.apache.shardingsphere.infra.config.algorithm.ShardingSphereAlgorithmFactory;
-import org.apache.shardingsphere.infra.config.datasource.DataSourceConfiguration;
 import org.apache.shardingsphere.ui.common.domain.SensitiveInformation;
-import org.apache.shardingsphere.ui.common.dto.FiledEncryptionInfo;
 import org.apache.shardingsphere.ui.util.excel.ExcelHeadDataListener;
-import org.apache.shardingsphere.ui.util.jdbc.ConnectionProxyUtils;
-import org.apache.shardingsphere.ui.util.sql.FieldFactory;
-import org.apache.shardingsphere.ui.util.sql.MysqlFieldFactory;
 import org.apache.shardingsphere.ui.web.response.ResponseResult;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Slf4j
 public class ImportEncryptionRuleUtils {
@@ -52,14 +35,14 @@ public class ImportEncryptionRuleUtils {
         return EXCEL_SUFFER.contains(split[split.length-1]);
     }
 
-    public static ResponseResult<List<SensitiveInformation>> getData(MultipartFile file, List<TableInfoVO> voList) throws IOException {
+    public static ResponseResult<List<SensitiveInformation>> getData(MultipartFile file, List<TableInfoVO> voList){
 
         // 文件格式校验
         if(file == null || !isExcel(file.getOriginalFilename())){
             return ResponseResult.error("文件为空或格式不正确");
         }
         ExcelHeadDataListener excelHeadDataListener = new ExcelHeadDataListener();
-        EasyExcel.read(file.getInputStream(), SensitiveInformation.class, excelHeadDataListener).sheet().doRead();
+        EasyExcel.read(transferToFile(file), SensitiveInformation.class, excelHeadDataListener).sheet().doRead();
         if(!excelHeadDataListener.errorList.isEmpty()){
             return ResponseResult.error(excelHeadDataListener.errorList.toString());
         }
@@ -75,9 +58,11 @@ public class ImportEncryptionRuleUtils {
                     List<String> voField = v.getColumns().stream().map(ColumnInfoVO::getName).collect(Collectors.toList());
                     String unExistField = map.get(v.getName()).stream().filter(m -> !voField.contains(m.getFieldName()))
                             .map(SensitiveInformation::getFieldName).collect(Collectors.joining(","));
-                    String error = String.format("表%s字段%s不存在", v.getName(), unExistField);
-                    log.info(error);
-                    excelHeadDataListener.errorList.add(error);
+                    if(!unExistField.isEmpty()){
+                        String error = String.format("表%s字段%s不存在", v.getName(), unExistField);
+                        log.info(error);
+                        excelHeadDataListener.errorList.add(error);
+                    }
                 }
             });
             return excelHeadDataListener.errorList.isEmpty() ? ResponseResult.ok(excelHeadDataListener.cachedDataList)
@@ -116,15 +101,11 @@ public class ImportEncryptionRuleUtils {
         return encryptRuleConfigurations;
     }
 
-    public static File transferToFile(MultipartFile multipartFile) {
+    public static InputStream transferToFile(MultipartFile multipartFile) {
 
-        File file = null;
+        InputStream file = null;
         try {
-            String originalFilename = multipartFile.getOriginalFilename();
-            String[] filename = originalFilename.split("\\.");
-            file=File.createTempFile(filename[0], filename[1]);
-            multipartFile.transferTo(file);
-            file.deleteOnExit();
+             file = multipartFile.getInputStream();
         } catch (IOException e) {
             e.printStackTrace();
         }
