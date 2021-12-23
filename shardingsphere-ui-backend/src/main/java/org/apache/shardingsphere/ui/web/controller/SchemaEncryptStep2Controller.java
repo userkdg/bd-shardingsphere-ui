@@ -3,12 +3,10 @@ package org.apache.shardingsphere.ui.web.controller;
 import lombok.Data;
 import org.apache.shardingsphere.ui.servcie.CreateCipherService;
 import org.apache.shardingsphere.ui.servcie.EncryptShuffleService;
-import org.apache.shardingsphere.ui.servcie.ShardingSchemaService;
 import org.apache.shardingsphere.ui.web.response.ResponseResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Set;
 
 /**

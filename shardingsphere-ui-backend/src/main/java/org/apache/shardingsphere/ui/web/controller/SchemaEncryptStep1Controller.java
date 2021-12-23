@@ -10,27 +10,22 @@ import cn.com.bluemoon.metadata.inter.dto.out.TableInfoVO;
 import com.alibaba.excel.EasyExcel;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.util.IOUtils;
-import org.apache.shardingsphere.infra.config.RuleConfiguration;
 import org.apache.shardingsphere.infra.config.datasource.DataSourceConfiguration;
-import org.apache.shardingsphere.infra.metadata.schema.ShardingSphereSchema;
 import org.apache.shardingsphere.ui.common.domain.SensitiveInformation;
 import org.apache.shardingsphere.ui.servcie.*;
 import org.apache.shardingsphere.ui.util.ImportEncryptionRuleUtils;
 import org.apache.shardingsphere.ui.util.jdbc.ConnectionProxyUtils;
 import org.apache.shardingsphere.ui.web.response.ResponseResult;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,13 +47,13 @@ public class SchemaEncryptStep1Controller {
     @Autowired
     ShardingSchemaService shardingSchemaService;
     @Autowired
-    private RemoteSystemDatasourceService remoteSystemDatasourceService;
-    @Resource
-    private ExcelShardingSchemaService excelShardingSchemaService;
-    @Autowired
     DsSySensitiveInfoService dsSySensitiveInfoService;
     @Autowired
     CreateCipherService createCipherService;
+    @Autowired
+    private RemoteSystemDatasourceService remoteSystemDatasourceService;
+    @Resource
+    private ExcelShardingSchemaService excelShardingSchemaService;
 
     /**
      * 模板下载
@@ -103,15 +98,15 @@ public class SchemaEncryptStep1Controller {
             String names = list.stream().map(SensitiveInformation::getTableName).collect(Collectors.joining(","));
             createCipherService.getMetaInfo(maps.values().stream().findFirst().get(), names, voMap);
             // 解析excel规则数据
-            if(voMap.isEmpty()){
+            if (voMap.isEmpty()) {
                 return ResponseResult.error("数据库不存在excel表信息");
             }
-            ResponseResult<List<SensitiveInformation>>  data = ImportEncryptionRuleUtils.getData(file,voMap.values().stream().findFirst().get());
+            ResponseResult<List<SensitiveInformation>> data = ImportEncryptionRuleUtils.getData(file, voMap.values().stream().findFirst().get());
             if (data.isSuccess()) {
                 // 规则入库
                 excelShardingSchemaService.ruleImport(schemaName, data.getModel(), maps);
                 // 数据入库
-                dsSySensitiveInfoService.insertRuleConfig(data.getModel(),schemaName);
+                dsSySensitiveInfoService.insertRuleConfig(data.getModel(), schemaName);
                 return ResponseResult.ok("导入成功!");
             }
             return ResponseResult.error(data.getErrorMsg());
@@ -122,13 +117,13 @@ public class SchemaEncryptStep1Controller {
     /**
      * schema列表
      */
-        @GetMapping("schema/List")
-        public ResponseResult<List<DapSystemSchema>> getSchemaList() {
+    @GetMapping("schema/List")
+    public ResponseResult<List<DapSystemSchema>> getSchemaList() {
 
-            ResultBean<List<DapSystemSchema>> schemaList = remoteSystemDatasourceService.getSchemaList();
-            if (schemaList.getCode() == 200 && schemaList.getContent() != null) {
-                return ResponseResult.ok(schemaList.getContent());
-            }
-            return ResponseResult.error(schemaList.getMsg());
+        ResultBean<List<DapSystemSchema>> schemaList = remoteSystemDatasourceService.getSchemaList();
+        if (schemaList.getCode() == 200 && schemaList.getContent() != null) {
+            return ResponseResult.ok(schemaList.getContent());
         }
+        return ResponseResult.error(schemaList.getMsg());
+    }
 }
