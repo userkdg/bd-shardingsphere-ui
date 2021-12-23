@@ -11,6 +11,7 @@ import org.apache.shardingsphere.encrypt.api.config.rule.EncryptTableRuleConfigu
 import org.apache.shardingsphere.infra.config.RuleConfiguration;
 import org.apache.shardingsphere.infra.config.algorithm.ShardingSphereAlgorithmConfiguration;
 import org.apache.shardingsphere.ui.common.domain.SensitiveInformation;
+import org.apache.shardingsphere.ui.common.exception.ShardingSphereUIException;
 import org.apache.shardingsphere.ui.util.excel.ExcelHeadDataListener;
 import org.apache.shardingsphere.ui.web.response.ResponseResult;
 import org.springframework.web.multipart.MultipartFile;
@@ -108,6 +109,7 @@ public class ImportEncryptionRuleUtils {
              file = multipartFile.getInputStream();
         } catch (IOException e) {
             e.printStackTrace();
+            throw new ShardingSphereUIException(ShardingSphereUIException.SERVER_ERROR, e.getMessage());
         }
         return file;
     }
