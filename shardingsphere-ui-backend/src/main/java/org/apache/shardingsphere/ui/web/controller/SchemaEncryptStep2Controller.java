@@ -7,6 +7,8 @@ import org.apache.shardingsphere.ui.web.response.ResponseResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Nullable;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -36,7 +38,7 @@ public class SchemaEncryptStep2Controller {
 
     @PostMapping("encrypt/shuffle")
     public ResponseResult<String> encryptShuffle(@RequestBody EncryptShuffleVo encryptShuffleVo) {
-        encryptShuffleService.submitJob(encryptShuffleVo.getSchema(), encryptShuffleVo.getTableNames());
+        encryptShuffleService.submitJob(encryptShuffleVo.getSchema(), encryptShuffleVo.getTableNames(), encryptShuffleVo.getTableNameAndIncrFieldPreVal());
         return ResponseResult.ok("提交作业成功");
     }
 
@@ -44,6 +46,13 @@ public class SchemaEncryptStep2Controller {
     public static class EncryptShuffleVo {
         private String schema;
         private Set<String> tableNames;
+        /**
+         * 表名
+         * 表对应的增量字段值
+         */
+        @Nullable
+        private Map<String, String> tableNameAndIncrFieldPreVal;
+
     }
 
 }

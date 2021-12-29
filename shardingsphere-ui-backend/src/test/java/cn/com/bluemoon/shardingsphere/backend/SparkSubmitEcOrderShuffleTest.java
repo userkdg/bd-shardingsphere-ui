@@ -210,7 +210,7 @@ public class SparkSubmitEcOrderShuffleTest extends BaseTest {
                 .filter(c -> !c.isEmpty())
                 .ifPresent(cs -> {
                     for (GlobalConfig c : cs) {
-                        String json = GlobalConfigSwapper.gson.toJson(c);
+                        String json = GlobalConfigSwapper.swapToJsonStr(c);
                         log.info("提交作业入参：表：{}，params：{}", c.getRuleTableName(), json);
                         SparkSubmitEncryptShuffleMain.main(new String[]{json, c.getRuleTableName()});
                     }

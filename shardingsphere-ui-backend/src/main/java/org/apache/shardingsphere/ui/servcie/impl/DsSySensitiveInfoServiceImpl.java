@@ -10,11 +10,7 @@ import org.apache.shardingsphere.ui.servcie.DsSySensitiveInfoService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -50,6 +46,6 @@ public class DsSySensitiveInfoServiceImpl extends ServiceImpl<DsSySensitiveInfoM
         queryWrapper.eq(DsSysSensitiveInfo::getSchemaName, schema)
         .eq(DsSysSensitiveInfo::getIncrField, Boolean.TRUE);
         List<DsSysSensitiveInfo> res = list(queryWrapper);
-        return res.stream().collect(Collectors.toMap(DsSysSensitiveInfo::getTableName, DsSysSensitiveInfo::getFieldName));
+        return res.stream().collect(Collectors.toMap(DsSysSensitiveInfo::getTableName, DsSysSensitiveInfo::getFieldName, (a, b) -> b));
     }
 }

@@ -74,10 +74,12 @@ public class EncryptShuffleServiceImpl implements EncryptShuffleService {
 
     private Set<String> customTableNames;
 
+    private Map<String, String> tableNameAndIncrFieldPreVal;
+
     @Override
-    public void submitJob(String schema, @Nullable Set<String> tableNames) {
+    public void submitJob(String schema, @Nullable Set<String> tableNames, Map<String, String> tableNameAndIncrFieldPreVal) {
         log.info("初始化作业配置信息开始");
-        init(schema, tableNames);
+        init(schema, tableNames, tableNameAndIncrFieldPreVal);
         buildJobConfigs();
         log.info("初始化作业配置信息完成");
         customTables();
@@ -96,7 +98,7 @@ public class EncryptShuffleServiceImpl implements EncryptShuffleService {
     private void doSubmit() {
         Objects.requireNonNull(globalConfigs);
         for (GlobalConfig c : globalConfigs) {
-            String json = GlobalConfigSwapper.gson.toJson(c);
+            String json = GlobalConfigSwapper.swapToJsonStr(c);
             log.info("提交作业入参：表：{}，params：{}", c.getRuleTableName(), json);
             SparkSubmitEncryptShuffleMain.main(new String[]{json, c.getRuleTableName()});
         }
@@ -127,6 +129,11 @@ public class EncryptShuffleServiceImpl implements EncryptShuffleService {
                     config.setExtractMode(ExtractMode.WithIncField);
                     config.setIncrTimestampCol(incFieldName);
                     log.info("增量抽取数据进行洗数, 表{}，增量字段为{}", table.getName(), incFieldName);
+                    String incrFieldPreVal = tableNameAndIncrFieldPreVal.getOrDefault(table.getName(), null);
+                    if (incrFieldPreVal != null) {
+                        config.setIncrTimestampColPreVal(incrFieldPreVal);
+                        log.info("增量抽取数据中指定了表{}只对增量字段{}大于{}的数据进行洗数", table.getName(), incFieldName, incrFieldPreVal);
+                    }
                 }
                 config.setCustomExtractWhereSql(null);
                 config.setOnYarn(true);
@@ -148,10 +155,11 @@ public class EncryptShuffleServiceImpl implements EncryptShuffleService {
         this.globalConfigs = configs;
     }
 
-    private void init(String schema, Set<String> tableNames) {
+    private void init(String schema, Set<String> tableNames, Map<String, String> tableNameAndIncrFieldPreVal) {
         this.metaDataPersistService = configCenterService.getActivatedMetadataService();
         this.schema = schema;
         this.customTableNames = tableNames;
+        this.tableNameAndIncrFieldPreVal = Optional.ofNullable(tableNameAndIncrFieldPreVal).orElse(Collections.emptyMap());
         Map<String, DataSourceConfiguration> dataSource = metaDataPersistService.getDataSourceService().load(schema);
         Map<String, Object> dataSourceProps = dataSource.values().stream().findFirst().map(DataSourceConfiguration::getAllProps).orElseThrow(() -> new RuntimeException("ERROR"));
         this.dataSourceProps = dataSourceProps;
