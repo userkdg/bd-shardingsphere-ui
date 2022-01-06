@@ -38,14 +38,16 @@ public class SchemaEncryptStep2Controller {
 
     @PostMapping("encrypt/shuffle")
     public ResponseResult<String> encryptShuffle(@RequestBody EncryptShuffleVo encryptShuffleVo) {
-        encryptShuffleService.submitJob(encryptShuffleVo.getSchema(), encryptShuffleVo.getTableNames(), encryptShuffleVo.getTableNameAndIncrFieldPreVal());
+        encryptShuffleService.submitJob(encryptShuffleVo.getSchema(), encryptShuffleVo.getUnSelectedTableNames(),
+                encryptShuffleVo.getSelectedTableNames(), encryptShuffleVo.getTableNameAndIncrFieldPreVal());
         return ResponseResult.ok("提交作业成功");
     }
 
     @Data
     public static class EncryptShuffleVo {
         private String schema;
-        private Set<String> tableNames;
+        private Set<String> unSelectedTableNames;
+        private Set<String> selectedTableNames;
         /**
          * 表名
          * 表对应的增量字段值

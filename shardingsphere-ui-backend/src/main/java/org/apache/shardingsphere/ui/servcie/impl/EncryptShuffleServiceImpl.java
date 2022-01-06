@@ -75,11 +75,15 @@ public class EncryptShuffleServiceImpl implements EncryptShuffleService {
     private Set<String> customTableNames;
 
     private Map<String, String> tableNameAndIncrFieldPreVal;
+    private Set<String> customIgnoreTableNames;
 
     @Override
-    public void submitJob(String schema, @Nullable Set<String> tableNames, Map<String, String> tableNameAndIncrFieldPreVal) {
+    public void submitJob(String schema,
+                          @Nullable Set<String> ignoreTableNames,
+                          @Nullable Set<String> tableNames,
+                          Map<String, String> tableNameAndIncrFieldPreVal) {
         log.info("初始化作业配置信息开始");
-        init(schema, tableNames, tableNameAndIncrFieldPreVal);
+        init(schema,ignoreTableNames, tableNames, tableNameAndIncrFieldPreVal);
         buildJobConfigs();
         log.info("初始化作业配置信息完成");
         customTables();
@@ -90,8 +94,23 @@ public class EncryptShuffleServiceImpl implements EncryptShuffleService {
 
     private void customTables() {
         Objects.requireNonNull(globalConfigs);
-        if (customTableNames != null && !customTableNames.isEmpty()) {
-            this.globalConfigs = globalConfigs.stream().filter(c -> customTableNames.contains(c.getRuleTableName())).collect(Collectors.toList());
+        if (!customTableNames.isEmpty()) {
+            this.globalConfigs = globalConfigs.stream().filter(c -> {
+                if (customTableNames.contains(c.getRuleTableName())) {
+                    log.info("指定洗数表{}", c.getRuleTableName());
+                    return true;
+                }
+                return false;
+            }).collect(Collectors.toList());
+        }
+        if (!customIgnoreTableNames.isEmpty()){
+            this.globalConfigs = globalConfigs.stream().filter(c -> {
+                if (customIgnoreTableNames.contains(c.getRuleTableName())){
+                    log.info("指定忽略洗数表{}", c.getRuleTableName());
+                    return false;
+                }
+                return true;
+            }).collect(Collectors.toList());
         }
     }
 
@@ -155,10 +174,11 @@ public class EncryptShuffleServiceImpl implements EncryptShuffleService {
         this.globalConfigs = configs;
     }
 
-    private void init(String schema, Set<String> tableNames, Map<String, String> tableNameAndIncrFieldPreVal) {
+    private void init(String schema, Set<String> ignoreTableNames, Set<String> tableNames, Map<String, String> tableNameAndIncrFieldPreVal) {
         this.metaDataPersistService = configCenterService.getActivatedMetadataService();
         this.schema = schema;
-        this.customTableNames = tableNames;
+        this.customTableNames = Optional.ofNullable(tableNames).orElse(Collections.emptySet());
+        this.customIgnoreTableNames = Optional.ofNullable(ignoreTableNames).orElse(Collections.emptySet());
         this.tableNameAndIncrFieldPreVal = Optional.ofNullable(tableNameAndIncrFieldPreVal).orElse(Collections.emptyMap());
         Map<String, DataSourceConfiguration> dataSource = metaDataPersistService.getDataSourceService().load(schema);
         Map<String, Object> dataSourceProps = dataSource.values().stream().findFirst().map(DataSourceConfiguration::getAllProps).orElseThrow(() -> new RuntimeException("ERROR"));
