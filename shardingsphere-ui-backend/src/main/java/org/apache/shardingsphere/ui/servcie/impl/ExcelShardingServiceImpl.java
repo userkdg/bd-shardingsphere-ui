@@ -31,23 +31,25 @@ public class ExcelShardingServiceImpl implements ExcelShardingSchemaService {
     @Override
     public void ruleImport(String schemaName, List<SensitiveInformation> infoList, Map<String, DataSourceConfiguration> maps) {
 
-      /*  // 封装数据源
-        Map<String, DataSourceConfiguration> maps = ConnectionProxyUtils.transToDatasourceString(map.get(schemaName));*/
-        // 筛选出增量字段
+        // 获取所有的schema名
+        Collection<String> schemaList = loadAllSchemaName();
         List<SensitiveInformation> list = infoList.stream().filter(d -> !d.getTableIncrField().equals("是")).collect(Collectors.toList());
         // 封装规则结果集
         List<RuleConfiguration> ruleConfigurations = ImportEncryptionRuleUtils.transToRuleConfiguration(list);
-        // TODO:规则生效
-        configCenterService.getActivatedMetadataService().getSchemaMetaDataService().persist(schemaName, new ShardingSphereSchema());
-        configCenterService.getActivatedMetadataService().getSchemaRuleService().persist(schemaName, ruleConfigurations, true);
-        configCenterService.getActivatedMetadataService().getDataSourceService().persist(schemaName, maps);
-        addRuleConfig(schemaName);
+        // 判断schema是否存在,存在的话覆盖规则
+        if(schemaList.contains(schemaName)){
+            configCenterService.getActivatedMetadataService().getSchemaRuleService().persist(schemaName, ruleConfigurations, true);
+        }else {
+            configCenterService.getActivatedMetadataService().getSchemaMetaDataService().persist(schemaName, new ShardingSphereSchema());
+            configCenterService.getActivatedMetadataService().getSchemaRuleService().persist(schemaName, ruleConfigurations, true);
+            configCenterService.getActivatedMetadataService().getDataSourceService().persist(schemaName, maps);
+            addRuleConfig(schemaName);
+        }
     }
 
     @Override
     public ResponseResult<Boolean> CheckShardingSchemaRule(Map<String, List<DapSystemDatasourceEnvironment>> map) {
 
-        Collection<String> schemaList = loadAllSchemaName();
         String schemaName = map.keySet().stream().findFirst().get();
         // 检查数据源是否能进行连接
         List<DapSystemDatasourceEnvironment> environments = map.get(schemaName);
@@ -56,10 +58,6 @@ public class ExcelShardingServiceImpl implements ExcelShardingSchemaService {
             if(!flag){
                 return ResponseResult.error(String.format("%s:%s数据源连接失败", environment.getHost(),environment.getPort()));
             }
-        }
-        // 判断schema是否存在,存在的话覆盖规则
-        if(schemaList.contains(schemaName)){
-            return ResponseResult.error(String.format("%s已存在",schemaName));
         }
         return ResponseResult.ok(true);
     }
