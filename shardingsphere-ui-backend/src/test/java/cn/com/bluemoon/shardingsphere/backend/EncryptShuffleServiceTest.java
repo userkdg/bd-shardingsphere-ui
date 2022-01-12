@@ -16,10 +16,10 @@ public class EncryptShuffleServiceTest extends BaseTest {
 
     @Test
     public void testSubmit() {
-//        encryptShuffleService.submitJob("ec_order", null, null);
-//        encryptShuffleService.submitJob("ec_order",null, null);
-        encryptShuffleService.submitJob("ec_order", Collections.singleton("sys_user"), new HashMap<String, String>(){{
-            put("sys_user", "2021-12-20 11:19:33");
-        }});
+        encryptShuffleService.submitJob("ec_order", Collections.singleton("ec_oms_order"),null, null);
+//        encryptShuffleService.submitJob("ec_order",Collections.singleton("ec_oms_order"), null, null);
+//        encryptShuffleService.submitJob("ec_order", null, Collections.singleton("ec_oms_order"), new HashMap<String, String>(){{
+//            put("ec_oms_order", "2021-01-05 10:00:00");
+//        }});
     }
 }
