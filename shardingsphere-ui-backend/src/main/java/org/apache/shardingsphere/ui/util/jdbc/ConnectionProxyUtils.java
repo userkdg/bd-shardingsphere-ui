@@ -111,7 +111,7 @@ public class ConnectionProxyUtils {
             DataSourceConfiguration dataSourceConfiguration = new DataSourceConfiguration("com.zaxxer.hikari.HikariDataSource");
             Properties customPoolProps = dataSourceConfiguration.getCustomPoolProps();
             String url = ConnectionProxyUtils.getUrl(environment);
-            customPoolProps.setProperty("connectionTimeoutMilliseconds", "3000");
+            customPoolProps.setProperty("connectionTimeoutMilliseconds", "30000");
             customPoolProps.setProperty("idleTimeoutMilliseconds", "60000");
             customPoolProps.setProperty("maxPoolSize", "50");
             customPoolProps.setProperty("minPoolSize", "1");
