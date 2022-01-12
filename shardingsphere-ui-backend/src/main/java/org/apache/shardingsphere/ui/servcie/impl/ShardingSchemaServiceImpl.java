@@ -19,13 +19,11 @@ package org.apache.shardingsphere.ui.servcie.impl;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.infra.config.RuleConfiguration;
 import org.apache.shardingsphere.infra.config.datasource.DataSourceConfiguration;
 import org.apache.shardingsphere.infra.metadata.schema.ShardingSphereSchema;
-import org.apache.shardingsphere.infra.metadata.schema.model.TableMetaData;
-import org.apache.shardingsphere.mode.metadata.persist.MetaDataPersistService;
 import org.apache.shardingsphere.mode.metadata.persist.node.SchemaMetaDataNode;
-import org.apache.shardingsphere.mode.metadata.persist.service.SchemaMetaDataPersistService;
 import org.apache.shardingsphere.mode.persist.PersistRepository;
 import org.apache.shardingsphere.ui.servcie.ConfigCenterService;
 import org.apache.shardingsphere.ui.servcie.ShardingSchemaService;
@@ -33,16 +31,18 @@ import org.apache.shardingsphere.ui.util.ConfigurationYamlConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * Implementation of sharding schema service.
  */
 @Service
+@Slf4j
 public final class ShardingSchemaServiceImpl implements ShardingSchemaService {
 
-    @Autowired ConfigCenterService configCenterService;
+    @Autowired
+    ConfigCenterService configCenterService;
 
     @Override
     public Collection<String> getAllSchemaNames() {
@@ -82,6 +82,27 @@ public final class ShardingSchemaServiceImpl implements ShardingSchemaService {
         persistDataSourceConfiguration(schemaName, dataSourceConfigurationMap);
         persistSchemaName(schemaName);
     }
+
+    @Override
+    public void refreshAllSchemaDataSources() {
+        Collection<String> schemaNames = getAllSchemaNames();
+        if (schemaNames == null) {
+            log.info("schema为空不刷新");
+            return;
+        }
+        for (String schemaName : schemaNames) {
+            refreshSchemaDataSourceConfiguration(schemaName);
+        }
+    }
+
+    private void refreshSchemaDataSourceConfiguration(String schemaName) {
+        log.info("刷新schema={}，数据源配置开始", schemaName);
+        String dsConfig = getDataSourceConfiguration(schemaName);
+        log.info("refresh dsConfig=" + dsConfig);
+        updateDataSourceConfiguration(schemaName, dsConfig);
+        log.info("刷新schema={}，数据源配置结束", schemaName);
+    }
+
 
     private Collection<RuleConfiguration> checkRuleConfiguration(final String configData) {
         try {

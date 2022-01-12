@@ -17,7 +17,10 @@
 
 package org.apache.shardingsphere.ui.web.controller;
 
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.ui.servcie.ProxyAuthenticationService;
+import org.apache.shardingsphere.ui.servcie.ShardingSchemaService;
 import org.apache.shardingsphere.ui.web.response.ResponseResult;
 import org.apache.shardingsphere.ui.web.response.ResponseResultUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,16 +30,24 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * RESTful API of sharding proxy authentication.
  */
 @RestController
 @RequestMapping("/api/authentication")
+@Slf4j
 public final class ProxyAuthenticationController {
     
     @Autowired
     private ProxyAuthenticationService proxyAuthenticationService;
+
+    @Autowired
+    private ShardingSchemaService shardingSchemaService;
     
     /**
      * Load authentication.
@@ -47,7 +58,7 @@ public final class ProxyAuthenticationController {
     public ResponseResult<String> loadAuthentication() {
         return ResponseResultUtil.build(proxyAuthenticationService.getAuthentication());
     }
-    
+
     /**
      * Update authentication.
      *
@@ -57,6 +68,20 @@ public final class ProxyAuthenticationController {
     @RequestMapping(value = "", method = RequestMethod.PUT)
     public ResponseResult updateAuthentication(@RequestBody final Map<String, String> configMap) {
         proxyAuthenticationService.updateAuthentication(configMap.get("authentication"));
+        asyncRefreshAllSchemaDataSources();
         return ResponseResultUtil.success();
+    }
+
+    @SneakyThrows
+    private void asyncRefreshAllSchemaDataSources() {
+        log.info("刷新开始");
+        TimeUnit.SECONDS.sleep(5);
+        ExecutorService singleThreadExecutor = Executors.newSingleThreadExecutor();
+        Future<?> submit = singleThreadExecutor.submit(() -> shardingSchemaService.refreshAllSchemaDataSources());
+        Object o = submit.get();
+        log.info("刷新完成, status:{}", o);
+        if (submit.isDone()){
+            singleThreadExecutor.shutdown();
+        }
     }
 }

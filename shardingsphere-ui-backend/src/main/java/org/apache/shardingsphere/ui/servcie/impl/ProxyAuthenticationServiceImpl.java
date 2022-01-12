@@ -19,7 +19,6 @@ package org.apache.shardingsphere.ui.servcie.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.infra.config.RuleConfiguration;
-import org.apache.shardingsphere.infra.config.datasource.DataSourceConfiguration;
 import org.apache.shardingsphere.mode.metadata.persist.MetaDataPersistService;
 import org.apache.shardingsphere.mode.metadata.persist.node.GlobalNode;
 import org.apache.shardingsphere.mode.persist.PersistRepository;
@@ -30,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
-import java.util.Map;
 
 /**
  * Implementation of sharding proxy authentication service.
@@ -52,17 +50,6 @@ public final class ProxyAuthenticationServiceImpl implements ProxyAuthentication
         Collection<RuleConfiguration> ruleConfigurations = checkAuthenticationConfiguration(authentication);
         MetaDataPersistService activatedMetadataService = configCenterService.getActivatedMetadataService();
         activatedMetadataService.getGlobalRuleService().persist(ruleConfigurations, true);
-        Collection<String> schemas = activatedMetadataService.getSchemaMetaDataService().loadAllNames();
-        for (String schemaName : schemas) {
-            refreshSchemaDataSourceConfiguration(schemaName);
-        }
-    }
-
-    private void refreshSchemaDataSourceConfiguration(String schemaName) {
-        log.info("刷新schema={}，数据源配置开始", schemaName);
-        Map<String, DataSourceConfiguration> dsMap = configCenterService.getActivatedMetadataService().getDataSourceService().load(schemaName);
-        configCenterService.getActivatedMetadataService().getDataSourceService().persist(schemaName, dsMap);
-        log.info("刷新schema={}，数据源配置结束", schemaName);
     }
 
     private Collection<RuleConfiguration> checkAuthenticationConfiguration(final String data) {

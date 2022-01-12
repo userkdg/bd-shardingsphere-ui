@@ -71,4 +71,9 @@ public interface ShardingSchemaService {
      * @param dataSourceConfiguration data source configuration
      */
     void addSchemaConfiguration(String schemaName, String ruleConfiguration, String dataSourceConfiguration);
+
+    /**
+     * 修改全局配置后刷新schema
+     */
+    void refreshAllSchemaDataSources();
 }

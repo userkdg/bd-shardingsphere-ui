@@ -47,8 +47,6 @@ logging:
     org.springframework: info
     org.apache.shardingsphere.ui: debug
     cn.com.bluemoon.daps.domp.api: debug
-    cn.com.bluemoon.metadata.inter: debug
-  config:
 
 eureka:
   client:
