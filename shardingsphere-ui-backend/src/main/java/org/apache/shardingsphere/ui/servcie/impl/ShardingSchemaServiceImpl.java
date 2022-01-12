@@ -98,7 +98,6 @@ public final class ShardingSchemaServiceImpl implements ShardingSchemaService {
         }
         for (String schemaName : schemaNames) {
             refreshSchemaDataSourceConfiguration(schemaName);
-            TimeUnit.SECONDS.sleep(5);
         }
     }
 
@@ -106,11 +105,6 @@ public final class ShardingSchemaServiceImpl implements ShardingSchemaService {
     public void asyncRefreshAllSchemaDataSources() {
         singleThreadExecutor.submit(() -> {
             log.info("刷新开始");
-            try {
-                TimeUnit.SECONDS.sleep(30);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
             refreshAllSchemaDataSources();
             log.info("刷新完成");
         });
