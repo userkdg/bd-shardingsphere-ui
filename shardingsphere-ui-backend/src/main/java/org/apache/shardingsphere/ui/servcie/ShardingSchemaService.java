@@ -76,4 +76,6 @@ public interface ShardingSchemaService {
      * 修改全局配置后刷新schema
      */
     void refreshAllSchemaDataSources();
+
+    void asyncRefreshAllSchemaDataSources();
 }

@@ -68,20 +68,8 @@ public final class ProxyAuthenticationController {
     @RequestMapping(value = "", method = RequestMethod.PUT)
     public ResponseResult updateAuthentication(@RequestBody final Map<String, String> configMap) {
         proxyAuthenticationService.updateAuthentication(configMap.get("authentication"));
-        asyncRefreshAllSchemaDataSources();
+        shardingSchemaService.asyncRefreshAllSchemaDataSources();
         return ResponseResultUtil.success();
     }
 
-    @SneakyThrows
-    private void asyncRefreshAllSchemaDataSources() {
-        log.info("刷新开始");
-        TimeUnit.SECONDS.sleep(5);
-        ExecutorService singleThreadExecutor = Executors.newSingleThreadExecutor();
-        Future<?> submit = singleThreadExecutor.submit(() -> shardingSchemaService.refreshAllSchemaDataSources());
-        Object o = submit.get();
-        log.info("刷新完成, status:{}", o);
-        if (submit.isDone()){
-            singleThreadExecutor.shutdown();
-        }
-    }
 }

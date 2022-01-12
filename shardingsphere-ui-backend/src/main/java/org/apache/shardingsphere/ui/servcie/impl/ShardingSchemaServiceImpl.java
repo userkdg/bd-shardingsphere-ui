@@ -19,6 +19,7 @@ package org.apache.shardingsphere.ui.servcie.impl;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.infra.config.RuleConfiguration;
 import org.apache.shardingsphere.infra.config.datasource.DataSourceConfiguration;
@@ -33,6 +34,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Implementation of sharding schema service.
@@ -41,6 +45,7 @@ import java.util.Map;
 @Slf4j
 public final class ShardingSchemaServiceImpl implements ShardingSchemaService {
 
+    private static final ExecutorService singleThreadExecutor = Executors.newSingleThreadExecutor();
     @Autowired
     ConfigCenterService configCenterService;
 
@@ -83,6 +88,7 @@ public final class ShardingSchemaServiceImpl implements ShardingSchemaService {
         persistSchemaName(schemaName);
     }
 
+    @SneakyThrows
     @Override
     public void refreshAllSchemaDataSources() {
         Collection<String> schemaNames = getAllSchemaNames();
@@ -92,7 +98,22 @@ public final class ShardingSchemaServiceImpl implements ShardingSchemaService {
         }
         for (String schemaName : schemaNames) {
             refreshSchemaDataSourceConfiguration(schemaName);
+            TimeUnit.SECONDS.sleep(5);
         }
+    }
+
+    @Override
+    public void asyncRefreshAllSchemaDataSources() {
+        singleThreadExecutor.submit(() -> {
+            log.info("刷新开始");
+            try {
+                TimeUnit.SECONDS.sleep(30);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            refreshAllSchemaDataSources();
+            log.info("刷新完成");
+        });
     }
 
     private void refreshSchemaDataSourceConfiguration(String schemaName) {
