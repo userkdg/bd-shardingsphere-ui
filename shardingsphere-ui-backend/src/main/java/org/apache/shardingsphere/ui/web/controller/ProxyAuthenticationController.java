@@ -68,8 +68,9 @@ public final class ProxyAuthenticationController {
     @RequestMapping(value = "", method = RequestMethod.PUT)
     public ResponseResult updateAuthentication(@RequestBody final Map<String, String> configMap) {
         proxyAuthenticationService.updateAuthentication(configMap.get("authentication"));
-        shardingSchemaService.asyncRefreshAllSchemaDataSources();
-        return ResponseResultUtil.success();
+//        shardingSchemaService.asyncRefreshAllSchemaDataSources();
+        log.warn("若修改了全局事务，请手动刷新Schema数据源配置");
+        return ResponseResultUtil.build("若修改了全局事务，请手动刷新Schema数据源配置");
     }
 
 }
