@@ -35,13 +35,13 @@ public class MysqlFieldFactory extends FieldFactory{
         if(charList.contains(vo.getSqlSimpleType())){
             String fieldLength = StringUtils.isNotBlank(vo.getLength()) ? String.format("(%s)", getFieldLength(info.algorithmType, info.props, vo.getLength())) : "";
             // 字段脚本
-            fieldSql = String.format("alter table %s add %s_cipher %s%s comment'%s' after %s;",
+            fieldSql = String.format("alter table %s add %s_cipher %s%s comment '%s' after %s;",
                     vo.getTableName(), vo.getName(), vo.getSqlSimpleType(), fieldLength, vo.getComment(), vo.getName());
         }else if(intList.contains(vo.getSqlSimpleType())){
-            fieldSql = String.format("alter table %s add %s_cipher %s(%s) comment'%s' after %s;",
+            fieldSql = String.format("alter table %s add %s_cipher %s(%s) comment '%s' after %s;",
                     vo.getTableName(), vo.getName(), "varchar", "512", vo.getComment(), vo.getName());
         }else{
-            String testFormat = "alter table %s add %s_cipher %s comment'%s' after %s;";
+            String testFormat = "alter table %s add %s_cipher %s comment '%s' after %s;";
             fieldSql = String.format(testFormat, vo.getTableName(), vo.getName(), "text", vo.getComment(), vo.getName());
         }
         return fieldSql;

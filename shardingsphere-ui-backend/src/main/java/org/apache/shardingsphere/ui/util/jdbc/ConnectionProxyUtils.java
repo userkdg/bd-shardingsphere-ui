@@ -26,13 +26,14 @@ public class ConnectionProxyUtils {
     public static String PG_DRIVER = "org.postgresql.Driver";
 
     public static ResponseResult<String> connectionDatabase(QueryMetaDataRequest request, List<String> list){
-        String url = String.format("jdbc:mysql://%s:%s/%s", request.getIp(),request.getPort(), request.getDbName());
+        String url = String.format("jdbc:mysql://%s:%s/%s?useUnicode=true&characterEncoding=utf8&useSSL=false", request.getIp(),request.getPort(), request.getDbName());
         Connection connection = null;
         Statement  st = null;
         try {
             connection = DriverManager.getConnection(url,request.getUsername(), request.getPassword());
             st = connection.createStatement();
             for (String sql : list) {
+                log.info("批量加入sql={}", sql);
                 st.addBatch(sql);
             }
             int[] nums = st.executeBatch();

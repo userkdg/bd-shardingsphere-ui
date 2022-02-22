@@ -18,5 +18,5 @@ public interface EncryptShuffleService {
     void submitJob(String schema,
                    @Nullable Set<String> ignoreTableNames,
                    @Nullable Set<String> tableNames,
-                   Map<String, String> tableNameAndIncrFieldPreVal);
+                   @Nullable Map<String, String> tableNameAndIncrFieldPreVal);
 }
