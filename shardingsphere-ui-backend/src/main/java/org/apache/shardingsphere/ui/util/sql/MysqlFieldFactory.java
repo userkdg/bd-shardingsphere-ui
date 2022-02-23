@@ -70,7 +70,7 @@ public class MysqlFieldFactory extends FieldFactory {
             sb.append(" default null ");
         }
         if (vo.getComment() != null) {
-            sb.append(" '").append(vo.getComment()).append("';");
+            sb.append(" comment '").append(vo.getComment()).append("';");
         }
 //        String rename = String.format("alter table %s change %s %s_plain %s%s default null comment '%s';",
 //                vo.getTableName(), vo.getName(), vo.getName(), vo.getSqlSimpleType(), length, vo.getComment());
