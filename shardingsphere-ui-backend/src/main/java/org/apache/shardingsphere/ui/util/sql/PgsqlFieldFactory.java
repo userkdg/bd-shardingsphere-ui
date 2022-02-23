@@ -22,4 +22,10 @@ public class PgsqlFieldFactory extends FieldFactory{
     public String renamePlainFieldSql(ColumnInfoVO columnInfoVO) {
         return null;
     }
+
+    @Override
+    public String renameCipherFieldSql(FiledEncryptionInfo info) {
+        return null;
+    }
+
 }

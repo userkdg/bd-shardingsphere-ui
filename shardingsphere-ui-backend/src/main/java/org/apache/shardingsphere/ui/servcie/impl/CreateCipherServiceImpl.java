@@ -8,6 +8,7 @@ import cn.com.bluemoon.metadata.inter.dto.out.ColumnInfoVO;
 import cn.com.bluemoon.metadata.inter.dto.out.SchemaInfoVO;
 import cn.com.bluemoon.metadata.inter.dto.out.TableInfoVO;
 import com.baomidou.mybatisplus.annotation.DbType;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.shardingsphere.encrypt.api.config.EncryptRuleConfiguration;
@@ -28,6 +29,9 @@ import org.apache.shardingsphere.ui.web.response.ResponseResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -82,16 +86,37 @@ public class CreateCipherServiceImpl implements CreateCipherService {
                 // 创建sql
                 sqlList = cipherInfo.stream().map(l -> mysqlFieldFactory.createCipherFieldSql(l)).collect(Collectors.toList());
             }else if(!isCipher && !fieldList.isEmpty()) {
-                // 明文字段处理
+                // 明文列改为明文备份列、密文列改为明文列
                 sqlList = fieldList.stream().map(f -> mysqlFieldFactory.renamePlainFieldSql(f)).collect(Collectors.toList());
+                for (String sql : sqlList) {
+                    log.info("logic Column to plain sql=>{}", sql);
+                }
+                generateTempFile(schemaName + "_明文列改为备份列_1_", sqlList);
+                List<FiledEncryptionInfo> cipherInfo = absScreenTableFactory.getCipherInfo(fieldList, encryptors);
+                List<String> renameCipherSqls = cipherInfo.stream().map(l -> mysqlFieldFactory.renameCipherFieldSql(l)).collect(Collectors.toList());
+                for (String sql : renameCipherSqls) {
+                    log.info("cipher  Column to logic sql=>{}", sql);
+                }
+                generateTempFile(schemaName + "_密文列改为明文列_2_", renameCipherSqls);
+                sqlList.addAll(renameCipherSqls);
             }else {
                 return ResponseResult.error("字段已创建或不存在");
             }
             // 连接数据库
+            if (true){
+                return null;
+            }
             ResponseResult<String> result = ConnectionProxyUtils.connectionDatabase(request, sqlList);
             return result.isSuccess() ? ResponseResult.ok("执行成功") : ResponseResult.error("执行失败");
         }
         return ResponseResult.error(String.format("数据库不存在%s表，无法创建密文字段", names));
+    }
+
+    @SneakyThrows
+    private void generateTempFile(String fileNamePrefix, List<String> sqlList) {
+        Path tempFile = Files.createTempFile(fileNamePrefix, ".sql");
+        Files.write(tempFile, sqlList);
+        log.info("生成修改明文列为_plain的SQL文件：{}", tempFile);
     }
 
     /**
