@@ -1,5 +1,6 @@
 package org.apache.shardingsphere.ui.util.sql;
 
+import cn.com.bluemoon.metadata.common.enums.JudgeEnum;
 import cn.com.bluemoon.metadata.inter.dto.out.ColumnInfoVO;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.excel.util.StringUtils;
@@ -66,8 +67,9 @@ public class MysqlFieldFactory extends FieldFactory {
                 defVal = String.format("'%s'", vo.getColumnDefault());
             }
             sb.append(" default ").append(defVal);
-        }else {
-            sb.append(" default null ");
+        }
+        if (JudgeEnum.NO.equals(vo.getIsNullable())){
+            sb.append(" not null ");
         }
         if (vo.getComment() != null) {
             sb.append(" comment '").append(vo.getComment()).append("';");
