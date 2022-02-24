@@ -19,37 +19,40 @@ package org.apache.shardingsphere.ui.security;
 
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
-import org.apache.shardingsphere.ui.web.response.ResponseResultUtil;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.shardingsphere.ui.web.response.ResponseResultUtil;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Authentication filter.
  */
+@Slf4j
 public final class AuthenticationFilter implements Filter {
-    
+
     private static final String LOGIN_URI = "/api/login";
-    
+
     private final Gson gson = new Gson();
-    
+
+    private static final Set<String> openApi = new HashSet<String >(){{
+        add("/api/kms-center/pull");
+    }};
+
     @Setter
     private UserAuthenticationService userAuthenticationService;
-    
+
     @Override
     public void init(final FilterConfig filterConfig) {
     }
-    
+
     @Override
     public void doFilter(final ServletRequest servletRequest, final ServletResponse servletResponse, final FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
@@ -60,16 +63,41 @@ public final class AuthenticationFilter implements Filter {
             String accessToken = httpRequest.getHeader("Access-Token");
             if (!Strings.isNullOrEmpty(accessToken) && accessToken.equals(userAuthenticationService.getToken())) {
                 filterChain.doFilter(httpRequest, httpResponse);
+            } else if (openApi.contains(httpRequest.getRequestURI())){
+                log.info("open api {} 放行，请求ip={}", httpRequest.getRequestURI(), getIP(httpRequest));
+                filterChain.doFilter(httpRequest, httpResponse);
             } else {
                 respondWithUnauthorized(httpResponse);
             }
         }
     }
-    
+
     @Override
     public void destroy() {
     }
-    
+
+    private String getIP(HttpServletRequest request) {
+        try {
+            String ip = request.getHeader("x-forwarded-for");
+            if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+                ip = request.getHeader("Proxy-Client-IP");
+            }
+            if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+                ip = request.getHeader("WL-Proxy-Client-IP");
+            }
+            if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+                ip = request.getHeader("X-Real-IP");
+            }
+            if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+                ip = request.getRemoteAddr();
+            }
+            return ip;
+        } catch (Exception e) {
+            // nothing
+        }
+        return null;
+    }
+
     private void handleLogin(final HttpServletRequest httpRequest, final HttpServletResponse httpResponse) {
         try {
             UserAccount user = gson.fromJson(httpRequest.getReader(), UserAccount.class);
@@ -86,9 +114,9 @@ public final class AuthenticationFilter implements Filter {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        
+
     }
-    
+
     private void respondWithUnauthorized(final HttpServletResponse httpResponse) throws IOException {
         httpResponse.setContentType("application/json");
         httpResponse.setCharacterEncoding("UTF-8");

@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "bluemoon.kms.secure",
+      "type": "java.lang.String",
+      "description": "bluemoon.kms.secure 秘钥管理"
+  }
+] }
