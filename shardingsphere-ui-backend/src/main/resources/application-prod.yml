@@ -3,19 +3,19 @@ bluemoon:
     secure:
       aes:
         - sys: ec
-          key: '{"aes-key-value":"test"}'
+          key: '{"aes-key-value":"wlf1d5mmal2xsttr"}'
       md5:
         - sys: pub
           key: '{}'
       sm3:
         - sys: ka
-          key: '{"sm3-salt":"test1234"}'
+          key: '{"sm3-salt":"wlf1d5mmal2xsttr"}'
       sm4:
         - sys: fi
           key: '{"sm4-key":"4D744E003D713D054E7E407C350E447E","sm4-mode":"ECB","sm4-padding":"PKCS5Padding"}'
       rc4:
         - sys: sc
-          key: '{"rc4-key-value":"123456"}'
+          key: '{"rc4-key-value":"wlf1d5mmal2xsttr"}'
 
 spring:
   #  redis:
