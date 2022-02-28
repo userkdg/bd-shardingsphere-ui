@@ -14,6 +14,17 @@ public class EncryptShuffleServiceTest extends BaseTest {
     @Autowired
     private EncryptShuffleService encryptShuffleService;
 
+    @Test
+    public void testNewApi() {
+
+        encryptShuffleService.submitJob("ec_order_test", null, new HashSet<String>() {{
+                    add("oms_b2b_client_storehouse");
+                }},
+                new HashMap<String, String>() {{
+
+                }});
+    }
+
     /**
      * 刷数据时候，要保证本地配置文件
      * eg: C:\Users\Administrator\shardingsphere-ui-configs.yaml

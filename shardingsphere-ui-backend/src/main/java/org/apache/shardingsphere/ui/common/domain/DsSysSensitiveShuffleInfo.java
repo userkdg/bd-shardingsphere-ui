@@ -1,6 +1,5 @@
 package org.apache.shardingsphere.ui.common.domain;
 
-import com.alibaba.excel.annotation.ExcelProperty;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -11,33 +10,18 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class DsSysSensitiveInfo {
+public class DsSysSensitiveShuffleInfo {
 
     @TableId(value = "id",type = IdType.AUTO)
     private Integer id;
 
-    private String dbname;
-
     private String schemaName;
-
-    private String schemaId;
 
     private String tableName;
 
-    private String fieldName;
+    private String incrFieldName;
 
-    private String dataType;
-
-    /**
-     * @Deprecated 增量字段管理移到 {@link DsSysSensitiveShuffleInfo#incrFieldName}管理
-     *
-     */
-    @Deprecated
-    private Boolean incrField;
-
-    private String algorithmType;
-
-    private String cipherKey;
+    private String onUpdateTimestampFields;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @TableField(fill = FieldFill.INSERT)

@@ -12,6 +12,8 @@ import cn.com.bluemoon.shardingsphere.custom.shuffle.base.ExtractMode;
 import cn.com.bluemoon.shardingsphere.custom.shuffle.base.GlobalConfig;
 import cn.com.bluemoon.shardingsphere.custom.shuffle.base.GlobalConfig.FieldInfo;
 import cn.com.bluemoon.shardingsphere.custom.shuffle.base.GlobalConfigSwapper;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,10 +25,13 @@ import org.apache.shardingsphere.infra.config.RuleConfiguration;
 import org.apache.shardingsphere.infra.config.algorithm.ShardingSphereAlgorithmConfiguration;
 import org.apache.shardingsphere.infra.config.datasource.DataSourceConfiguration;
 import org.apache.shardingsphere.mode.metadata.persist.MetaDataPersistService;
+import org.apache.shardingsphere.ui.common.domain.DsSysSensitiveShuffleInfo;
 import org.apache.shardingsphere.ui.servcie.ConfigCenterService;
 import org.apache.shardingsphere.ui.servcie.DsSySensitiveInfoService;
+import org.apache.shardingsphere.ui.servcie.DsSySensitiveShuffleInfoService;
 import org.apache.shardingsphere.ui.servcie.EncryptShuffleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -54,6 +59,12 @@ public class EncryptShuffleServiceImpl implements EncryptShuffleService {
     @Autowired
     private DsSySensitiveInfoService dsSySensitiveInfoService;
 
+    @Autowired
+    private DsSySensitiveShuffleInfoService dsSySensitiveShuffleInfoService;
+
+    @Value("${spark.job.env:test}")
+    private String sparkJobEnv;
+
     private String sourceUrl;
 
     private List<TableInfo> encryptTablesByRule;
@@ -68,6 +79,8 @@ public class EncryptShuffleServiceImpl implements EncryptShuffleService {
 
     private Map<String, String> tableAndIncField;
 
+    private Map<String, DsSysSensitiveShuffleInfo> tableAndShuffleInfo;
+
     private Map<String, List<ColumnInfoVO>> tableAndPrimaryCols;
 
     private List<GlobalConfig> globalConfigs;
@@ -75,6 +88,7 @@ public class EncryptShuffleServiceImpl implements EncryptShuffleService {
     private Set<String> customTableNames;
 
     private Map<String, String> tableNameAndIncrFieldPreVal;
+
     private Set<String> customIgnoreTableNames;
 
     @Override
@@ -119,7 +133,8 @@ public class EncryptShuffleServiceImpl implements EncryptShuffleService {
         for (GlobalConfig c : globalConfigs) {
             String json = GlobalConfigSwapper.swapToJsonStr(c);
             log.info("提交作业入参：表：{}，params：{}", c.getRuleTableName(), json);
-            SparkSubmitEncryptShuffleMain.main(new String[]{json, c.getRuleTableName()});
+            // TODO: 2022/2/25 增加部署环境对应作业提交
+            SparkSubmitEncryptShuffleMain.main(new String[]{json, c.getRuleTableName(), sparkJobEnv});
         }
     }
 
@@ -140,22 +155,29 @@ public class EncryptShuffleServiceImpl implements EncryptShuffleService {
                 config.setPartitionCol(partitionCol);
 
                 // 获取表->增量字段
-                String incFieldName = tableAndIncField.get(table.getName());
-                if (StringUtils.isBlank(incFieldName)) {
+//                String incrFieldName = tableAndIncField.get(table.getName());
+                DsSysSensitiveShuffleInfo shuffleInfo = tableAndShuffleInfo.get(table.getName());
+                String incrFieldName = shuffleInfo.getIncrFieldName();
+                if (StringUtils.isBlank(incrFieldName)) {
                     config.setExtractMode(ExtractMode.All);
                     log.info("全量一次抽取数据进行洗数");
                 } else {
                     config.setExtractMode(ExtractMode.WithIncField);
-                    config.setIncrTimestampCol(incFieldName);
-                    log.info("增量抽取数据进行洗数, 表{}，增量字段为{}", table.getName(), incFieldName);
+                    config.setIncrTimestampCol(incrFieldName);
+                    log.info("增量抽取数据进行洗数, 表{}，增量字段为{}", table.getName(), incrFieldName);
                     String incrFieldPreVal = tableNameAndIncrFieldPreVal.getOrDefault(table.getName(), null);
                     if (incrFieldPreVal != null) {
                         config.setIncrTimestampColPreVal(incrFieldPreVal);
-                        log.info("增量抽取数据中指定了表{}只对增量字段{}大于{}的数据进行洗数", table.getName(), incFieldName, incrFieldPreVal);
+                        log.info("增量抽取数据中指定了表{}只对增量字段{}大于{}的数据进行洗数", table.getName(), incrFieldName, incrFieldPreVal);
                     }
                 }
+                // 增加避免刷库更新SQL中timestamp自动更新问题，会拿该原值数据回填
+                // TODO: 2022/2/25  DsSySensitiveInfo库表（导入文件数据）增加一列，onUpdateCurrentTimestamps列字段，eg: sys_user的op_time
+                List<String> onUpdateTimestampFields = Arrays.stream(shuffleInfo.getOnUpdateTimestampFields().split(",")).filter(StringUtils::isNotBlank).collect(Collectors.toList());
+                config.setOnUpdateCurrentTimestamps(onUpdateTimestampFields);
+
                 config.setCustomExtractWhereSql(null);
-                config.setOnYarn(true);
+                config.setOnYarn(false);
                 config.setJobName(JOB_NAME_PREFIX + table.getName());
                 // 明文列加密
                 List<GlobalConfig.Tuple2<FieldInfo>> shuffleCols = new ArrayList<>();
@@ -189,6 +211,10 @@ public class EncryptShuffleServiceImpl implements EncryptShuffleService {
         this.encryptTablesByRule = findEncryptTablesByRule(encryptRules);
         this.tableAndPrimaryCols = tableAndPrimaryCols();
         //获取导入的表与增量字段关系
+        LambdaQueryWrapper<DsSysSensitiveShuffleInfo> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(DsSysSensitiveShuffleInfo::getSchemaName, schema);
+        List<DsSysSensitiveShuffleInfo> sensitiveShuffleInfos = dsSySensitiveShuffleInfoService.list(wrapper);
+        this.tableAndShuffleInfo = sensitiveShuffleInfos.stream().collect(Collectors.toMap(DsSysSensitiveShuffleInfo::getTableName, d -> d, (a, b) -> b));
         this.tableAndIncField = dsSySensitiveInfoService.getTableNameAndIncFieldMap(schema);
     }
 
