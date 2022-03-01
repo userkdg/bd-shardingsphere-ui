@@ -41,8 +41,8 @@ public final class UserAuthenticationService {
     private String password;
     
     private final Base64 base64 = new Base64();
-    
-    private Gson gson = new Gson();
+
+    private final transient Gson gson = new Gson();
     
     /**
      * Check user.
