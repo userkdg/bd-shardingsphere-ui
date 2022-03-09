@@ -10,6 +10,8 @@ npm install
 npm run dev
 
 # build for production with minification
+# ./src/utils/conf.js
+# 修改const HOST = 后端访问路径
 npm run build
 
 # build for production and view the bundle analyzer report
