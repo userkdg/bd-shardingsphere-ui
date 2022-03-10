@@ -25,4 +25,5 @@ public class SchemaEncryptStep3Controller {
 
         return createCipherService.createCipherPlainField(schemaName, false);
     }
+
 }

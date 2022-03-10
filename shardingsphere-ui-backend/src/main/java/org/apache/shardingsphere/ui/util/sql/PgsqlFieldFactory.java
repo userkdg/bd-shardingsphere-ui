@@ -28,4 +28,9 @@ public class PgsqlFieldFactory extends FieldFactory{
         return null;
     }
 
+    @Override
+    public String createPlainBakFieldSql(FiledEncryptionInfo info) {
+        return null;
+    }
+
 }

@@ -99,4 +99,32 @@ public class MysqlFieldFactory extends FieldFactory {
         }
         return fieldSql;
     }
+
+    @Override
+    public String createPlainBakFieldSql(FiledEncryptionInfo info) {
+        ColumnInfoVO vo = info.getColumnInfoVO();
+        String length = StringUtils.isBlank(vo.getLength()) ? "" : "(" + vo.getLength() + ")";
+        StringBuilder sb = new StringBuilder();
+        sb.append("alter table ").append(vo.getTableName())
+                .append(" add column ").append(vo.getName() + "_plain ")
+                .append(vo.getSqlSimpleType()).append(length);
+        if (vo.getColumnDefault() != null) {
+            String defVal;
+            if ("".equals(vo.getColumnDefault())) {
+                defVal = "''";
+            } else if (intList.contains(vo.getSqlSimpleType())) {
+                defVal = vo.getColumnDefault();
+            } else {
+                defVal = String.format("'%s'", vo.getColumnDefault());
+            }
+            sb.append(" default ").append(defVal);
+        }
+        if (JudgeEnum.NO.equals(vo.getIsNullable())){
+            sb.append(" not null ");
+        }
+        if (vo.getComment() != null) {
+            sb.append(" comment '").append(vo.getComment()).append("';");
+        }
+        return sb.toString();
+    }
 }

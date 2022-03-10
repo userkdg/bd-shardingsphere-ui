@@ -15,8 +15,9 @@ public class SchemaEncryptStep3ControllerTest extends BaseTest{
     private SchemaEncryptStep3Controller controller;
 
     @Test
-    public void swapName() {
+    public void renamePlainField() {
         ResponseResult<String> ec_order = controller.renamePlainField("ec_order");
         System.out.println(ec_order);
     }
+
 }

@@ -27,11 +27,13 @@ import org.apache.shardingsphere.ui.util.jdbc.ConnectionProxyUtils;
 import org.apache.shardingsphere.ui.util.sql.FieldFactory;
 import org.apache.shardingsphere.ui.web.response.ResponseResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -44,6 +46,9 @@ public class CreateCipherServiceImpl implements CreateCipherService {
 
     @Autowired
     DbMetaDataService dbMetaDataService;
+
+    @Value("${spark.job.env:test}")
+    private String sparkJobEnv;
 
     @Override
     public ResponseResult<String> createCipherPlainField(String schemaName, Boolean isCipher) {
@@ -85,25 +90,33 @@ public class CreateCipherServiceImpl implements CreateCipherService {
                 List<FiledEncryptionInfo> cipherInfo = absScreenTableFactory.getCipherInfo(fieldList, encryptors);
                 // 创建sql
                 sqlList = cipherInfo.stream().map(l -> mysqlFieldFactory.createCipherFieldSql(l)).collect(Collectors.toList());
+                generateTempFile(schemaName + "_1-1_创建密文列_", sqlList);
             }else if(!isCipher && !fieldList.isEmpty()) {
                 // 明文列改为明文备份列、密文列改为明文列
                 sqlList = fieldList.stream().map(f -> mysqlFieldFactory.renamePlainFieldSql(f)).collect(Collectors.toList());
                 for (String sql : sqlList) {
                     log.info("logic Column to plain sql=>{}", sql);
                 }
-                generateTempFile(schemaName + "_明文列改为备份列_1_", sqlList);
+                generateTempFile(schemaName + "_2-1_明文列改为备份列_", sqlList);
                 List<FiledEncryptionInfo> cipherInfo = absScreenTableFactory.getCipherInfo(fieldList, encryptors);
                 List<String> renameCipherSqls = cipherInfo.stream().map(l -> mysqlFieldFactory.renameCipherFieldSql(l)).collect(Collectors.toList());
                 for (String sql : renameCipherSqls) {
                     log.info("cipher  Column to logic sql=>{}", sql);
                 }
-                generateTempFile(schemaName + "_密文列改为明文列_2_", renameCipherSqls);
+                generateTempFile(schemaName + "_2-2_密文列改为明文列_", renameCipherSqls);
                 sqlList.addAll(renameCipherSqls);
+                // 生成备份列创建sql
+                List<String> createPlainBakSqls = cipherInfo.stream().map(l -> mysqlFieldFactory.createPlainBakFieldSql(l)).collect(Collectors.toList());
+                for (String sql : createPlainBakSqls) {
+                    log.info("plain Column bak to logic sql=>{}", sql);
+                }
+                generateTempFile(schemaName+"_3_创建备份列_", createPlainBakSqls);
             }else {
                 return ResponseResult.error("字段已创建或不存在");
             }
             // 连接数据库
-            if (true){
+            if ("prod".equals(sparkJobEnv)){
+                log.error("生产环境程序不执行SQL，提供SQL语句给DBA负责执行");
                 return null;
             }
             ResponseResult<String> result = ConnectionProxyUtils.connectionDatabase(request, sqlList);
@@ -114,9 +127,13 @@ public class CreateCipherServiceImpl implements CreateCipherService {
 
     @SneakyThrows
     private void generateTempFile(String fileNamePrefix, List<String> sqlList) {
-        Path tempFile = Files.createTempFile(fileNamePrefix, ".sql");
+        String userDir = System.getProperty("user.dir");
+        Path sqlPath = Files.createDirectories(Paths.get(userDir, "/kms-sql"));
+        File file = new File(sqlPath.toAbsolutePath() + "/" + fileNamePrefix + ".sql");
+        Files.deleteIfExists(file.toPath());
+        Path tempFile = Files.createFile(file.toPath());
         Files.write(tempFile, sqlList);
-        log.info("生成修改明文列为_plain的SQL文件：{}", tempFile);
+        log.info("生成SQL文件：{}", tempFile);
     }
 
     /**
