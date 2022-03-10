@@ -24,7 +24,7 @@ public class MysqlFieldFactory extends FieldFactory {
         EncryptAlgorithm algorithm = ShardingSphereAlgorithmFactory.createAlgorithm
                 (new ShardingSphereAlgorithmConfiguration(algorithmType, props), EncryptAlgorithm.class);
         String join = StrUtil.repeat("中", Integer.parseInt(length));
-        return algorithm.encrypt(join).length();
+        return algorithm.encrypt(join).toString().length();
     }
 
     @Override
