@@ -38,16 +38,26 @@ public class SchemaEncryptStep2Controller {
 
     @PostMapping("encrypt/shuffle")
     public ResponseResult<String> encryptShuffle(@RequestBody EncryptShuffleVo encryptShuffleVo) {
-        encryptShuffleService.submitJob(encryptShuffleVo.getSchema(), encryptShuffleVo.getUnSelectedTableNames(),
-                encryptShuffleVo.getSelectedTableNames(), encryptShuffleVo.getTableNameAndIncrFieldPreVal());
+        encryptShuffleService.submitJob(encryptShuffleVo.getSchema(), encryptShuffleVo.getDbType(),
+                encryptShuffleVo.getUnSelectedTableNames(),
+                encryptShuffleVo.getSelectedTableNames(),
+                encryptShuffleVo.getTableNameAndIncrFieldPreVal(),
+                encryptShuffleVo.isWithIncrFieldExtractOnce());
         return ResponseResult.ok("提交作业成功");
     }
 
     @Data
     public static class EncryptShuffleVo {
         private String schema;
+        private String dbType;
         private Set<String> unSelectedTableNames;
         private Set<String> selectedTableNames;
+
+        /**
+         * 刷库中抽取源数据的方式
+         */
+        private boolean withIncrFieldExtractOnce;
+
         /**
          * 表名
          * 表对应的增量字段值
