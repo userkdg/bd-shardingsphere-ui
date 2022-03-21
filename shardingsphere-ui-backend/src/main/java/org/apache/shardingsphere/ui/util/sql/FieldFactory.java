@@ -32,4 +32,6 @@ public abstract class FieldFactory {
     public abstract String renameCipherFieldSql(FiledEncryptionInfo info);
 
     public abstract String createPlainBakFieldSql(FiledEncryptionInfo info);
+
+    public abstract String deletePlainFieldData(FiledEncryptionInfo info);
 }

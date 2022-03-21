@@ -33,4 +33,9 @@ public class PgsqlFieldFactory extends FieldFactory{
         return null;
     }
 
+    @Override
+    public String deletePlainFieldData(FiledEncryptionInfo info) {
+        return null;
+    }
+
 }

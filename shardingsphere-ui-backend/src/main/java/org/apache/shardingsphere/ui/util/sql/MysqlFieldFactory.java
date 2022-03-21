@@ -15,8 +15,8 @@ import java.util.Properties;
 
 public class MysqlFieldFactory extends FieldFactory {
 
-    private final List<String> charList = Arrays.asList("char", "varchar", "varbinary", "binary", "text", "tinytext", "mediumtext", "longtext");
-    private final List<String> intList = Arrays.asList("int", "bigint", "tinyint", "smallint", "mediumint", "float", "double", "decimal");
+    public static final List<String> charList = Arrays.asList("char", "varchar", "varbinary", "binary", "text", "tinytext", "mediumtext", "longtext");
+    public static final List<String> intList = Arrays.asList("int", "bigint", "tinyint", "smallint", "mediumint", "float", "double", "decimal");
 
     @Override
     public Integer getFieldLength(String algorithmType, Properties props, String length) {
@@ -68,7 +68,7 @@ public class MysqlFieldFactory extends FieldFactory {
             }
             sb.append(" default ").append(defVal);
         }
-        if (JudgeEnum.NO.equals(vo.getIsNullable())){
+        if (JudgeEnum.NO.equals(vo.getIsNullable())) {
             sb.append(" not null ");
         }
         if (vo.getComment() != null) {
@@ -119,12 +119,35 @@ public class MysqlFieldFactory extends FieldFactory {
             }
             sb.append(" default ").append(defVal);
         }
-        if (JudgeEnum.NO.equals(vo.getIsNullable())){
+        if (JudgeEnum.NO.equals(vo.getIsNullable())) {
             sb.append(" not null ");
         }
         if (vo.getComment() != null) {
             sb.append(" comment '").append(vo.getComment()).append("';");
         }
+        return sb.toString();
+    }
+
+    /**
+     * update xxx set xxx = null where 1=1
+     */
+    @Override
+    public String deletePlainFieldData(FiledEncryptionInfo info) {
+        ColumnInfoVO vo = info.getColumnInfoVO();
+        StringBuilder sb = new StringBuilder();
+        sb.append("update ").append(vo.getTableName())
+                .append(" set ").append(vo.getName()).append(" = ");
+        String defVal = null;
+        if (vo.getColumnDefault() != null) {
+            if ("".equals(vo.getColumnDefault())) {
+                defVal = "''";
+            } else if (intList.contains(vo.getSqlSimpleType())) {
+                defVal = vo.getColumnDefault();
+            } else {
+                defVal = String.format("'%s'", vo.getColumnDefault());
+            }
+        }
+        sb.append(defVal).append(" where 1=1;");
         return sb.toString();
     }
 }
