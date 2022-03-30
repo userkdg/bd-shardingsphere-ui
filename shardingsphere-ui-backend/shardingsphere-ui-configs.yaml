@@ -1,0 +1,31 @@
+centerConfigs:
+  #  模拟环境
+- activated: true
+  digest: ''
+  instanceType: Zookeeper
+  name: data_security_ns_dev
+  namespace: data_security_ns_dev
+  orchestrationName: data_security_ns_dev
+  orchestrationType: config_center
+  props: {}
+  serverLists: 192.168.243.20:12181,192.168.243.21:12181,192.168.243.22:12181
+#  测试
+- activated: false
+  digest: ''
+  instanceType: Zookeeper
+  name: data_security_ns_test
+  namespace: data_security_ns_test
+  orchestrationName: data_security_ns_test
+  orchestrationType: config_center
+  props: {}
+  serverLists: 192.168.243.34:12181
+#  生产
+- activated: false
+  digest: ''
+  instanceType: Zookeeper
+  name: ec_order_zk
+  namespace: ec_order_zk
+  orchestrationName: ec_order_zk
+  orchestrationType: config_center
+  props: {}
+  serverLists: 192.168.63.26:2181

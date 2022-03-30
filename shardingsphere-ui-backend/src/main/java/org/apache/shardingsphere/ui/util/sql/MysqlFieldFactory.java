@@ -136,7 +136,7 @@ public class MysqlFieldFactory extends FieldFactory {
         ColumnInfoVO vo = info.getColumnInfoVO();
         StringBuilder sb = new StringBuilder();
         sb.append("update ").append(vo.getTableName())
-                .append(" set ").append(vo.getName()).append(" = ");
+                .append(" set ").append(vo.getName()).append("_plain").append(" = ");
         String defVal = null;
         if (vo.getColumnDefault() != null) {
             if ("".equals(vo.getColumnDefault())) {

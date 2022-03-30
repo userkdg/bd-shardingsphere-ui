@@ -1,5 +1,6 @@
 package org.apache.shardingsphere.ui.servcie.impl;
 
+import cn.com.bluemoon.daps.common.toolkit.BmAssetUtils;
 import cn.com.bluemoon.encrypt.shuffle.cli.SparkSubmitEncryptShuffleMain;
 import cn.com.bluemoon.metadata.common.ResultBean;
 import cn.com.bluemoon.metadata.common.enums.DbTypeEnum;
@@ -12,7 +13,6 @@ import cn.com.bluemoon.shardingsphere.custom.shuffle.base.ExtractMode;
 import cn.com.bluemoon.shardingsphere.custom.shuffle.base.GlobalConfig;
 import cn.com.bluemoon.shardingsphere.custom.shuffle.base.GlobalConfig.FieldInfo;
 import cn.com.bluemoon.shardingsphere.custom.shuffle.base.GlobalConfigSwapper;
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +30,7 @@ import org.apache.shardingsphere.ui.servcie.ConfigCenterService;
 import org.apache.shardingsphere.ui.servcie.DsSySensitiveInfoService;
 import org.apache.shardingsphere.ui.servcie.DsSySensitiveShuffleInfoService;
 import org.apache.shardingsphere.ui.servcie.EncryptShuffleService;
+import org.apache.shardingsphere.ui.util.sql.MysqlFieldFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
@@ -91,13 +92,22 @@ public class EncryptShuffleServiceImpl implements EncryptShuffleService {
 
     private Set<String> customIgnoreTableNames;
 
+    private String dbType;
+
+    private boolean withIncrFieldExtractOnce;
+
     @Override
     public void submitJob(String schema,
+                          String dbType,
                           @Nullable Set<String> ignoreTableNames,
                           @Nullable Set<String> tableNames,
-                          Map<String, String> tableNameAndIncrFieldPreVal) {
+                          @Nullable Map<String, String> tableNameAndIncrFieldPreVal,
+                          boolean withIncrFieldExtractOnce) {
         log.info("初始化作业配置信息开始");
-        init(schema,ignoreTableNames, tableNames, tableNameAndIncrFieldPreVal);
+        init(schema, ignoreTableNames, tableNames, tableNameAndIncrFieldPreVal);
+        BmAssetUtils.isTrue(dbType != null, "数据库类型不为空");
+        this.dbType = dbType;
+        this.withIncrFieldExtractOnce = withIncrFieldExtractOnce;
         buildJobConfigs();
         log.info("初始化作业配置信息完成");
         customTables();
@@ -117,9 +127,9 @@ public class EncryptShuffleServiceImpl implements EncryptShuffleService {
                 return false;
             }).collect(Collectors.toList());
         }
-        if (!customIgnoreTableNames.isEmpty()){
+        if (!customIgnoreTableNames.isEmpty()) {
             this.globalConfigs = globalConfigs.stream().filter(c -> {
-                if (customIgnoreTableNames.contains(c.getRuleTableName())){
+                if (customIgnoreTableNames.contains(c.getRuleTableName())) {
                     log.info("指定忽略洗数表{}", c.getRuleTableName());
                     return false;
                 }
@@ -133,7 +143,7 @@ public class EncryptShuffleServiceImpl implements EncryptShuffleService {
         for (GlobalConfig c : globalConfigs) {
             String json = GlobalConfigSwapper.swapToJsonStr(c);
             log.info("提交作业入参：表：{}，params：{}", c.getRuleTableName(), json);
-            // TODO: 2022/2/25 增加部署环境对应作业提交
+            //  2022/2/25 增加部署环境对应作业提交
             SparkSubmitEncryptShuffleMain.main(new String[]{json, c.getRuleTableName(), sparkJobEnv});
         }
     }
@@ -146,18 +156,39 @@ public class EncryptShuffleServiceImpl implements EncryptShuffleService {
                 GlobalConfig config = new GlobalConfig();
                 config.setSourceUrl(sourceUrl);
                 config.setTargetUrl(sourceUrl);
+                // 增加库名
+                config.setDbName(schema);
+                config.setDbType(dbType);
                 config.setRuleTableName(table.getName());
                 // 主键列
                 List<ColumnInfoVO> primaryCols = tableAndPrimaryCols.get(table.getName());
+                for (ColumnInfoVO p : primaryCols) {
+                    if (dbType.equalsIgnoreCase("mysql")) {
+                        if (MysqlFieldFactory.intList.contains(p.getSqlSimpleType())) {
+                            log.info("表{}主键{}类型为{}数值类", table.getName(), p.getName(), p.getSqlSimpleType());
+                        }else {
+                            log.warn("表{}主键{}类型为{}非数值类", table.getName(), p.getName(), p.getSqlSimpleType());
+                        }
+                    }
+                }
                 List<FieldInfo> fieldInfos = primaryCols.stream().map(ColumnInfoVO::getName).map(FieldInfo::new).collect(Collectors.toList());
                 config.setPrimaryCols(fieldInfos);
-                FieldInfo partitionCol = primaryCols.stream().filter(c -> c.getSqlSimpleType().equalsIgnoreCase("int")).map(c -> new FieldInfo(c.getName())).findFirst().orElse(fieldInfos.get(0));
+                FieldInfo partitionCol = primaryCols.stream().filter(c -> JudgeEnum.YES.equals(c.getIsAutoIncrement()))
+                        .map(c -> new FieldInfo(c.getName())).findFirst().orElseGet(()->{
+                            try {
+                                return primaryCols.stream().max(Comparator.comparing(ColumnInfoVO::getLength))
+                                        .map(c -> new FieldInfo(c.getName())).orElse(fieldInfos.get(0));
+                            } catch (Exception e) {
+                                log.error("对比字段长度失败", e);
+                                return fieldInfos.get(0);
+                            }
+                        });
                 config.setPartitionCol(partitionCol);
-
                 // 获取表->增量字段
 //                String incrFieldName = tableAndIncField.get(table.getName());
                 DsSysSensitiveShuffleInfo shuffleInfo = tableAndShuffleInfo.get(table.getName());
                 String incrFieldName = shuffleInfo.getIncrFieldName();
+//                incrFieldName=null;// 2022/3/10 临时改为全量跑 不走count统计
                 if (StringUtils.isBlank(incrFieldName)) {
                     config.setExtractMode(ExtractMode.All);
                     log.info("全量一次抽取数据进行洗数");
@@ -171,13 +202,18 @@ public class EncryptShuffleServiceImpl implements EncryptShuffleService {
                         log.info("增量抽取数据中指定了表{}只对增量字段{}大于{}的数据进行洗数", table.getName(), incrFieldName, incrFieldPreVal);
                     }
                 }
+                if (ExtractMode.WithIncField.equals(config.getExtractMode()) && withIncrFieldExtractOnce) {
+                    log.warn("接口入参指定了抽取模式{}，默认为根据具体业务逻辑进行设置抽取模式，由最初{}=>{}",
+                            ExtractMode.WithIncFieldOnce, config.getExtractMode(), ExtractMode.WithIncFieldOnce);
+                    config.setExtractMode(ExtractMode.WithIncFieldOnce);
+                }
                 // 增加避免刷库更新SQL中timestamp自动更新问题，会拿该原值数据回填
                 // TODO: 2022/2/25  DsSySensitiveInfo库表（导入文件数据）增加一列，onUpdateCurrentTimestamps列字段，eg: sys_user的op_time
                 List<String> onUpdateTimestampFields = Arrays.stream(shuffleInfo.getOnUpdateTimestampFields().split(",")).filter(StringUtils::isNotBlank).collect(Collectors.toList());
                 config.setOnUpdateCurrentTimestamps(onUpdateTimestampFields);
 
                 config.setCustomExtractWhereSql(null);
-                config.setOnYarn(false);
+                config.setOnYarn(true);
                 config.setJobName(JOB_NAME_PREFIX + table.getName());
                 // 明文列加密
                 List<GlobalConfig.Tuple2<FieldInfo>> shuffleCols = new ArrayList<>();

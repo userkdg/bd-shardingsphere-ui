@@ -17,6 +17,7 @@
 
 package org.apache.shardingsphere.ui.repository.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.ui.common.domain.CenterConfigs;
 import org.apache.shardingsphere.ui.common.exception.ShardingSphereUIException;
 import org.apache.shardingsphere.ui.repository.CenterConfigsRepository;
@@ -35,12 +36,15 @@ import java.nio.charset.StandardCharsets;
 /**
  * Implementation of Center configs repository.
  */
+@Slf4j
 public final class YamlCenterConfigsRepositoryImpl implements CenterConfigsRepository {
     
     private final File file;
     
     public YamlCenterConfigsRepositoryImpl() {
-        file = new File(new File(System.getProperty("user.home")), "shardingsphere-ui-configs.yaml");
+//        file = new File(new File(System.getProperty("user.home")), "shardingsphere-ui-configs.yaml");
+        file = new File(new File(System.getProperty("user.dir")), "shardingsphere-ui-configs.yaml");
+        log.info("加载配置文件：{}", file.getAbsolutePath());
     }
     
     @Override

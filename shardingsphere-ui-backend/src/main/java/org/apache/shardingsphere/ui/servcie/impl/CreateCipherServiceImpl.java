@@ -95,32 +95,39 @@ public class CreateCipherServiceImpl implements CreateCipherService {
                 // 明文列改为明文备份列、密文列改为明文列
                 sqlList = fieldList.stream().map(f -> mysqlFieldFactory.renamePlainFieldSql(f)).collect(Collectors.toList());
                 for (String sql : sqlList) {
-                    log.info("logic Column to plain sql=>{}", sql);
+                    log.info("gen logic Column to plain sql=>{}", sql);
                 }
                 generateTempFile(schemaName + "_2-1_明文列改为备份列_", sqlList);
                 List<FiledEncryptionInfo> cipherInfo = absScreenTableFactory.getCipherInfo(fieldList, encryptors);
                 List<String> renameCipherSqls = cipherInfo.stream().map(l -> mysqlFieldFactory.renameCipherFieldSql(l)).collect(Collectors.toList());
                 for (String sql : renameCipherSqls) {
-                    log.info("cipher  Column to logic sql=>{}", sql);
+                    log.info("gen cipher  Column to logic sql=>{}", sql);
                 }
                 generateTempFile(schemaName + "_2-2_密文列改为明文列_", renameCipherSqls);
                 sqlList.addAll(renameCipherSqls);
                 // 生成备份列创建sql
                 List<String> createPlainBakSqls = cipherInfo.stream().map(l -> mysqlFieldFactory.createPlainBakFieldSql(l)).collect(Collectors.toList());
                 for (String sql : createPlainBakSqls) {
-                    log.info("plain Column bak to logic sql=>{}", sql);
+                    log.info("gen plain Column bak to logic sql=>{}", sql);
                 }
                 generateTempFile(schemaName+"_3_创建备份列_", createPlainBakSqls);
+                // 生成清空备份列数据sql（考虑字段是否存在默认值）
+                List<String> cleanPlainFieldDataSql = cipherInfo.stream().map(l -> mysqlFieldFactory.deletePlainFieldData(l)).collect(Collectors.toList());
+                for (String sql : cleanPlainFieldDataSql) {
+                    log.info("gen clean bak_plain sql=>{}", sql);
+                }
+                generateTempFile(schemaName + "_2-3_备份列数据清空_", cleanPlainFieldDataSql);
             }else {
                 return ResponseResult.error("字段已创建或不存在");
             }
-            // 连接数据库
-            if ("prod".equals(sparkJobEnv)){
-                log.error("生产环境程序不执行SQL，提供SQL语句给DBA负责执行");
-                return null;
-            }
-            ResponseResult<String> result = ConnectionProxyUtils.connectionDatabase(request, sqlList);
-            return result.isSuccess() ? ResponseResult.ok("执行成功") : ResponseResult.error("执行失败");
+//            if ("prod".equals(sparkJobEnv)){
+//                log.error("生产环境程序不执行SQL，提供SQL语句给DBA负责执行");
+//                return null;
+//            }
+            log.error("测试或生产环境，程序不执行SQL，提供SQL语句给DBA负责执行");
+            return ResponseResult.ok("执行成功");
+//            ResponseResult<String> result = ConnectionProxyUtils.connectionDatabase(request, sqlList);
+//            return result.isSuccess() ? ResponseResult.ok("执行成功") : ResponseResult.error("执行失败");
         }
         return ResponseResult.error(String.format("数据库不存在%s表，无法创建密文字段", names));
     }
