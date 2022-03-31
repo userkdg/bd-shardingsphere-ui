@@ -8,6 +8,8 @@ bluemoon:
       aes:
         - sys: ec
           key: '{"aes-key-value":"wlf1d5mmal2xsttr"}'
+        - sys: washing
+          key: '{"aes-key-value":"zsG9NUYfQPrHBhq1"}'
       md5:
         - sys: pub
           key: '{}'

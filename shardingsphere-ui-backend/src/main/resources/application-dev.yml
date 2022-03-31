@@ -48,9 +48,9 @@ spring:
     allow-bean-definition-overriding: true
     #数据库配置
   datasource:
-    url: jdbc:mysql://192.168.234.4:3307/data_asset_platform?useUnicode=true&useSSL=false&characterEncoding=utf-8&rewriteBatchedStatements=true&serverTimezone=Asia/Shanghai&autoReconnect=true
+    url: jdbc:mysql://192.168.234.4:3306/data_asset_platform?useUnicode=true&useSSL=false&characterEncoding=utf-8&rewriteBatchedStatements=true&serverTimezone=Asia/Shanghai&autoReconnect=true
     username: dsmanager
-    password: 'ufxErKTi'
+    password: 'l0qwU3UU'
 
 mybatis-plus:
   configuration:
