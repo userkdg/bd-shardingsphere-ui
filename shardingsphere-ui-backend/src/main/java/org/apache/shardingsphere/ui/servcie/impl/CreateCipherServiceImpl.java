@@ -120,14 +120,8 @@ public class CreateCipherServiceImpl implements CreateCipherService {
             }else {
                 return ResponseResult.error("字段已创建或不存在");
             }
-//            if ("prod".equals(sparkJobEnv)){
-//                log.error("生产环境程序不执行SQL，提供SQL语句给DBA负责执行");
-//                return null;
-//            }
             log.error("测试或生产环境，程序不执行SQL，提供SQL语句给DBA负责执行");
             return ResponseResult.ok("执行成功");
-//            ResponseResult<String> result = ConnectionProxyUtils.connectionDatabase(request, sqlList);
-//            return result.isSuccess() ? ResponseResult.ok("执行成功") : ResponseResult.error("执行失败");
         }
         return ResponseResult.error(String.format("数据库不存在%s表，无法创建密文字段", names));
     }
