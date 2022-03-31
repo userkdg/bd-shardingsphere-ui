@@ -207,10 +207,12 @@ public class EncryptShuffleServiceImpl implements EncryptShuffleService {
                             ExtractMode.WithIncFieldOnce, config.getExtractMode(), ExtractMode.WithIncFieldOnce);
                     config.setExtractMode(ExtractMode.WithIncFieldOnce);
                 }
-                // 增加避免刷库更新SQL中timestamp自动更新问题，会拿该原值数据回填
-                // TODO: 2022/2/25  DsSySensitiveInfo库表（导入文件数据）增加一列，onUpdateCurrentTimestamps列字段，eg: sys_user的op_time
-                List<String> onUpdateTimestampFields = Arrays.stream(shuffleInfo.getOnUpdateTimestampFields().split(",")).filter(StringUtils::isNotBlank).collect(Collectors.toList());
-                config.setOnUpdateCurrentTimestamps(onUpdateTimestampFields);
+                if (shuffleInfo != null) {
+                    // 增加避免刷库更新SQL中timestamp自动更新问题，会拿该原值数据回填
+                    // TODO: 2022/2/25  DsSySensitiveInfo库表（导入文件数据）增加一列，onUpdateCurrentTimestamps列字段，eg: sys_user的op_time
+                    List<String> onUpdateTimestampFields = Arrays.stream(shuffleInfo.getOnUpdateTimestampFields().split(",")).filter(StringUtils::isNotBlank).collect(Collectors.toList());
+                    config.setOnUpdateCurrentTimestamps(onUpdateTimestampFields);
+                }
 
                 config.setCustomExtractWhereSql(null);
                 config.setOnYarn(true);
