@@ -1,5 +1,6 @@
-package cn.com.bluemoon.shardingsphere.backend;
+package cn.com.bluemoon.shardingsphere.backend.ec;
 
+import cn.com.bluemoon.shardingsphere.backend.util.BaseTest;
 import cn.hutool.core.util.RandomUtil;
 import com.alibaba.excel.EasyExcel;
 import lombok.extern.slf4j.Slf4j;
@@ -8,14 +9,10 @@ import org.apache.shardingsphere.encrypt.api.config.rule.EncryptColumnRuleConfig
 import org.apache.shardingsphere.encrypt.api.config.rule.EncryptTableRuleConfiguration;
 import org.apache.shardingsphere.infra.config.RuleConfiguration;
 import org.apache.shardingsphere.infra.config.algorithm.ShardingSphereAlgorithmConfiguration;
-import org.apache.shardingsphere.ui.Bootstrap;
 import org.apache.shardingsphere.ui.common.domain.SensitiveInformation;
 import org.apache.shardingsphere.ui.servcie.ConfigCenterService;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.File;
 import java.sql.Connection;
@@ -27,7 +24,7 @@ import java.util.stream.Collectors;
 
 
 @Slf4j
-public class ImportEncryptionRuleTest extends BaseTest{
+public class ImportEncryptionRuleTest extends BaseTest {
 
     @Autowired
     private ConfigCenterService configCenterService;

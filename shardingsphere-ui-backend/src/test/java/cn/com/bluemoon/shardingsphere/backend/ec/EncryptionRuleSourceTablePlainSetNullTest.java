@@ -1,5 +1,6 @@
-package cn.com.bluemoon.shardingsphere.backend;
+package cn.com.bluemoon.shardingsphere.backend.ec;
 
+import cn.com.bluemoon.shardingsphere.backend.util.BaseTest;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

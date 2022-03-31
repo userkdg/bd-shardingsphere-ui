@@ -1,4 +1,4 @@
-package cn.com.bluemoon.shardingsphere.backend;
+package cn.com.bluemoon.shardingsphere.backend.ec;
 
 import cn.com.bluemoon.encrypt.shuffle.cli.SparkSubmitEncryptShuffleMain;
 import lombok.extern.slf4j.Slf4j;

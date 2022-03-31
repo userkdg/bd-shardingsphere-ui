@@ -23,7 +23,7 @@ public class SchemaEncryptStep3Controller {
     @GetMapping("rename/plain")
     public ResponseResult<String> renamePlainField(@RequestParam("schema") String schemaName) {
 
-        return createCipherService.createCipherPlainField(schemaName, false);
+        return createCipherService.operateDbField(schemaName, false);
     }
 
 }

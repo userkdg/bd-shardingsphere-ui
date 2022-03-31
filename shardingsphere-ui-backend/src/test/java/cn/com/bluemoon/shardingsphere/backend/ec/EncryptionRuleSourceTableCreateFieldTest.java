@@ -1,5 +1,6 @@
-package cn.com.bluemoon.shardingsphere.backend;
+package cn.com.bluemoon.shardingsphere.backend.ec;
 
+import cn.com.bluemoon.shardingsphere.backend.util.BaseTest;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +23,7 @@ import java.util.stream.Collectors;
 
 
 @Slf4j
-public class EncryptionRuleSourceTableColumnSwapTest extends BaseTest {
+public class EncryptionRuleSourceTableCreateFieldTest extends BaseTest {
 
     private String sourceUrl;
 
@@ -43,7 +44,7 @@ public class EncryptionRuleSourceTableColumnSwapTest extends BaseTest {
     @Before
     public void setUp() throws Exception {
         this.metaDataPersistService = configCenterService.getActivatedMetadataService();
-        this.schema = "ec_order";
+        this.schema = "ec_order_db";
         Map<String, DataSourceConfiguration> dataSource = metaDataPersistService.getDataSourceService().load(schema);
         Map<String, Object> dataSourceProps = dataSource.values().stream().findFirst()
                 .map(DataSourceConfiguration::getAllProps).orElseThrow(() -> new RuntimeException("ERROR"));
@@ -53,17 +54,22 @@ public class EncryptionRuleSourceTableColumnSwapTest extends BaseTest {
         List<TableInfo> tableInfos0 = encrypts.stream().flatMap(e -> e.getTables().stream())
                 .map(t -> {
                     List<String> cols = t.getColumns().stream().map(c -> Optional.ofNullable(c.getPlainColumn()).orElse(c.getLogicColumn())).collect(Collectors.toList());
-                    return new TableInfo(t.getName(), cols);
+                    return new TableInfo(t.getName(), wrappCiphers(cols));
                 }).collect(Collectors.toList());
         assert !tableInfos0.isEmpty();
         this.tableInfos = tableInfos0;
     }
 
+    private List<String> wrappCiphers(List<String> cols) {
+        return cols.stream().map(c -> c+"_cipher").collect(Collectors.toList());
+    }
+
     @Test
-    public void testSourceTableColumnPlainToBak() {
-        // alter table xx change column address address_plain;
-        List<String> updateSqls = getSqlMode(FieldMode.DROP);
-        updateSqls.parallelStream()
+    public void testSourceTablePlainSetNull() {
+        // update table_xx set field_1=null, field_2 = null where 1=1
+        // alter table xx drop column col1, drop column col2 ..;
+        List<String> sqls = getSqlMode(FieldMode.CREATE);
+        sqls.parallelStream()
                 .forEach(sql -> {
                     try (Connection conn = DriverManager.getConnection(sourceUrl)) {
                         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -74,43 +80,58 @@ public class EncryptionRuleSourceTableColumnSwapTest extends BaseTest {
                         e.printStackTrace();
                     }
                 });
-        log.info("sqls:{}", updateSqls);
+        log.info("sqls:{}", sqls);
     }
 
     private List<String> getSqlMode(FieldMode mode) {
         if (FieldMode.DROP.equals(mode)) {
             return getDropSqls();
+        }else if (FieldMode.CREATE.equals(mode)){
+            return getCreateSqls();
         }
         return getUpdateSqls();
     }
 
+    private List<String> getCreateSqls() {
+        List<String> sqls = new ArrayList<>(tableInfos.size());
+        for (TableInfo tableInfo : tableInfos) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("alter table ").append(tableInfo.getName());
+            String setFieldNulls = tableInfo.getCleanFields().stream()
+                    .map(f -> " add column " + f).collect(Collectors.joining(" , "));
+            sb.append(setFieldNulls);
+            sqls.add(sb.toString());
+        }
+        return sqls;
+    }
+
     private List<String> getDropSqls() {
-        List<String> updateSqls = new ArrayList<>(tableInfos.size());
+        List<String> sqls = new ArrayList<>(tableInfos.size());
         for (TableInfo tableInfo : tableInfos) {
             StringBuilder sb = new StringBuilder();
             sb.append("alter table ").append(tableInfo.getName());
             String setFieldNulls = tableInfo.getCleanFields().stream()
                     .map(f -> " drop column " + f).collect(Collectors.joining(" , "));
             sb.append(setFieldNulls);
-            updateSqls.add(sb.toString());
+            sqls.add(sb.toString());
         }
-        return updateSqls;
+        return sqls;
     }
 
     private List<String> getUpdateSqls() {
-        List<String> updateSqls = new ArrayList<>(tableInfos.size());
+        List<String> sqls = new ArrayList<>(tableInfos.size());
         for (TableInfo tableInfo : tableInfos) {
             StringBuilder sb = new StringBuilder();
             sb.append("update ").append(tableInfo.getName()).append(" set ");
             String setFieldNulls = tableInfo.getCleanFields().stream().map(f -> f + "=0").collect(Collectors.joining(" , "));
             sb.append(setFieldNulls);
-            updateSqls.add(sb.toString());
+            sqls.add(sb.toString());
         }
-        return updateSqls;
+        return sqls;
     }
 
     public enum FieldMode {
-        UPDATE, DROP;
+        UPDATE, DROP, CREATE;
     }
 
     @RequiredArgsConstructor

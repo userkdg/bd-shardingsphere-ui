@@ -1,5 +1,6 @@
-package cn.com.bluemoon.shardingsphere.backend;
+package cn.com.bluemoon.shardingsphere.backend.washing;
 
+import cn.com.bluemoon.shardingsphere.backend.util.BaseTest;
 import cn.com.bluemoon.shardingsphere.custom.shuffle.base.GlobalConfig;
 import org.apache.shardingsphere.ui.web.controller.SchemaEncryptStep2Controller;
 import org.apache.shardingsphere.ui.web.response.ResponseResult;
@@ -12,33 +13,53 @@ import java.util.HashSet;
 /**
  * 电商上线启动类
  */
-public class EcOrderSchemaEncryptStep2ControllerTest extends BaseTest {
+public class WashingEncryptStep2ControllerTest extends BaseTest {
 //    String preTimestamp = "2022-03-10 14:00:00";
 //    String preTimestamp = "2022-03-14 14:00:00";
 //    String preTimestamp = "2022-03-15 09:00:00";
 //    String preTimestamp = "2022-03-15 21:00:00";
     String preTimestamp = "2022-03-15 23:00:00";
+    String schemaName = "washingservice";
 
     @Autowired
     private SchemaEncryptStep2Controller controller;
 
+
     /**
-     * 生成脚本
+     * 生成脚本-创建加密字段
      */
     @Test
     public void createCipherField() {
-        ResponseResult<String> ec_order = controller.createCipherField("ec_order");
+        ResponseResult<String> ec_order = controller.createCipherField(schemaName);
         System.out.println(ec_order);
 
+    }
+
+    @Test
+    public void forTest() {
+        SchemaEncryptStep2Controller.EncryptShuffleVo shuffleVo = new SchemaEncryptStep2Controller.EncryptShuffleVo();
+        shuffleVo.setSchema(schemaName);
+        shuffleVo.setDbType(GlobalConfig.MYSQL);
+        shuffleVo.setUnSelectedTableNames(new HashSet<String>() {{
+
+        }});
+        shuffleVo.setSelectedTableNames(new HashSet<String>() {{
+            add("mall_wash_appointment_order");
+        }});
+        shuffleVo.setTableNameAndIncrFieldPreVal(new HashMap<String, String>() {{
+
+        }});
+        ResponseResult<String> res = controller.encryptShuffle(shuffleVo);
+        System.out.println(res);
     }
 
     /**
      * 小表-全量
      */
     @Test
-    public void sumbitSmallTable() {
+    public void submitSmallTable() {
         SchemaEncryptStep2Controller.EncryptShuffleVo shuffleVo = new SchemaEncryptStep2Controller.EncryptShuffleVo();
-        shuffleVo.setSchema("ec_order");
+        shuffleVo.setSchema(schemaName);
         shuffleVo.setDbType(GlobalConfig.MYSQL);
         shuffleVo.setUnSelectedTableNames(new HashSet<String>() {{
 
@@ -72,7 +93,7 @@ public class EcOrderSchemaEncryptStep2ControllerTest extends BaseTest {
     public void sumbitBigTableStep1() {
 
         SchemaEncryptStep2Controller.EncryptShuffleVo shuffleVo = new SchemaEncryptStep2Controller.EncryptShuffleVo();
-        shuffleVo.setSchema("ec_order");
+        shuffleVo.setSchema(schemaName);
         shuffleVo.setDbType(GlobalConfig.MYSQL);
         shuffleVo.setUnSelectedTableNames(new HashSet<String>() {{
 
@@ -100,7 +121,7 @@ public class EcOrderSchemaEncryptStep2ControllerTest extends BaseTest {
     @Test
     public void submitBigTableIncr() {
         SchemaEncryptStep2Controller.EncryptShuffleVo shuffleVo = new SchemaEncryptStep2Controller.EncryptShuffleVo();
-        shuffleVo.setSchema("ec_order");
+        shuffleVo.setSchema(schemaName);
         shuffleVo.setDbType(GlobalConfig.MYSQL);
         shuffleVo.setUnSelectedTableNames(new HashSet<String>() {{
 

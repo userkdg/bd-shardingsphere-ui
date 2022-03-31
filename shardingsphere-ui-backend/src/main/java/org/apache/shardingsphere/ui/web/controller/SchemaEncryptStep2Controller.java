@@ -33,7 +33,7 @@ public class SchemaEncryptStep2Controller {
     @GetMapping("create/cipher")
     public ResponseResult<String> createCipherField(@RequestParam("schema") String schemaName) {
 
-        return createCipherService.createCipherPlainField(schemaName, true);
+        return createCipherService.operateDbField(schemaName, true);
     }
 
     @PostMapping("encrypt/shuffle")

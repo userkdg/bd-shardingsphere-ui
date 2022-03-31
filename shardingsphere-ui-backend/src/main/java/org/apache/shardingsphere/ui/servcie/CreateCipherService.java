@@ -10,7 +10,7 @@ import java.util.Map;
 
 public interface CreateCipherService {
 
-    ResponseResult<String> createCipherPlainField(String schemaName, Boolean isCipher);
+    ResponseResult<String> operateDbField(String schemaName, Boolean isCipher);
 
     void getMetaInfo(DataSourceConfiguration dataSourceConfiguration, String names, Map<QueryMetaDataRequest, List<TableInfoVO>> map);
 

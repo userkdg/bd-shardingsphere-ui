@@ -1,5 +1,6 @@
-package cn.com.bluemoon.shardingsphere.backend;
+package cn.com.bluemoon.shardingsphere.backend.ec;
 
+import cn.com.bluemoon.shardingsphere.backend.util.BaseTest;
 import org.apache.shardingsphere.ui.servcie.EncryptShuffleService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;

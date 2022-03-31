@@ -187,7 +187,7 @@ public class EncryptShuffleServiceImpl implements EncryptShuffleService {
                 // 获取表->增量字段
 //                String incrFieldName = tableAndIncField.get(table.getName());
                 DsSysSensitiveShuffleInfo shuffleInfo = tableAndShuffleInfo.get(table.getName());
-                String incrFieldName = shuffleInfo.getIncrFieldName();
+                String incrFieldName = shuffleInfo != null ? shuffleInfo.getIncrFieldName() : null;
 //                incrFieldName=null;// 2022/3/10 临时改为全量跑 不走count统计
                 if (StringUtils.isBlank(incrFieldName)) {
                     config.setExtractMode(ExtractMode.All);

@@ -51,7 +51,7 @@ public class CreateCipherServiceImpl implements CreateCipherService {
     private String sparkJobEnv;
 
     @Override
-    public ResponseResult<String> createCipherPlainField(String schemaName, Boolean isCipher) {
+    public ResponseResult<String> operateDbField(String schemaName, Boolean isCipher) {
 
         MetaDataPersistService activatedMetadataService = configCenterService.getActivatedMetadataService();
         Collection<RuleConfiguration> ruleConfiguration = activatedMetadataService.getSchemaRuleService().load(schemaName);// 规则信息

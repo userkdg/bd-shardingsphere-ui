@@ -1,4 +1,4 @@
-package cn.com.bluemoon.shardingsphere.backend;
+package cn.com.bluemoon.shardingsphere.backend.ec;
 
 import cn.com.bluemoon.encrypt.shuffle.cli.SparkSubmitEncryptShuffleMain;
 import cn.com.bluemoon.metadata.common.ResultBean;
@@ -8,6 +8,7 @@ import cn.com.bluemoon.metadata.inter.DbMetaDataService;
 import cn.com.bluemoon.metadata.inter.dto.in.QueryMetaDataRequest;
 import cn.com.bluemoon.metadata.inter.dto.out.ColumnInfoVO;
 import cn.com.bluemoon.metadata.inter.dto.out.SchemaInfoVO;
+import cn.com.bluemoon.shardingsphere.backend.util.BaseTest;
 import cn.com.bluemoon.shardingsphere.custom.shuffle.base.ExtractMode;
 import cn.com.bluemoon.shardingsphere.custom.shuffle.base.GlobalConfig;
 import cn.com.bluemoon.shardingsphere.custom.shuffle.base.GlobalConfig.FieldInfo;
