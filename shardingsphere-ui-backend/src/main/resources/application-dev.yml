@@ -3,18 +3,27 @@ bluemoon:
     secure:
       aes:
         - sys: test-aes
+          type: aes
+          key: '{"aes-key-value":"test"}'
+      mysql-aes:
+        - sys: test-mysql-aes
+          type: mysql-aes
           key: '{"aes-key-value":"test"}'
       md5:
         - sys: test-md5
+          type: md5
           key: '{}'
       sm3:
         - sys: test-sm3
+          type: sm3
           key: '{"sm3-salt":"test1234"}'
       sm4:
         - sys: test-sm4
+          type: sm4
           key: '{"sm4-key":"4D744E003D713D054E7E407C350E447E","sm4-mode":"ECB","sm4-padding":"PKCS5Padding"}'
       rc4:
         - sys: test-rc4
+          type: rc4
           key: '{"rc4-key-value":"123456"}'
 
 spring:

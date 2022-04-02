@@ -15,6 +15,8 @@ import java.util.List;
 public class BmKMSConfig {
     private List<AlgorithmType> aes;
 
+    private List<AlgorithmType> mysqlAes;
+
     private List<AlgorithmType> md5;
 
     private List<AlgorithmType> sm3;
