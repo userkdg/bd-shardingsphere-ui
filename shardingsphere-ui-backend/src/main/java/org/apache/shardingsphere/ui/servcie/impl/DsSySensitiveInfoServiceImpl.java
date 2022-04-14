@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class DsSySensitiveInfoServiceImpl extends ServiceImpl<DsSySensitiveInfoMapper, DsSysSensitiveInfo> implements DsSySensitiveInfoService {
 
     @Override
-    public void insertRuleConfig(List<SensitiveInformation> list, String schemaName) {
+    public void insertRuleConfig(List<SensitiveInformation> list, String schemaName, String importUuid) {
 
         List<DsSysSensitiveInfo> infos = Lists.newArrayList();
         for (SensitiveInformation info : list) {
@@ -31,6 +31,7 @@ public class DsSySensitiveInfoServiceImpl extends ServiceImpl<DsSySensitiveInfoM
             information.setDataType(info.getDatatype());
             information.setSchemaName(schemaName);
             information.setCreateTime(LocalDateTime.now());
+            information.setSensitiveId(importUuid);
             log.info("info:{}", information);
             infos.add(information);
         }

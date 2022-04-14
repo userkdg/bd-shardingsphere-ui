@@ -9,5 +9,5 @@ import java.util.List;
 
 public interface DsSySensitiveShuffleInfoService extends IService<DsSysSensitiveShuffleInfo> {
 
-    void insertRuleShuffleInfo(List<SensitiveShuffleInfo> model, String schemaName);
+    void insertRuleShuffleInfo(List<SensitiveShuffleInfo> model, String schemaName, String importUuid);
 }

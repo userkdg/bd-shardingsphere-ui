@@ -22,7 +22,7 @@ public class DsSySensitiveShuffleInfoServiceImpl
         implements DsSySensitiveShuffleInfoService {
 
     @Override
-    public void insertRuleShuffleInfo(List<SensitiveShuffleInfo> model, String schemaName) {
+    public void insertRuleShuffleInfo(List<SensitiveShuffleInfo> model, String schemaName, String importUuid) {
         if (model != null) {
             List<DsSysSensitiveShuffleInfo> res = model.stream().map(m -> {
                 DsSysSensitiveShuffleInfo each = new DsSysSensitiveShuffleInfo();
@@ -31,6 +31,7 @@ public class DsSySensitiveShuffleInfoServiceImpl
                 each.setIncrFieldName(m.getIncrFieldName());
                 each.setOnUpdateTimestampFields(m.getOnUpdateTimestampFields());
                 each.setCreateTime(LocalDateTime.now());
+                each.setSensitiveId(importUuid);
                 log.info("shuffleInfo:{}", each);
                 return each;
             }).collect(Collectors.toList());

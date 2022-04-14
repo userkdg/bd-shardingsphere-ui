@@ -7,6 +7,7 @@ import cn.com.bluemoon.daps.system.entity.DapSystemDatasourceEnvironment;
 import cn.com.bluemoon.daps.system.entity.DapSystemSchema;
 import cn.com.bluemoon.metadata.inter.dto.in.QueryMetaDataRequest;
 import cn.com.bluemoon.metadata.inter.dto.out.TableInfoVO;
+import cn.hutool.core.util.IdUtil;
 import com.alibaba.excel.EasyExcel;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.util.IOUtils;
@@ -106,14 +107,20 @@ public class SchemaEncryptStep1Controller {
             }
             ResponseResult<List<SensitiveInformation>> data = ImportEncryptionRuleUtils.getData(file, voMap.values().stream().findFirst().get());
             if (data.isSuccess()) {
-                // 规则入库
-                excelShardingSchemaService.ruleImport(schemaName, data.getModel(), maps);
-                // 数据入库
-                dsSySensitiveInfoService.insertRuleConfig(data.getModel(), schemaName);
                 // 增加洗数辅助信息
                 ResponseResult<List<SensitiveShuffleInfo>> shuffleInfos = ImportEncryptionRuleUtils.getDataSheet2(file, voMap.values().stream().findFirst().get());
-                dsSySensitiveShuffleInfoService.insertRuleShuffleInfo(shuffleInfos.getModel(), schemaName);
-                return ResponseResult.ok("导入成功!");
+                if (shuffleInfos.isSuccess()) {
+                    // 规则入库
+                    excelShardingSchemaService.ruleImport(schemaName, data.getModel(), maps);
+                    // 数据入库
+                    String importUuid = IdUtil.randomUUID();
+                    dsSySensitiveInfoService.insertRuleConfig(data.getModel(), schemaName, importUuid);
+                    dsSySensitiveShuffleInfoService.insertRuleShuffleInfo(shuffleInfos.getModel(), schemaName, importUuid);
+                    log.info("importUuid={}导入成功", importUuid);
+                    return ResponseResult.ok("导入成功!");
+                }else {
+                    return ResponseResult.error(shuffleInfos.getErrorMsg());
+                }
             }
             return ResponseResult.error(data.getErrorMsg());
         }

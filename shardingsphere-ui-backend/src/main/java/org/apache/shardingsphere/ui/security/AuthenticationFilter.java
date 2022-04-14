@@ -61,6 +61,7 @@ public final class AuthenticationFilter implements Filter {
             handleLogin(httpRequest, httpResponse);
         } else {
             String accessToken = httpRequest.getHeader("Access-Token");
+            log.info("Access-Token:{}", accessToken);
             if (!Strings.isNullOrEmpty(accessToken) && accessToken.equals(userAuthenticationService.getToken())) {
                 filterChain.doFilter(httpRequest, httpResponse);
             } else if (openApi.contains(httpRequest.getRequestURI())){

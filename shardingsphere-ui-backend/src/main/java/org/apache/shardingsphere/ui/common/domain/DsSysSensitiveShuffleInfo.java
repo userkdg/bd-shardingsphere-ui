@@ -15,6 +15,8 @@ public class DsSysSensitiveShuffleInfo {
     @TableId(value = "id",type = IdType.AUTO)
     private Integer id;
 
+    private String sensitiveId;
+
     private String schemaName;
 
     private String tableName;
