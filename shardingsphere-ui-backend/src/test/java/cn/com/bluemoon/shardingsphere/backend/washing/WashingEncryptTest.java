@@ -5,6 +5,7 @@ import cn.com.bluemoon.shardingsphere.custom.shuffle.base.GlobalConfig;
 import org.apache.shardingsphere.ui.web.controller.SchemaEncryptStep2Controller;
 import org.apache.shardingsphere.ui.web.controller.SchemaEncryptStep3Controller;
 import org.apache.shardingsphere.ui.web.response.ResponseResult;
+import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -15,6 +16,9 @@ import java.util.HashSet;
  * 洗数上线启动类
  */
 public class WashingEncryptTest extends BaseTest {
+    /**
+     * 配置中心、当前应用对应的schema（库名）
+     */
     String schemaName = "washingservice";
 
     @Autowired
@@ -32,7 +36,7 @@ public class WashingEncryptTest extends BaseTest {
     public void createCipherField() {
         ResponseResult<String> ec_order = controller.createCipherField(schemaName);
         System.out.println(ec_order);
-
+        Assert.assertTrue(ec_order.isSuccess());
     }
 
 
@@ -47,6 +51,7 @@ public class WashingEncryptTest extends BaseTest {
     public void renamePlainField() {
         ResponseResult<String> ec_order = step3Controller.renamePlainField(schemaName);
         System.out.println(ec_order);
+        Assert.assertTrue(ec_order.isSuccess());
     }
 
     /**
@@ -68,6 +73,7 @@ public class WashingEncryptTest extends BaseTest {
         }});
         ResponseResult<String> res = controller.encryptShuffle(shuffleVo);
         System.out.println(res);
+        Assert.assertTrue(res.isSuccess());
     }
 
     /**
@@ -99,6 +105,7 @@ public class WashingEncryptTest extends BaseTest {
         }});
         ResponseResult<String> res = controller.encryptShuffle(shuffleVo);
         System.out.println(res);
+        Assert.assertTrue(res.isSuccess());
     }
 
 }
