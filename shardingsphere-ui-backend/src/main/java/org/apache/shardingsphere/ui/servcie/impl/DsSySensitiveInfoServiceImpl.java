@@ -2,6 +2,7 @@ package org.apache.shardingsphere.ui.servcie.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.shardingsphere.ui.common.domain.DsSysSensitiveInfo;
 import org.apache.shardingsphere.ui.common.domain.SensitiveInformation;
@@ -17,6 +18,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class DsSySensitiveInfoServiceImpl extends ServiceImpl<DsSySensitiveInfoMapper, DsSysSensitiveInfo> implements DsSySensitiveInfoService {
 
     @Override
@@ -27,13 +29,9 @@ public class DsSySensitiveInfoServiceImpl extends ServiceImpl<DsSySensitiveInfoM
             DsSysSensitiveInfo information = new DsSysSensitiveInfo();
             BeanUtils.copyProperties(info, information);
             information.setDataType(info.getDatatype());
-            information.setIncrField(info.getTableIncrField().equals("是"));
-            if(info.getTableIncrField().equals("是")){
-                information.setAlgorithmType("");
-                information.setCipherKey("");
-            }
             information.setSchemaName(schemaName);
             information.setCreateTime(LocalDateTime.now());
+            log.info("info:{}", information);
             infos.add(information);
         }
         this.saveBatch(infos);

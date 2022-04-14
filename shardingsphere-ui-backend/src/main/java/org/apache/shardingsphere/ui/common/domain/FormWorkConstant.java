@@ -11,7 +11,6 @@ public class FormWorkConstant {
     public static List<SensitiveInformation> getData(){
         SensitiveInformation information = new SensitiveInformation();
         information.setDatabaseName("数据库名称");
-        information.setSchemaName("模式名称");
         information.setTableName("数据库表名");
         information.setFieldName("数据库列名");
         information.setDatatype("数据库字段类型");

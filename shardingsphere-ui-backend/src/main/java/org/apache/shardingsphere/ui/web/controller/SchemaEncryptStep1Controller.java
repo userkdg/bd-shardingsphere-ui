@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.util.IOUtils;
 import org.apache.shardingsphere.infra.config.datasource.DataSourceConfiguration;
 import org.apache.shardingsphere.ui.common.domain.SensitiveInformation;
+import org.apache.shardingsphere.ui.common.domain.SensitiveShuffleInfo;
 import org.apache.shardingsphere.ui.servcie.*;
 import org.apache.shardingsphere.ui.util.ImportEncryptionRuleUtils;
 import org.apache.shardingsphere.ui.util.jdbc.ConnectionProxyUtils;
@@ -48,6 +49,8 @@ public class SchemaEncryptStep1Controller {
     ShardingSchemaService shardingSchemaService;
     @Autowired
     DsSySensitiveInfoService dsSySensitiveInfoService;
+    @Autowired
+    private DsSySensitiveShuffleInfoService dsSySensitiveShuffleInfoService;
     @Autowired
     CreateCipherService createCipherService;
     @Autowired
@@ -107,6 +110,9 @@ public class SchemaEncryptStep1Controller {
                 excelShardingSchemaService.ruleImport(schemaName, data.getModel(), maps);
                 // 数据入库
                 dsSySensitiveInfoService.insertRuleConfig(data.getModel(), schemaName);
+                // 增加洗数辅助信息
+                ResponseResult<List<SensitiveShuffleInfo>> shuffleInfos = ImportEncryptionRuleUtils.getDataSheet2(file, voMap.values().stream().findFirst().get());
+                dsSySensitiveShuffleInfoService.insertRuleShuffleInfo(shuffleInfos.getModel(), schemaName);
                 return ResponseResult.ok("导入成功!");
             }
             return ResponseResult.error(data.getErrorMsg());

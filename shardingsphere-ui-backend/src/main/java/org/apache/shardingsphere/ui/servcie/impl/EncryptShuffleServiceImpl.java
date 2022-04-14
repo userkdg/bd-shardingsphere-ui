@@ -78,8 +78,6 @@ public class EncryptShuffleServiceImpl implements EncryptShuffleService {
 
     private Map<String, Object> dataSourceProps;
 
-    private Map<String, String> tableAndIncField;
-
     private Map<String, DsSysSensitiveShuffleInfo> tableAndShuffleInfo;
 
     private Map<String, List<ColumnInfoVO>> tableAndPrimaryCols;
@@ -253,7 +251,6 @@ public class EncryptShuffleServiceImpl implements EncryptShuffleService {
         wrapper.eq(DsSysSensitiveShuffleInfo::getSchemaName, schema);
         List<DsSysSensitiveShuffleInfo> sensitiveShuffleInfos = dsSySensitiveShuffleInfoService.list(wrapper);
         this.tableAndShuffleInfo = sensitiveShuffleInfos.stream().collect(Collectors.toMap(DsSysSensitiveShuffleInfo::getTableName, d -> d, (a, b) -> b));
-        this.tableAndIncField = dsSySensitiveInfoService.getTableNameAndIncFieldMap(schema);
     }
 
     private List<TableInfo> findEncryptTablesByRule(List<EncryptRuleConfiguration> encryptRules) {

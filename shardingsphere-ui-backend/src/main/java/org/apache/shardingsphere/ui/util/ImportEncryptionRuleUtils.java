@@ -4,6 +4,8 @@ package org.apache.shardingsphere.ui.util;
 import cn.com.bluemoon.metadata.inter.dto.out.ColumnInfoVO;
 import cn.com.bluemoon.metadata.inter.dto.out.TableInfoVO;
 import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.context.AnalysisContext;
+import com.alibaba.excel.event.AnalysisEventListener;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.encrypt.api.config.EncryptRuleConfiguration;
 import org.apache.shardingsphere.encrypt.api.config.rule.EncryptColumnRuleConfiguration;
@@ -11,6 +13,7 @@ import org.apache.shardingsphere.encrypt.api.config.rule.EncryptTableRuleConfigu
 import org.apache.shardingsphere.infra.config.RuleConfiguration;
 import org.apache.shardingsphere.infra.config.algorithm.ShardingSphereAlgorithmConfiguration;
 import org.apache.shardingsphere.ui.common.domain.SensitiveInformation;
+import org.apache.shardingsphere.ui.common.domain.SensitiveShuffleInfo;
 import org.apache.shardingsphere.ui.common.exception.ShardingSphereUIException;
 import org.apache.shardingsphere.ui.util.excel.ExcelHeadDataListener;
 import org.apache.shardingsphere.ui.web.response.ResponseResult;
@@ -35,6 +38,61 @@ public class ImportEncryptionRuleUtils {
         return EXCEL_SUFFER.contains(split[split.length - 1]);
     }
 
+    public static class SyncReadListener<T> extends AnalysisEventListener<T> {
+        private List<T> list = new ArrayList<T>();
+
+        @Override
+        public void invoke(T object, AnalysisContext context) {
+            list.add(object);
+        }
+
+        @Override
+        public void doAfterAllAnalysed(AnalysisContext context) {}
+
+        public List<T> getList() {
+            return list;
+        }
+
+        public void setList(List<T> list) {
+            this.list = list;
+        }
+    }
+
+    public static ResponseResult<List<SensitiveShuffleInfo>> getDataSheet2(MultipartFile file, List<TableInfoVO> voList) {
+        // 文件格式校验
+        if (file == null || !isExcel(file.getOriginalFilename())) {
+            return ResponseResult.error("文件为空或格式不正确");
+        }
+        SyncReadListener<SensitiveShuffleInfo> readListener = new SyncReadListener<>();
+        EasyExcel.read(transferToFile(file), SensitiveShuffleInfo.class, readListener).sheet(1).doRead();
+        List<SensitiveShuffleInfo> shuffleInfos = readListener.getList();
+        List<String> collect = voList.stream().map(TableInfoVO::getName).collect(Collectors.toList());
+        List<String> unExistTable = shuffleInfos.stream().filter(c -> !collect.contains(c.getTableName()))
+                .map(SensitiveShuffleInfo::getTableName).collect(Collectors.toList());
+        List<String> errorList = new ArrayList<>();
+        if (unExistTable.isEmpty()) {
+            // 字段校验
+            Map<String, List<SensitiveShuffleInfo>> map = shuffleInfos.stream().collect(Collectors.groupingBy(SensitiveShuffleInfo::getTableName));
+            voList.forEach(v -> {
+                if (map.containsKey(v.getName())) {
+                    List<String> voField = v.getColumns().stream().map(ColumnInfoVO::getName).collect(Collectors.toList());
+                    String unExistField = map.get(v.getName()).stream().filter(m -> !voField.contains(m.getIncrFieldName()))
+                            .map(SensitiveShuffleInfo::getIncrFieldName).collect(Collectors.joining(","));
+                    if (!unExistField.isEmpty()) {
+                        String error = String.format("表%s字段%s不存在", v.getName(), unExistField);
+                        log.info(error);
+                        errorList.add(error);
+                    }
+                }
+            });
+            return errorList.isEmpty() ? ResponseResult.ok(shuffleInfos)
+                    : ResponseResult.error(errorList.toString());
+        } else {
+            String format = String.format("表%s不存在", unExistTable);
+            log.info(format);
+            return ResponseResult.error(format);
+        }
+    }
     public static ResponseResult<List<SensitiveInformation>> getData(MultipartFile file, List<TableInfoVO> voList) {
 
         // 文件格式校验
@@ -42,7 +100,7 @@ public class ImportEncryptionRuleUtils {
             return ResponseResult.error("文件为空或格式不正确");
         }
         ExcelHeadDataListener excelHeadDataListener = new ExcelHeadDataListener();
-        EasyExcel.read(transferToFile(file), SensitiveInformation.class, excelHeadDataListener).sheet().doRead();
+        EasyExcel.read(transferToFile(file), SensitiveInformation.class, excelHeadDataListener).sheet(0).doRead();
         if (!excelHeadDataListener.errorList.isEmpty()) {
             return ResponseResult.error(excelHeadDataListener.errorList.toString());
         }
