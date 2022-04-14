@@ -3,6 +3,7 @@ package cn.com.bluemoon.shardingsphere.backend.washing;
 import cn.com.bluemoon.shardingsphere.backend.util.BaseTest;
 import cn.com.bluemoon.shardingsphere.custom.shuffle.base.GlobalConfig;
 import org.apache.shardingsphere.ui.web.controller.SchemaEncryptStep2Controller;
+import org.apache.shardingsphere.ui.web.controller.SchemaEncryptStep3Controller;
 import org.apache.shardingsphere.ui.web.response.ResponseResult;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,15 +14,19 @@ import java.util.HashSet;
 /**
  * 洗数上线启动类
  */
-public class WashingEncryptStep2ControllerTest extends BaseTest {
+public class WashingEncryptTest extends BaseTest {
     String schemaName = "washingservice";
 
     @Autowired
     private SchemaEncryptStep2Controller controller;
 
+    @Autowired
+    private SchemaEncryptStep3Controller step3Controller;
+
 
     /**
-     * 生成脚本-创建加密字段
+     * 生成脚本1
+     * xxx_1-1_创建密文列_.sql
      */
     @Test
     public void createCipherField() {
@@ -30,6 +35,23 @@ public class WashingEncryptStep2ControllerTest extends BaseTest {
 
     }
 
+
+    /**
+     * 生成脚本2
+     * xxx_明文列改为备份列_.sql
+     * xxx_密文列改为明文列_.sql
+     * xxx_备份列数据清空_.sql
+     * xxx_创建备份列_.sql
+     */
+    @Test
+    public void renamePlainField() {
+        ResponseResult<String> ec_order = step3Controller.renamePlainField(schemaName);
+        System.out.println(ec_order);
+    }
+
+    /**
+     * 单独跑一个小表验证是否正常
+     */
     @Test
     public void forTest() {
         SchemaEncryptStep2Controller.EncryptShuffleVo shuffleVo = new SchemaEncryptStep2Controller.EncryptShuffleVo();
