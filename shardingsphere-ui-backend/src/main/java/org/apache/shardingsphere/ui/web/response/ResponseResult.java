@@ -17,10 +17,7 @@
 
 package org.apache.shardingsphere.ui.web.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.io.Serializable;
 
@@ -31,6 +28,7 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public final class ResponseResult<T> implements Serializable {
     
     private static final long serialVersionUID = 8144393142115317354L;
