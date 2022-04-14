@@ -12,8 +12,8 @@ centerConfigs:
     digest: ''
     instanceType: Zookeeper
     name: 小屋系统-测试
-    namespace: small_room_name_space
-    orchestrationName: small_room_name_space
+    namespace: data_security_ns_dev
+    orchestrationName: data_security_ns_dev
     orchestrationType: config_center
     props: {}
     serverLists: 192.168.243.20:12181,192.168.243.21:12181,192.168.243.22:12181
