@@ -1,12 +1,14 @@
 package org.apache.shardingsphere.ui.util;
 
 
+import cn.com.bluemoon.daps.common.exception.DapThrowException;
 import cn.com.bluemoon.metadata.inter.dto.out.ColumnInfoVO;
 import cn.com.bluemoon.metadata.inter.dto.out.TableInfoVO;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shardingsphere.encrypt.api.config.EncryptRuleConfiguration;
 import org.apache.shardingsphere.encrypt.api.config.rule.EncryptColumnRuleConfiguration;
 import org.apache.shardingsphere.encrypt.api.config.rule.EncryptTableRuleConfiguration;
@@ -23,6 +25,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.apache.shardingsphere.ui.common.domain.SensitiveInformation.ALGORITHM_LIST;
 
 @Slf4j
 public class ImportEncryptionRuleUtils {
@@ -143,7 +147,13 @@ public class ImportEncryptionRuleUtils {
             for (SensitiveInformation information : value) {
                 Properties properties = new Properties();
                 properties.setProperty("aes-key-value", information.getCipherKey());
-                String algorithmType = SensitiveInformation.ALGORITHM_LIST.contains(information.getAlgorithmType()) ? information.getAlgorithmType() : "AES";
+                String algorithmType;
+                if (StringUtils.isNotBlank(information.getAlgorithmType())) {
+                    algorithmType = information.getAlgorithmType();
+                    if (!ALGORITHM_LIST.contains(information.getAlgorithmType().toUpperCase())){
+                        throw new DapThrowException("目前只支持算法类型："+ALGORITHM_LIST);
+                    }
+                }else algorithmType = "AES";
                 ShardingSphereAlgorithmConfiguration shardingSphereAlgorithmConfiguration = new ShardingSphereAlgorithmConfiguration(algorithmType, properties);
                 EncryptColumnRuleConfiguration encrypt = new EncryptColumnRuleConfiguration
                         (information.getFieldName(), information.getFieldName() + "_cipher",

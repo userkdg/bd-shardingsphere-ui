@@ -1,4 +1,13 @@
 centerConfigs:
+  - activated: true
+    digest: ''
+    instanceType: Zookeeper
+    name: 电商CRM系统配置中心
+    namespace: ec_crm_ns
+    orchestrationName: ec_crm_ns
+    orchestrationType: config_center
+    props: { }
+    serverLists: 192.168.243.20:12181,192.168.243.21:12181,192.168.243.22:12181
   - activated: false
     digest: ''
     instanceType: Zookeeper
@@ -8,7 +17,7 @@ centerConfigs:
     orchestrationType: config_center
     props: {}
     serverLists: 192.168.243.34:12181
-  - activated: true
+  - activated: false
     digest: ''
     instanceType: Zookeeper
     name: 小屋系统-测试

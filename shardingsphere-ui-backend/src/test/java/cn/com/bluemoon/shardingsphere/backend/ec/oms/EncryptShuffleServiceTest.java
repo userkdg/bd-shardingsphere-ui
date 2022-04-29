@@ -1,4 +1,4 @@
-package cn.com.bluemoon.shardingsphere.backend.ec;
+package cn.com.bluemoon.shardingsphere.backend.ec.oms;
 
 import cn.com.bluemoon.shardingsphere.backend.util.BaseTest;
 import org.apache.shardingsphere.ui.servcie.EncryptShuffleService;

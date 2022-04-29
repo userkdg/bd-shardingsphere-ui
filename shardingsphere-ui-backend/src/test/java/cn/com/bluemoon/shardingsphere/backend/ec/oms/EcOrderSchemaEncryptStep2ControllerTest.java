@@ -1,4 +1,4 @@
-package cn.com.bluemoon.shardingsphere.backend.ec;
+package cn.com.bluemoon.shardingsphere.backend.ec.oms;
 
 import cn.com.bluemoon.shardingsphere.backend.util.BaseTest;
 import cn.com.bluemoon.shardingsphere.custom.shuffle.base.GlobalConfig;

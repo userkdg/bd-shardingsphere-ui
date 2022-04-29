@@ -1,4 +1,4 @@
-package cn.com.bluemoon.shardingsphere.backend.ec;
+package cn.com.bluemoon.shardingsphere.backend.ec.oms;
 
 import cn.com.bluemoon.shardingsphere.backend.util.BaseTest;
 import lombok.Getter;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 
 @Slf4j
-public class EncryptionRuleSourceTablePlainSetNullTest extends BaseTest {
+public class EncryptionRuleSourceTableColumnSwapTest extends BaseTest {
 
     private String sourceUrl;
 
@@ -44,7 +44,7 @@ public class EncryptionRuleSourceTablePlainSetNullTest extends BaseTest {
     @Before
     public void setUp() throws Exception {
         this.metaDataPersistService = configCenterService.getActivatedMetadataService();
-        this.schema = "ec_order_db";
+        this.schema = "ec_order";
         Map<String, DataSourceConfiguration> dataSource = metaDataPersistService.getDataSourceService().load(schema);
         Map<String, Object> dataSourceProps = dataSource.values().stream().findFirst()
                 .map(DataSourceConfiguration::getAllProps).orElseThrow(() -> new RuntimeException("ERROR"));
@@ -61,9 +61,8 @@ public class EncryptionRuleSourceTablePlainSetNullTest extends BaseTest {
     }
 
     @Test
-    public void testSourceTablePlainSetNull() {
-        // update table_xx set field_1=null, field_2 = null where 1=1
-        // alter table xx drop column col1, drop column col2 ..;
+    public void testSourceTableColumnPlainToBak() {
+        // alter table xx change column address address_plain;
         List<String> updateSqls = getSqlMode(FieldMode.DROP);
         updateSqls.parallelStream()
                 .forEach(sql -> {

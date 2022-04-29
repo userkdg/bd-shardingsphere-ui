@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 public class SensitiveInformation {
 
-    public final static List<String> ALGORITHM_LIST = Arrays.asList("AES","MD5","RC4");
+    public final static List<String> ALGORITHM_LIST = Arrays.asList("AES", "MYSQL-AES");
 
     @ExcelProperty("数据库名称")
     private String databaseName;

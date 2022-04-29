@@ -1,4 +1,4 @@
-package cn.com.bluemoon.shardingsphere.backend.ec;
+package cn.com.bluemoon.shardingsphere.backend.ec.oms;
 
 import org.junit.Test;
 

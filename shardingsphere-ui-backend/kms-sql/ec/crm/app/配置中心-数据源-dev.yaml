@@ -1,0 +1,19 @@
+bm_ucm_34n:
+  customPoolProps:
+    connectionTimeoutMilliseconds: '30000'
+    idleTimeoutMilliseconds: '60000'
+    maxPoolSize: '50'
+    minPoolSize: '1'
+    maxLifetimeMilliseconds: '1800000'
+  readOnly: false
+  maxLifetime: 1800000
+  minimumIdle: 1
+  password: HGbZYrqlpr25
+  minPoolSize: 1
+  idleTimeout: 60000
+  jdbcUrl: jdbc:mysql://192.168.240.46:3306/bm_ucm?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true&useSSL=false
+  dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+  maximumPoolSize: 50
+  connectionTimeout: 30000
+  maxPoolSize: 50
+  username: sharding
