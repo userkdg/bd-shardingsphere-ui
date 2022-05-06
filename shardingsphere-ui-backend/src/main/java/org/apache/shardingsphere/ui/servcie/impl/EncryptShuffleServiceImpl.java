@@ -187,27 +187,28 @@ public class EncryptShuffleServiceImpl implements EncryptShuffleService {
                 DsSysSensitiveShuffleInfo shuffleInfo = tableAndShuffleInfo.get(table.getName());
                 String incrFieldName = shuffleInfo != null ? shuffleInfo.getIncrFieldName() : null;
 //                incrFieldName=null;// 2022/3/10 临时改为全量跑 不走count统计
-                if (StringUtils.isBlank(incrFieldName)) {
-                    config.setExtractMode(ExtractMode.All);
-                    log.info("全量一次抽取数据进行洗数");
-                } else {
+                String incrFieldPreVal = tableNameAndIncrFieldPreVal.getOrDefault(table.getName(), null);
+                boolean hadIncrFieldVal = StringUtils.isNotBlank(incrFieldPreVal);
+                if (hadIncrFieldVal) {
+                    config.setIncrTimestampColPreVal(incrFieldPreVal);
+                    log.info("增量抽取数据中指定了表{}只对增量字段{}大于{}的数据进行洗数", table.getName(), incrFieldName, incrFieldPreVal);
+                }
+                // 抽取方式
+                if ((withIncrFieldExtractOnce || StringUtils.isNotBlank(incrFieldName)) && hadIncrFieldVal) {
                     config.setExtractMode(ExtractMode.WithIncField);
                     config.setIncrTimestampCol(incrFieldName);
                     log.info("增量抽取数据进行洗数, 表{}，增量字段为{}", table.getName(), incrFieldName);
-                    String incrFieldPreVal = tableNameAndIncrFieldPreVal.getOrDefault(table.getName(), null);
-                    if (incrFieldPreVal != null) {
-                        config.setIncrTimestampColPreVal(incrFieldPreVal);
-                        log.info("增量抽取数据中指定了表{}只对增量字段{}大于{}的数据进行洗数", table.getName(), incrFieldName, incrFieldPreVal);
-                    }
-                }
-                if (ExtractMode.WithIncField.equals(config.getExtractMode()) && withIncrFieldExtractOnce) {
+                } else if (withIncrFieldExtractOnce && StringUtils.isBlank(incrFieldPreVal)){
+                    config.setExtractMode(ExtractMode.All);
                     log.warn("接口入参指定了抽取模式{}，默认为根据具体业务逻辑进行设置抽取模式，由最初{}=>{}",
-                            ExtractMode.WithIncFieldOnce, config.getExtractMode(), ExtractMode.WithIncFieldOnce);
-                    config.setExtractMode(ExtractMode.WithIncFieldOnce);
+                            ExtractMode.WithIncFieldOnce, config.getExtractMode(), ExtractMode.All);
+                } else {
+                    config.setExtractMode(ExtractMode.All);
+                    log.info("全量一次抽取数据进行洗数");
                 }
                 if (shuffleInfo != null) {
                     // 增加避免刷库更新SQL中timestamp自动更新问题，会拿该原值数据回填
-                    // TODO: 2022/2/25  DsSySensitiveInfo库表（导入文件数据）增加一列，onUpdateCurrentTimestamps列字段，eg: sys_user的op_time
+                    // 2022/2/25  DsSySensitiveInfo库表（导入文件数据）增加一列，onUpdateCurrentTimestamps列字段，eg: sys_user的op_time
                     List<String> onUpdateTimestampFields = Arrays.stream(shuffleInfo.getOnUpdateTimestampFields().split(",")).filter(StringUtils::isNotBlank).collect(Collectors.toList());
                     config.setOnUpdateCurrentTimestamps(onUpdateTimestampFields);
                 }

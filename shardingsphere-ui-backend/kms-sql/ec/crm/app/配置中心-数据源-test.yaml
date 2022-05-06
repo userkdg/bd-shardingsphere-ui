@@ -11,7 +11,7 @@ bm_ucm_34n:
   password: 2wK2zskE
   minPoolSize: 1
   idleTimeout: 60000
-  jdbcUrl: jdbc:mysql://192.168.240.207:8066/bm_ucm?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true&useSSL=false
+  jdbcUrl: jdbc:mysql://192.168.240.119:3339/bm_ucm?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true&useSSL=false
   dataSourceClassName: com.zaxxer.hikari.HikariDataSource
   maximumPoolSize: 50
   connectionTimeout: 30000
