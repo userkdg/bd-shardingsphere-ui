@@ -2,6 +2,7 @@ alter table bm_ucm_customer_1 add column address_plain varchar(255) comment '常
 alter table bm_ucm_customer_1 add column other_contact_num_plain varchar(32) comment '客户其他号码';
 alter table bm_ucm_customer_1 add column mobile_plain varchar(20) comment '客户手机';
 alter table bm_ucm_customer_1 add column phone_plain varchar(32) comment '客户固话';
+alter table bm_ucm_customer_1 add column name_plain varchar(32) comment '客户姓名';
 alter table bm_ucm_customer_2 add column mobile_plain varchar(20) comment '客户手机';
 alter table bm_ucm_customer_2 add column address_plain varchar(255) comment '常用详细地址';
 alter table bm_ucm_customer_2 add column other_contact_num_plain varchar(32) comment '客户其他号码';

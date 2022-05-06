@@ -2,6 +2,7 @@ alter table bm_ucm_customer_1 change address_cipher address varchar(1024) commen
 alter table bm_ucm_customer_1 change other_contact_num_cipher other_contact_num varchar(152) comment '客户其他号码';
 alter table bm_ucm_customer_1 change mobile_cipher mobile varchar(88) comment '客户手机';
 alter table bm_ucm_customer_1 change phone_cipher phone varchar(152) comment '客户固话';
+alter table bm_ucm_customer_1 change name_cipher name varchar(152) comment '客户姓名';
 alter table bm_ucm_customer_2 change mobile_cipher mobile varchar(88) comment '客户手机';
 alter table bm_ucm_customer_2 change address_cipher address varchar(1024) comment '常用详细地址';
 alter table bm_ucm_customer_2 change other_contact_num_cipher other_contact_num varchar(152) comment '客户其他号码';

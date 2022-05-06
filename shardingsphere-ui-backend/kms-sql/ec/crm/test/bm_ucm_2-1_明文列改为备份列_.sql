@@ -46,6 +46,7 @@ alter table bm_ucm_customer_1 change mobile mobile_plain varchar(20) comment '�
 alter table bm_ucm_customer_1 change phone phone_plain varchar(32) comment '客户固话';
 alter table bm_ucm_customer_1 change other_contact_num other_contact_num_plain varchar(32) comment '客户其他号码';
 alter table bm_ucm_customer_1 change address address_plain varchar(255) comment '常用详细地址';
+alter table bm_ucm_customer_1 change name name_plain varchar(32) comment '客户姓名';
 alter table bm_ucm_customer_2 change name name_plain varchar(32) comment '客户姓名';
 alter table bm_ucm_customer_2 change mobile mobile_plain varchar(20) comment '客户手机';
 alter table bm_ucm_customer_2 change phone phone_plain varchar(32) comment '客户固话';

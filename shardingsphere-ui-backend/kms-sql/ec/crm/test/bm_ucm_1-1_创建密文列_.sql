@@ -1,8 +1,8 @@
 alter table bm_ucm_customer_1 add address_cipher varchar(1024) comment '常用详细地址' after address;
 alter table bm_ucm_customer_1 add other_contact_num_cipher varchar(152) comment '客户其他号码' after other_contact_num;
 alter table bm_ucm_customer_1 add mobile_cipher varchar(88) comment '客户手机' after mobile;
-alter table bm_ucm_customer_1 add name_cipher varchar(152) comment '客户姓名' after name;
 alter table bm_ucm_customer_1 add phone_cipher varchar(152) comment '客户固话' after phone;
+alter table bm_ucm_customer_1 add name_cipher varchar(152) comment '客户姓名' after name;
 alter table bm_ucm_customer_2 add mobile_cipher varchar(88) comment '客户手机' after mobile;
 alter table bm_ucm_customer_2 add address_cipher varchar(1024) comment '常用详细地址' after address;
 alter table bm_ucm_customer_2 add other_contact_num_cipher varchar(152) comment '客户其他号码' after other_contact_num;

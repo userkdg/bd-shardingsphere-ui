@@ -2,6 +2,7 @@ update bm_ucm_customer_1 set address_plain = null where 1=1;
 update bm_ucm_customer_1 set other_contact_num_plain = null where 1=1;
 update bm_ucm_customer_1 set mobile_plain = null where 1=1;
 update bm_ucm_customer_1 set phone_plain = null where 1=1;
+update bm_ucm_customer_1 set name_plain = null where 1=1;
 update bm_ucm_customer_2 set mobile_plain = null where 1=1;
 update bm_ucm_customer_2 set address_plain = null where 1=1;
 update bm_ucm_customer_2 set other_contact_num_plain = null where 1=1;
