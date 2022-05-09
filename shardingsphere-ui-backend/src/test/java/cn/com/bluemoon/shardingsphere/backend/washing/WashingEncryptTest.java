@@ -19,7 +19,7 @@ public class WashingEncryptTest extends BaseTest {
     /**
      * 配置中心、当前应用对应的schema（库名）
      */
-    String schemaName = "mh_smc";
+    String schemaName = "washingservice";
 
     @Autowired
     private SchemaEncryptStep2Controller controller;
