@@ -1,5 +1,5 @@
 centerConfigs:
-  - activated: false
+  - activated: true
     digest: ''
     instanceType: Zookeeper
     name: 电商CRM系统配置中心
@@ -17,7 +17,7 @@ centerConfigs:
     orchestrationType: config_center
     props: {}
     serverLists: 192.168.243.34:12181
-  - activated: true
+  - activated: false
     digest: ''
     instanceType: Zookeeper
     name: 小屋系统-测试
@@ -25,8 +25,7 @@ centerConfigs:
     orchestrationName: data_security_ns_dev
     orchestrationType: config_center
     props: {}
-    serverLists: 192.168.63.26:2181
-  #    serverLists: 192.168.243.20:12181,192.168.243.21:12181,192.168.243.22:12181
+    serverLists: 192.168.243.20:12181,192.168.243.21:12181,192.168.243.22:12181
   - activated: false
     digest: ''
     instanceType: Zookeeper
