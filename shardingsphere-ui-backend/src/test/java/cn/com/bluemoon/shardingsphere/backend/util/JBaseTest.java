@@ -1,5 +1,6 @@
 package cn.com.bluemoon.shardingsphere.backend.util;
 
+import cn.hutool.core.util.RandomUtil;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -12,6 +13,14 @@ import static org.junit.Assert.assertFalse;
  * @author Jarod.Kong
  */
 public class JBaseTest {
+
+
+    @Test
+    public void secureKey() {
+        String s = RandomUtil.randomString(16);
+        System.out.println(s);
+    }
+
     @Test
     public void findConnectInfo() {
         String url = "jdbc:mysql://192.168.xx.x:3306/xxxx?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true&useSSL=false";

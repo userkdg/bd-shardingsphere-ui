@@ -154,6 +154,7 @@ public class ImportEncryptionRuleUtils {
                         throw new DapThrowException("目前只支持算法类型："+ALGORITHM_LIST);
                     }
                 }else algorithmType = "AES";
+                // TODO: 2022/5/7 mysql-aes定义失败
                 ShardingSphereAlgorithmConfiguration shardingSphereAlgorithmConfiguration = new ShardingSphereAlgorithmConfiguration(algorithmType, properties);
                 EncryptColumnRuleConfiguration encrypt = new EncryptColumnRuleConfiguration
                         (information.getFieldName(), information.getFieldName() + "_cipher",
@@ -164,7 +165,6 @@ public class ImportEncryptionRuleUtils {
             EncryptTableRuleConfiguration encryptTableRuleConfiguration = new EncryptTableRuleConfiguration(entry.getKey(), configurations, true);
             tableRuleConfigurations.add(encryptTableRuleConfiguration);
         }
-        ;
         EncryptRuleConfiguration encryptRuleConfiguration = new EncryptRuleConfiguration(tableRuleConfigurations, map, true);
         List<RuleConfiguration> encryptRuleConfigurations = Arrays.asList(encryptRuleConfiguration);
         return encryptRuleConfigurations;

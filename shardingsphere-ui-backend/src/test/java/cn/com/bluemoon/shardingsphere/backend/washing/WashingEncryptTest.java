@@ -66,7 +66,7 @@ public class WashingEncryptTest extends BaseTest {
 
         }});
         shuffleVo.setSelectedTableNames(new HashSet<String>() {{
-            add("mall_wash_appointment_order");
+            add("mall_wash_back_order");
         }});
         shuffleVo.setTableNameAndIncrFieldPreVal(new HashMap<String, String>() {{
 

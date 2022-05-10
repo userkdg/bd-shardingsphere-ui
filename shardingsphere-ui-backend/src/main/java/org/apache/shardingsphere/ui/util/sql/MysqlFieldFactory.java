@@ -252,7 +252,7 @@ public class MysqlFieldFactory extends FieldFactory {
                     List<String> indexDdl = hadCipherFieldIndexes.stream().map(i -> {
                         return String.format("alter table %s add %s index %s(%s);",
                                 tableName, IndexTypeEnum.NORMAL.equals(i.getIdxType()) ? "" : i.getIdxType(),
-                                i.getName(), i.getFields().stream().map(f -> {
+                                i.getName()+"_kms", i.getFields().stream().map(f -> {
                                     String filedName = f.getName();
                                     if (f.getSubPart() != null) {
                                         return String.format("%s(%d)", filedName, f.getSubPart());

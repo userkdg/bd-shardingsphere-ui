@@ -114,8 +114,8 @@ public class BmUCMEncryptTest extends BaseTest {
             add("bm_ucm_wxwork_mobile_history");
             add("bm_ucm_yz_customer");
             add("bm_ucm_yz_customer_import");
-//            add("scrm_crowd_data");
-//            add("scrm_msg_send_record");
+            add("scrm_crowd_data");
+            add("scrm_msg_send_record");
             add("scrm_white_list_import");
             add("bm_ucm_member_wx_user");
             add("scrm_marketing_activity_user");
