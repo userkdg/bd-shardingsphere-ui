@@ -20,13 +20,10 @@ public class BmUCMEncryptTest extends BaseTest {
      * 配置中心、当前应用对应的schema（库名）
      */
     String schemaName = "bm_ucm";
-
     @Autowired
     private SchemaEncryptStep2Controller controller;
-
     @Autowired
     private SchemaEncryptStep3Controller step3Controller;
-
 
     /**
      * 生成脚本1
@@ -38,7 +35,6 @@ public class BmUCMEncryptTest extends BaseTest {
         System.out.println(ec_order);
         Assert.assertTrue(ec_order.isSuccess());
     }
-
 
     /**
      * 生成脚本2
@@ -66,7 +62,7 @@ public class BmUCMEncryptTest extends BaseTest {
 
         }});
         shuffleVo.setSelectedTableNames(new HashSet<String>() {{
-            add("scrm_crowd_data");
+            add("bm_ucm_customer_call_info");
         }});
         shuffleVo.setTableNameAndIncrFieldPreVal(new HashMap<String, String>() {{
 
@@ -77,10 +73,13 @@ public class BmUCMEncryptTest extends BaseTest {
     }
 
     /**
-     * 全量
+     * 为空，首次全量刷数
+     * 不为空，>该值，增量刷数
      */
+    private final String preTimestampValue = "";
+
     @Test
-    public void shuffleEncrypt() {
+    public void shuffleAllOrIncr() {
         SchemaEncryptStep2Controller.EncryptShuffleVo shuffleVo = new SchemaEncryptStep2Controller.EncryptShuffleVo();
         shuffleVo.setSchema(schemaName);
         shuffleVo.setDbType(GlobalConfig.MYSQL);
@@ -119,62 +118,39 @@ public class BmUCMEncryptTest extends BaseTest {
             add("scrm_white_list_import");
             add("bm_ucm_member_wx_user");
             add("scrm_marketing_activity_user");
-
         }});
-// FIXME: 2022/4/21  setWithIncrFieldExtractOnce=true刷库失败！
-//        shuffleVo.setWithIncrFieldExtractOnce(true);
         shuffleVo.setTableNameAndIncrFieldPreVal(new HashMap<String, String>() {{
-
-        }});
-        ResponseResult<String> res = controller.encryptShuffle(shuffleVo);
-        System.out.println(res);
-        Assert.assertTrue(res.isSuccess());
-    }
-    @Test
-    public void shuffleEncrypt2() {
-        SchemaEncryptStep2Controller.EncryptShuffleVo shuffleVo = new SchemaEncryptStep2Controller.EncryptShuffleVo();
-        shuffleVo.setSchema(schemaName);
-        shuffleVo.setDbType(GlobalConfig.MYSQL);
-        shuffleVo.setUnSelectedTableNames(new HashSet<String>() {{
-
-        }});
-        shuffleVo.setSelectedTableNames(new HashSet<String>() {{
-            add("scrm_msg_send_record");
-//            add("bm_ucm_customer_2");
-//            add("bm_ucm_customer_3");
-//            add("bm_ucm_customer_address_1");
-//            add("bm_ucm_customer_address_2");
-//            add("bm_ucm_customer_address_3");
-//            add("bm_ucm_customer_buy_info_1");
-//            add("bm_ucm_customer_buy_info_2");
-//            add("bm_ucm_customer_buy_info_3");
-//            add("bm_ucm_customer_buy_order_info_1");
-//            add("bm_ucm_customer_buy_order_info_2");
-//            add("bm_ucm_customer_buy_order_info_3");
-//            add("bm_ucm_customer_call_info");
-//            add("bm_ucm_customer_import");
-//            add("bm_ucm_customer_oper_log_1");
-//            add("bm_ucm_customer_oper_log_2");
-//            add("bm_ucm_customer_oper_log_3");
-//            add("bm_ucm_jd_membership_info");
-//            add("bm_ucm_member_cy_customer");
-//            add("bm_ucm_wxwork_customer");
-//            add("bm_ucm_wxwork_customer_follow_user");
-//            add("bm_ucm_wxwork_import_record");
-//            add("bm_ucm_wxwork_mobile");
-//            add("bm_ucm_wxwork_mobile_history");
-//            add("bm_ucm_yz_customer");
-//            add("bm_ucm_yz_customer_import");
-//            add("scrm_crowd_data");
-//            add("scrm_msg_send_record");
-//            add("scrm_white_list_import");
-//            add("bm_ucm_member_wx_user");
-//            add("scrm_marketing_activity_user");
-
-        }});
-        // FIXME: 2022/4/21  setWithIncrFieldExtractOnce=true刷库失败！
-//        shuffleVo.setWithIncrFieldExtractOnce(true);
-        shuffleVo.setTableNameAndIncrFieldPreVal(new HashMap<String, String>() {{
+            put("bm_ucm_customer_1", preTimestampValue);
+            put("bm_ucm_customer_2", preTimestampValue);
+            put("bm_ucm_customer_3", preTimestampValue);
+            put("bm_ucm_customer_address_1", preTimestampValue);
+            put("bm_ucm_customer_address_2", preTimestampValue);
+            put("bm_ucm_customer_address_3", preTimestampValue);
+            put("bm_ucm_customer_buy_info_1", preTimestampValue);
+            put("bm_ucm_customer_buy_info_2", preTimestampValue);
+            put("bm_ucm_customer_buy_info_3", preTimestampValue);
+            put("bm_ucm_customer_buy_order_info_1", preTimestampValue);
+            put("bm_ucm_customer_buy_order_info_2", preTimestampValue);
+            put("bm_ucm_customer_buy_order_info_3", preTimestampValue);
+            put("bm_ucm_customer_call_info", preTimestampValue);
+            put("bm_ucm_customer_import", preTimestampValue);
+            put("bm_ucm_customer_oper_log_1", preTimestampValue);
+            put("bm_ucm_customer_oper_log_2", preTimestampValue);
+            put("bm_ucm_customer_oper_log_3", preTimestampValue);
+            put("bm_ucm_jd_membership_info", preTimestampValue);
+            put("bm_ucm_member_cy_customer", preTimestampValue);
+            put("bm_ucm_wxwork_customer", preTimestampValue);
+            put("bm_ucm_wxwork_customer_follow_user", preTimestampValue);
+            put("bm_ucm_wxwork_import_record", preTimestampValue);
+            put("bm_ucm_wxwork_mobile", preTimestampValue);
+            put("bm_ucm_wxwork_mobile_history", preTimestampValue);
+            put("bm_ucm_yz_customer", preTimestampValue);
+            put("bm_ucm_yz_customer_import", preTimestampValue);
+            put("scrm_crowd_data", preTimestampValue);
+            put("scrm_msg_send_record", preTimestampValue);
+            put("scrm_white_list_import", preTimestampValue);
+            put("bm_ucm_member_wx_user", preTimestampValue);
+            put("scrm_marketing_activity_user", preTimestampValue);
 
         }});
         ResponseResult<String> res = controller.encryptShuffle(shuffleVo);

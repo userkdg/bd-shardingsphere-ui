@@ -188,13 +188,12 @@ public class EncryptShuffleServiceImpl implements EncryptShuffleService {
                 String incrFieldName = shuffleInfo != null ? shuffleInfo.getIncrFieldName() : null;
 //                incrFieldName=null;// 2022/3/10 临时改为全量跑 不走count统计
                 String incrFieldPreVal = tableNameAndIncrFieldPreVal.getOrDefault(table.getName(), null);
-                boolean hadIncrFieldVal = StringUtils.isNotBlank(incrFieldPreVal);
-                if (hadIncrFieldVal) {
+                if (StringUtils.isNotBlank(incrFieldPreVal)) {
                     config.setIncrTimestampColPreVal(incrFieldPreVal);
                     log.info("增量抽取数据中指定了表{}只对增量字段{}大于{}的数据进行洗数", table.getName(), incrFieldName, incrFieldPreVal);
                 }
                 // 抽取方式
-                if ((withIncrFieldExtractOnce || StringUtils.isNotBlank(incrFieldName)) && hadIncrFieldVal) {
+                if ((withIncrFieldExtractOnce || StringUtils.isNotBlank(incrFieldName)) && StringUtils.isNotBlank(incrFieldPreVal)) {
                     config.setExtractMode(ExtractMode.WithIncField);
                     config.setIncrTimestampCol(incrFieldName);
                     log.info("增量抽取数据进行洗数, 表{}，增量字段为{}", table.getName(), incrFieldName);
