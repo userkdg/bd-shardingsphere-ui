@@ -1,0 +1,529 @@
+- !ENCRYPT
+  encryptors:
+    bm_ucm_customer_import_mobile:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_1_address:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_import_name:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_address_3_address:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_1_other_contact_num:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_3_mobile:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_1_mobile:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_2_mobile:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_yz_customer_mobile:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_address_2_mobile:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_wxwork_customer_mobile:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_1_name:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    scrm_msg_send_record_mobile:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_member_cy_customer_mobile:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_call_info_mobile:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_oper_log_1_masking:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_import_phone:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_import_other_contact_num:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    scrm_marketing_activity_user_mobile:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_address_2_address:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_3_phone:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_wxwork_customer_follow_user_follow_user_remark_mobiles:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_3_address:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_oper_log_3_masking:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_member_wx_user_mobile:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_buy_info_2_mobile:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    scrm_crowd_data_mobile:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_wxwork_import_record_mobile:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_3_other_contact_num:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_2_address:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_1_phone:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_wxwork_mobile_history_mobile:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_buy_order_info_2_mobile:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_address_3_receiver_name:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_buy_order_info_1_mobile:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_3_name:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_buy_order_info_3_mobile:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_jd_membership_info_address:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_address_3_mobile:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_oper_log_2_masking:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_address_2_receiver_name:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_jd_membership_info_user_mobile:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_address_1_mobile:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_2_other_contact_num:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_import_address:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_wxwork_mobile_mobile:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_2_phone:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_yz_customer_import_mobile:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_2_name:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_address_1_receiver_name:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_address_1_address:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_buy_info_1_mobile:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    scrm_white_list_import_mobile:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+    bm_ucm_customer_buy_info_3_mobile:
+      props:
+        aes-key-value: 7l8avffzgrngdtco
+      type: MYSQL-AES
+  queryWithCipherColumn: true
+  tables:
+    bm_ucm_yz_customer:
+      columns:
+        mobile:
+          cipherColumn: mobile_cipher
+          encryptorName: bm_ucm_yz_customer_mobile
+          plainColumn: mobile
+      queryWithCipherColumn: true
+    scrm_msg_send_record:
+      columns:
+        mobile:
+          cipherColumn: mobile_cipher
+          encryptorName: scrm_msg_send_record_mobile
+          plainColumn: mobile
+      queryWithCipherColumn: true
+    bm_ucm_yz_customer_import:
+      columns:
+        mobile:
+          cipherColumn: mobile_cipher
+          encryptorName: bm_ucm_yz_customer_import_mobile
+          plainColumn: mobile
+      queryWithCipherColumn: true
+    bm_ucm_member_cy_customer:
+      columns:
+        mobile:
+          cipherColumn: mobile_cipher
+          encryptorName: bm_ucm_member_cy_customer_mobile
+          plainColumn: mobile
+      queryWithCipherColumn: true
+    bm_ucm_customer_buy_order_info_1:
+      columns:
+        mobile:
+          cipherColumn: mobile_cipher
+          encryptorName: bm_ucm_customer_buy_order_info_1_mobile
+          plainColumn: mobile
+      queryWithCipherColumn: true
+    scrm_marketing_activity_user:
+      columns:
+        mobile:
+          cipherColumn: mobile_cipher
+          encryptorName: scrm_marketing_activity_user_mobile
+          plainColumn: mobile
+      queryWithCipherColumn: true
+    bm_ucm_customer_call_info:
+      columns:
+        mobile:
+          cipherColumn: mobile_cipher
+          encryptorName: bm_ucm_customer_call_info_mobile
+          plainColumn: mobile
+      queryWithCipherColumn: true
+    scrm_white_list_import:
+      columns:
+        mobile:
+          cipherColumn: mobile_cipher
+          encryptorName: scrm_white_list_import_mobile
+          plainColumn: mobile
+      queryWithCipherColumn: true
+    bm_ucm_customer_buy_order_info_3:
+      columns:
+        mobile:
+          cipherColumn: mobile_cipher
+          encryptorName: bm_ucm_customer_buy_order_info_3_mobile
+          plainColumn: mobile
+      queryWithCipherColumn: true
+    bm_ucm_customer_buy_order_info_2:
+      columns:
+        mobile:
+          cipherColumn: mobile_cipher
+          encryptorName: bm_ucm_customer_buy_order_info_2_mobile
+          plainColumn: mobile
+      queryWithCipherColumn: true
+    bm_ucm_customer_address_2:
+      columns:
+        mobile:
+          cipherColumn: mobile_cipher
+          encryptorName: bm_ucm_customer_address_2_mobile
+          plainColumn: mobile
+        receiver_name:
+          cipherColumn: receiver_name_cipher
+          encryptorName: bm_ucm_customer_address_2_receiver_name
+          plainColumn: receiver_name
+        address:
+          cipherColumn: address_cipher
+          encryptorName: bm_ucm_customer_address_2_address
+          plainColumn: address
+      queryWithCipherColumn: true
+    bm_ucm_customer_address_3:
+      columns:
+        mobile:
+          cipherColumn: mobile_cipher
+          encryptorName: bm_ucm_customer_address_3_mobile
+          plainColumn: mobile
+        receiver_name:
+          cipherColumn: receiver_name_cipher
+          encryptorName: bm_ucm_customer_address_3_receiver_name
+          plainColumn: receiver_name
+        address:
+          cipherColumn: address_cipher
+          encryptorName: bm_ucm_customer_address_3_address
+          plainColumn: address
+      queryWithCipherColumn: true
+    bm_ucm_customer_buy_info_3:
+      columns:
+        mobile:
+          cipherColumn: mobile_cipher
+          encryptorName: bm_ucm_customer_buy_info_3_mobile
+          plainColumn: mobile
+      queryWithCipherColumn: true
+    bm_ucm_customer_address_1:
+      columns:
+        mobile:
+          cipherColumn: mobile_cipher
+          encryptorName: bm_ucm_customer_address_1_mobile
+          plainColumn: mobile
+        receiver_name:
+          cipherColumn: receiver_name_cipher
+          encryptorName: bm_ucm_customer_address_1_receiver_name
+          plainColumn: receiver_name
+        address:
+          cipherColumn: address_cipher
+          encryptorName: bm_ucm_customer_address_1_address
+          plainColumn: address
+      queryWithCipherColumn: true
+    bm_ucm_customer_import:
+      columns:
+        name:
+          cipherColumn: name_cipher
+          encryptorName: bm_ucm_customer_import_name
+          plainColumn: name
+        mobile:
+          cipherColumn: mobile_cipher
+          encryptorName: bm_ucm_customer_import_mobile
+          plainColumn: mobile
+        phone:
+          cipherColumn: phone_cipher
+          encryptorName: bm_ucm_customer_import_phone
+          plainColumn: phone
+        other_contact_num:
+          cipherColumn: other_contact_num_cipher
+          encryptorName: bm_ucm_customer_import_other_contact_num
+          plainColumn: other_contact_num
+        address:
+          cipherColumn: address_cipher
+          encryptorName: bm_ucm_customer_import_address
+          plainColumn: address
+      queryWithCipherColumn: true
+    bm_ucm_wxwork_customer:
+      columns:
+        mobile:
+          cipherColumn: mobile_cipher
+          encryptorName: bm_ucm_wxwork_customer_mobile
+          plainColumn: mobile
+      queryWithCipherColumn: true
+    bm_ucm_customer_buy_info_1:
+      columns:
+        mobile:
+          cipherColumn: mobile_cipher
+          encryptorName: bm_ucm_customer_buy_info_1_mobile
+          plainColumn: mobile
+      queryWithCipherColumn: true
+    bm_ucm_customer_buy_info_2:
+      columns:
+        mobile:
+          cipherColumn: mobile_cipher
+          encryptorName: bm_ucm_customer_buy_info_2_mobile
+          plainColumn: mobile
+      queryWithCipherColumn: true
+    bm_ucm_wxwork_import_record:
+      columns:
+        mobile:
+          cipherColumn: mobile_cipher
+          encryptorName: bm_ucm_wxwork_import_record_mobile
+          plainColumn: mobile
+      queryWithCipherColumn: true
+    bm_ucm_customer_oper_log_3:
+      columns:
+        masking:
+          cipherColumn: masking_cipher
+          encryptorName: bm_ucm_customer_oper_log_3_masking
+          plainColumn: masking
+      queryWithCipherColumn: true
+    bm_ucm_jd_membership_info:
+      columns:
+        user_mobile:
+          cipherColumn: user_mobile_cipher
+          encryptorName: bm_ucm_jd_membership_info_user_mobile
+          plainColumn: user_mobile
+        address:
+          cipherColumn: address_cipher
+          encryptorName: bm_ucm_jd_membership_info_address
+          plainColumn: address
+      queryWithCipherColumn: true
+    bm_ucm_wxwork_mobile:
+      columns:
+        mobile:
+          cipherColumn: mobile_cipher
+          encryptorName: bm_ucm_wxwork_mobile_mobile
+          plainColumn: mobile
+      queryWithCipherColumn: true
+    scrm_crowd_data:
+      columns:
+        mobile:
+          cipherColumn: mobile_cipher
+          encryptorName: scrm_crowd_data_mobile
+          plainColumn: mobile
+      queryWithCipherColumn: true
+    bm_ucm_customer_oper_log_1:
+      columns:
+        masking:
+          cipherColumn: masking_cipher
+          encryptorName: bm_ucm_customer_oper_log_1_masking
+          plainColumn: masking
+      queryWithCipherColumn: true
+    bm_ucm_wxwork_mobile_history:
+      columns:
+        mobile:
+          cipherColumn: mobile_cipher
+          encryptorName: bm_ucm_wxwork_mobile_history_mobile
+          plainColumn: mobile
+      queryWithCipherColumn: true
+    bm_ucm_customer_oper_log_2:
+      columns:
+        masking:
+          cipherColumn: masking_cipher
+          encryptorName: bm_ucm_customer_oper_log_2_masking
+          plainColumn: masking
+      queryWithCipherColumn: true
+    bm_ucm_wxwork_customer_follow_user:
+      columns:
+        follow_user_remark_mobiles:
+          cipherColumn: follow_user_remark_mobiles_cipher
+          encryptorName: bm_ucm_wxwork_customer_follow_user_follow_user_remark_mobiles
+          plainColumn: follow_user_remark_mobiles
+      queryWithCipherColumn: true
+    bm_ucm_customer_3:
+      columns:
+        name:
+          cipherColumn: name_cipher
+          encryptorName: bm_ucm_customer_3_name
+          plainColumn: name
+        mobile:
+          cipherColumn: mobile_cipher
+          encryptorName: bm_ucm_customer_3_mobile
+          plainColumn: mobile
+        address:
+          cipherColumn: address_cipher
+          encryptorName: bm_ucm_customer_3_address
+          plainColumn: address
+        phone:
+          cipherColumn: phone_cipher
+          encryptorName: bm_ucm_customer_3_phone
+          plainColumn: phone
+        other_contact_num:
+          cipherColumn: other_contact_num_cipher
+          encryptorName: bm_ucm_customer_3_other_contact_num
+          plainColumn: other_contact_num
+      queryWithCipherColumn: true
+    bm_ucm_member_wx_user:
+      columns:
+        mobile:
+          cipherColumn: mobile_cipher
+          encryptorName: bm_ucm_member_wx_user_mobile
+          plainColumn: mobile
+      queryWithCipherColumn: true
+    bm_ucm_customer_1:
+      columns:
+        name:
+          cipherColumn: name_cipher
+          encryptorName: bm_ucm_customer_1_name
+          plainColumn: name
+        mobile:
+          cipherColumn: mobile_cipher
+          encryptorName: bm_ucm_customer_1_mobile
+          plainColumn: mobile
+        address:
+          cipherColumn: address_cipher
+          encryptorName: bm_ucm_customer_1_address
+          plainColumn: address
+        phone:
+          cipherColumn: phone_cipher
+          encryptorName: bm_ucm_customer_1_phone
+          plainColumn: phone
+        other_contact_num:
+          cipherColumn: other_contact_num_cipher
+          encryptorName: bm_ucm_customer_1_other_contact_num
+          plainColumn: other_contact_num
+      queryWithCipherColumn: true
+    bm_ucm_customer_2:
+      columns:
+        name:
+          cipherColumn: name_cipher
+          encryptorName: bm_ucm_customer_2_name
+          plainColumn: name
+        mobile:
+          cipherColumn: mobile_cipher
+          encryptorName: bm_ucm_customer_2_mobile
+          plainColumn: mobile
+        address:
+          cipherColumn: address_cipher
+          encryptorName: bm_ucm_customer_2_address
+          plainColumn: address
+        phone:
+          cipherColumn: phone_cipher
+          encryptorName: bm_ucm_customer_2_phone
+          plainColumn: phone
+        other_contact_num:
+          cipherColumn: other_contact_num_cipher
+          encryptorName: bm_ucm_customer_2_other_contact_num
+          plainColumn: other_contact_num
+      queryWithCipherColumn: true
