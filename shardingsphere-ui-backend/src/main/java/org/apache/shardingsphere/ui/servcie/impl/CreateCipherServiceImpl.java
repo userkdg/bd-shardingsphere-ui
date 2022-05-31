@@ -133,6 +133,7 @@ public class CreateCipherServiceImpl implements CreateCipherService {
                 for (String sql : changeCipherFieldNullable) {
                     log.info("gen bak_plain set nullable sql=>{}", sql);
                 }
+                // TODO: 2022/5/26 调整密文列长度为加密字段长度 20->88
                 generateTempFile(schemaName + "_3-4_密文列非空_", changeCipherFieldNullable);
 
             }else {

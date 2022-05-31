@@ -16,6 +16,7 @@ import cn.com.bluemoon.shardingsphere.custom.shuffle.base.GlobalConfigSwapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shardingsphere.encrypt.api.config.EncryptRuleConfiguration;
@@ -136,13 +137,55 @@ public class EncryptShuffleServiceImpl implements EncryptShuffleService {
         }
     }
 
+    public static final Map<String, Object> tableIncrIdMap = new HashMap<String, Object>(){{
+        /*put("bm_ucm_jd_membership_info", 14187779);
+        put("bm_ucm_customer_buy_info_1", 78528199);
+        put("bm_ucm_customer_buy_info_2", 78521226);
+        put("bm_ucm_customer_buy_info_3", 78528195);
+        put("bm_ucm_customer_address_1", 82803234);
+        put("bm_ucm_customer_address_2", 82774372);
+        put("bm_ucm_customer_address_3", 82774511);
+        put("bm_ucm_customer_buy_order_info_1", 109098096);
+        put("bm_ucm_customer_buy_order_info_2", 109183526);
+        put("bm_ucm_customer_buy_order_info_3", 109099870);*/
+        put("bm_ucm_jd_membership_info", 14187779);
+        put("bm_ucm_customer_buy_info_1", 78525441);
+        put("bm_ucm_customer_buy_info_2", 78528450);
+        put("bm_ucm_customer_buy_info_3", 78528191);
+        put("bm_ucm_customer_address_1", 82812828);
+        put("bm_ucm_customer_address_2", 82812829);
+        put("bm_ucm_customer_address_3", 82812830);
+        put("bm_ucm_customer_buy_order_info_1", 109231872);
+        put("bm_ucm_customer_buy_order_info_2", 109231903);
+        put("bm_ucm_customer_buy_order_info_3", 109231902);
+    }};
+
+    @SneakyThrows
     private void doSubmit() {
         Objects.requireNonNull(globalConfigs);
+        for (GlobalConfig g : globalConfigs) {
+            if (tableIncrIdMap.containsKey(g.getRuleTableName())){
+                g.setExtractMode(ExtractMode.OtherCustom);
+                String whereSql = String.format(" id >= %s", tableIncrIdMap.get(g.getRuleTableName()));
+                g.setCustomExtractWhereSql(whereSql);
+                g.setIncrTimestampColPreVal(null);
+                g.setIncrTimestampCol(null);
+            }
+        }
+        for (GlobalConfig c : globalConfigs) {
+            String jsonParam = GlobalConfigSwapper.swapToJsonStr(c);
+            String jobName = c.getRuleTableName();
+            log.info("提交作业入参：表：{}，params：{}", jobName, jsonParam);
+            String command = String.format("sh /home/data_tool/bd-spark/bd-spark-encrypt-shuffle/runSparkEncryptShuffleJob.sh '-c %s' '%s'", jsonParam, jobName);
+            System.out.println("预生产命令，如下：");
+            System.out.println(command);
+        }
         for (GlobalConfig c : globalConfigs) {
             String json = GlobalConfigSwapper.swapToJsonStr(c);
             log.info("提交作业入参：表：{}，params：{}", c.getRuleTableName(), json);
             //  2022/2/25 增加部署环境对应作业提交
             SparkSubmitEncryptShuffleMain.main(new String[]{json, c.getRuleTableName(), sparkJobEnv});
+//            TimeUnit.MINUTES.sleep(30);
         }
     }
 

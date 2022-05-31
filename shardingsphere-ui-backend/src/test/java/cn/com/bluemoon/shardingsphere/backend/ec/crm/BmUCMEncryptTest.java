@@ -76,7 +76,135 @@ public class BmUCMEncryptTest extends BaseTest {
      * 为空，首次全量刷数
      * 不为空，>该值，增量刷数
      */
-    private final String preTimestampValue = "";
+//    private final String preTimestampValue = "";
+//    private final String preTimestampValue = "2022-05-17 09:00:00";
+
+    @Test
+    public void shuffleSmallTables() {
+        SchemaEncryptStep2Controller.EncryptShuffleVo shuffleVo = new SchemaEncryptStep2Controller.EncryptShuffleVo();
+        shuffleVo.setSchema(schemaName);
+        shuffleVo.setDbType(GlobalConfig.MYSQL);
+        shuffleVo.setUnSelectedTableNames(new HashSet<String>() {{
+
+        }});
+        shuffleVo.setSelectedTableNames(new HashSet<String>() {{
+            add("bm_ucm_customer_import");
+            add("scrm_white_list_import");
+            add("bm_ucm_member_wx_user");
+            add("scrm_marketing_activity_user");
+            add("bm_ucm_wxwork_mobile_history");
+            add("bm_ucm_yz_customer_import");
+            add("bm_ucm_yz_customer");
+            add("bm_ucm_wxwork_mobile");
+            add("bm_ucm_customer_call_info");
+            add("scrm_crowd_data");
+            add("bm_ucm_wxwork_customer");
+            add("bm_ucm_wxwork_customer_follow_user");
+            add("bm_ucm_wxwork_import_record");
+            add("bm_ucm_member_cy_customer");
+            add("scrm_msg_send_record");
+            add("bm_ucm_customer_oper_log_2");
+            add("bm_ucm_customer_oper_log_3");
+            add("bm_ucm_customer_oper_log_1");
+
+        }});
+        shuffleVo.setTableNameAndIncrFieldPreVal(new HashMap<String, String>() {{
+            put("bm_ucm_customer_1", preTimestampValue);
+            put("bm_ucm_customer_2", preTimestampValue);
+            put("bm_ucm_customer_3", preTimestampValue);
+            put("bm_ucm_customer_address_1", preTimestampValue);
+            put("bm_ucm_customer_address_2", preTimestampValue);
+            put("bm_ucm_customer_address_3", preTimestampValue);
+            put("bm_ucm_customer_buy_info_1", preTimestampValue);
+            put("bm_ucm_customer_buy_info_2", preTimestampValue);
+            put("bm_ucm_customer_buy_info_3", preTimestampValue);
+            put("bm_ucm_customer_buy_order_info_1", preTimestampValue);
+            put("bm_ucm_customer_buy_order_info_2", preTimestampValue);
+            put("bm_ucm_customer_buy_order_info_3", preTimestampValue);
+            put("bm_ucm_customer_call_info", preTimestampValue);
+            put("bm_ucm_customer_import", preTimestampValue);
+            put("bm_ucm_customer_oper_log_1", preTimestampValue);
+            put("bm_ucm_customer_oper_log_2", preTimestampValue);
+            put("bm_ucm_customer_oper_log_3", preTimestampValue);
+            put("bm_ucm_jd_membership_info", preTimestampValue);
+            put("bm_ucm_member_cy_customer", preTimestampValue);
+            put("bm_ucm_wxwork_customer", preTimestampValue);
+            put("bm_ucm_wxwork_customer_follow_user", preTimestampValue);
+            put("bm_ucm_wxwork_import_record", preTimestampValue);
+            put("bm_ucm_wxwork_mobile", preTimestampValue);
+            put("bm_ucm_wxwork_mobile_history", preTimestampValue);
+            put("bm_ucm_yz_customer", preTimestampValue);
+            put("bm_ucm_yz_customer_import", preTimestampValue);
+            put("scrm_crowd_data", preTimestampValue);
+            put("scrm_msg_send_record", preTimestampValue);
+            put("scrm_white_list_import", preTimestampValue);
+            put("bm_ucm_member_wx_user", preTimestampValue);
+//            put("scrm_marketing_activity_user", preTimestampValue);
+
+        }});
+        ResponseResult<String> res = controller.encryptShuffle(shuffleVo);
+        System.out.println(res);
+        Assert.assertTrue(res.isSuccess());
+    }
+
+    @Test
+    public void shuffleBigTables() {
+        SchemaEncryptStep2Controller.EncryptShuffleVo shuffleVo = new SchemaEncryptStep2Controller.EncryptShuffleVo();
+        shuffleVo.setSchema(schemaName);
+        shuffleVo.setDbType(GlobalConfig.MYSQL);
+        shuffleVo.setUnSelectedTableNames(new HashSet<String>() {{
+
+        }});
+        shuffleVo.setSelectedTableNames(new HashSet<String>() {{
+            add("bm_ucm_jd_membership_info");
+            add("bm_ucm_customer_3");
+            add("bm_ucm_customer_2");
+            add("bm_ucm_customer_1");
+            add("bm_ucm_customer_buy_info_1");
+            add("bm_ucm_customer_buy_info_2");
+//            add("bm_ucm_customer_buy_info_3"); doing
+            add("bm_ucm_customer_address_1");
+
+        }});
+        shuffleVo.setTableNameAndIncrFieldPreVal(new HashMap<String, String>() {{
+            put("bm_ucm_customer_1", preTimestampValue);
+            put("bm_ucm_customer_2", preTimestampValue);
+            put("bm_ucm_customer_3", preTimestampValue);
+            put("bm_ucm_customer_address_1", preTimestampValue);
+            put("bm_ucm_customer_address_2", preTimestampValue);
+            put("bm_ucm_customer_address_3", preTimestampValue);
+            put("bm_ucm_customer_buy_info_1", preTimestampValue);
+            put("bm_ucm_customer_buy_info_2", preTimestampValue);
+            put("bm_ucm_customer_buy_info_3", preTimestampValue);
+            put("bm_ucm_customer_buy_order_info_1", preTimestampValue);
+            put("bm_ucm_customer_buy_order_info_2", preTimestampValue);
+            put("bm_ucm_customer_buy_order_info_3", preTimestampValue);
+            put("bm_ucm_customer_call_info", preTimestampValue);
+            put("bm_ucm_customer_import", preTimestampValue);
+            put("bm_ucm_customer_oper_log_1", preTimestampValue);
+            put("bm_ucm_customer_oper_log_2", preTimestampValue);
+            put("bm_ucm_customer_oper_log_3", preTimestampValue);
+            put("bm_ucm_jd_membership_info", preTimestampValue);
+            put("bm_ucm_member_cy_customer", preTimestampValue);
+            put("bm_ucm_wxwork_customer", preTimestampValue);
+            put("bm_ucm_wxwork_customer_follow_user", preTimestampValue);
+            put("bm_ucm_wxwork_import_record", preTimestampValue);
+            put("bm_ucm_wxwork_mobile", preTimestampValue);
+            put("bm_ucm_wxwork_mobile_history", preTimestampValue);
+            put("bm_ucm_yz_customer", preTimestampValue);
+            put("bm_ucm_yz_customer_import", preTimestampValue);
+            put("scrm_crowd_data", preTimestampValue);
+            put("scrm_msg_send_record", preTimestampValue);
+            put("scrm_white_list_import", preTimestampValue);
+            put("bm_ucm_member_wx_user", preTimestampValue);
+//            put("scrm_marketing_activity_user", preTimestampValue);
+
+        }});
+        ResponseResult<String> res = controller.encryptShuffle(shuffleVo);
+        System.out.println(res);
+        Assert.assertTrue(res.isSuccess());
+    }
+
 
     @Test
     public void shuffleAllOrIncr() {
@@ -150,7 +278,7 @@ public class BmUCMEncryptTest extends BaseTest {
             put("scrm_msg_send_record", preTimestampValue);
             put("scrm_white_list_import", preTimestampValue);
             put("bm_ucm_member_wx_user", preTimestampValue);
-            put("scrm_marketing_activity_user", preTimestampValue);
+//            put("scrm_marketing_activity_user", preTimestampValue);
 
         }});
         ResponseResult<String> res = controller.encryptShuffle(shuffleVo);
@@ -158,6 +286,7 @@ public class BmUCMEncryptTest extends BaseTest {
         Assert.assertTrue(res.isSuccess());
     }
 
+    private final String preTimestampValue = "2022-05-24 12:00:00";
     /**
      * 增量表的跑数（可以不用，取决于全量刷库完后的增量数据量是否很大，若大可以考虑）
      */
@@ -172,68 +301,9 @@ public class BmUCMEncryptTest extends BaseTest {
         shuffleVo.setSelectedTableNames(new HashSet<String>() {{
             add("bm_ucm_customer_1");
             add("bm_ucm_customer_2");
-            add("bm_ucm_customer_3");
-            add("bm_ucm_customer_address_1");
-            add("bm_ucm_customer_address_2");
-            add("bm_ucm_customer_address_3");
-            add("bm_ucm_customer_buy_info_1");
-            add("bm_ucm_customer_buy_info_2");
-            add("bm_ucm_customer_buy_info_3");
-            add("bm_ucm_customer_buy_order_info_1");
-            add("bm_ucm_customer_buy_order_info_2");
-            add("bm_ucm_customer_buy_order_info_3");
-            add("bm_ucm_customer_call_info");
-            add("bm_ucm_customer_import");
-            add("bm_ucm_customer_oper_log_1");
-            add("bm_ucm_customer_oper_log_2");
-            add("bm_ucm_customer_oper_log_3");
-            add("bm_ucm_jd_membership_info");
-            add("bm_ucm_member_cy_customer");
-            add("bm_ucm_wxwork_customer");
-            add("bm_ucm_wxwork_customer_follow_user");
-            add("bm_ucm_wxwork_import_record");
-            add("bm_ucm_wxwork_mobile");
-            add("bm_ucm_wxwork_mobile_history");
-            add("bm_ucm_yz_customer");
-            add("bm_ucm_yz_customer_import");
-            add("scrm_crowd_data");
-            add("scrm_msg_send_record");
-            add("scrm_white_list_import");
-            add("bm_ucm_member_wx_user");
-            add("scrm_marketing_activity_user");
         }});
         shuffleVo.setTableNameAndIncrFieldPreVal(new HashMap<String, String>() {{
             put("bm_ucm_customer_1", preTimestampValue);
-            put("bm_ucm_customer_2", preTimestampValue);
-            put("bm_ucm_customer_3", preTimestampValue);
-            put("bm_ucm_customer_address_1", preTimestampValue);
-            put("bm_ucm_customer_address_2", preTimestampValue);
-            put("bm_ucm_customer_address_3", preTimestampValue);
-            put("bm_ucm_customer_buy_info_1", preTimestampValue);
-            put("bm_ucm_customer_buy_info_2", preTimestampValue);
-            put("bm_ucm_customer_buy_info_3", preTimestampValue);
-            put("bm_ucm_customer_buy_order_info_1", preTimestampValue);
-            put("bm_ucm_customer_buy_order_info_2", preTimestampValue);
-            put("bm_ucm_customer_buy_order_info_3", preTimestampValue);
-            put("bm_ucm_customer_call_info", preTimestampValue);
-            put("bm_ucm_customer_import", preTimestampValue);
-            put("bm_ucm_customer_oper_log_1", preTimestampValue);
-            put("bm_ucm_customer_oper_log_2", preTimestampValue);
-            put("bm_ucm_customer_oper_log_3", preTimestampValue);
-            put("bm_ucm_jd_membership_info", preTimestampValue);
-            put("bm_ucm_member_cy_customer", preTimestampValue);
-            put("bm_ucm_wxwork_customer", preTimestampValue);
-            put("bm_ucm_wxwork_customer_follow_user", preTimestampValue);
-            put("bm_ucm_wxwork_import_record", preTimestampValue);
-            put("bm_ucm_wxwork_mobile", preTimestampValue);
-            put("bm_ucm_wxwork_mobile_history", preTimestampValue);
-            put("bm_ucm_yz_customer", preTimestampValue);
-            put("bm_ucm_yz_customer_import", preTimestampValue);
-            put("scrm_crowd_data", preTimestampValue);
-            put("scrm_msg_send_record", preTimestampValue);
-            put("scrm_white_list_import", preTimestampValue);
-            put("bm_ucm_member_wx_user", preTimestampValue);
-            put("scrm_marketing_activity_user", preTimestampValue);
 
         }});
         ResponseResult<String> res = controller.encryptShuffle(shuffleVo);
