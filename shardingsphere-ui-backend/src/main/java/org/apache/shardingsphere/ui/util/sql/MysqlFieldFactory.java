@@ -92,9 +92,13 @@ public class MysqlFieldFactory extends FieldFactory {
         return sb.toString();
     }
 
-    private String changeFieldSqlNotNull(ColumnInfoVO vo, boolean forceFieldNull) {
+    private String changeFieldSqlNotNull(FiledEncryptionInfo info, ColumnInfoVO vo, boolean forceFieldNull) {
         // alter table <表名> change <字段名> <字段新名称> <字段的类型>。
-        String length = StringUtils.isBlank(vo.getLength()) ? "" : "(" + vo.getLength() + ")";
+        String length  = "";
+        if (StringUtils.isNotBlank(vo.getLength())) {
+            Integer cipherFieldLength = getFieldLength(info.algorithmType, info.props, vo.getLength());
+            length = "(" + cipherFieldLength + ")";
+        }
         StringBuilder sb = new StringBuilder();
         sb.append("alter table ").append(vo.getTableName())
                 .append(" change ").append(vo.getName())
@@ -278,6 +282,6 @@ public class MysqlFieldFactory extends FieldFactory {
         if (vo.getIsNullable().equals(JudgeEnum.YES)) {
             return "";
         }
-        return changeFieldSqlNotNull(vo, false);
+        return changeFieldSqlNotNull(info, vo, false);
     }
 }
