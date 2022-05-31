@@ -31,10 +31,10 @@ public class ConfigsRepositoryConfig {
     public YamlCenterConfigsRepositoryImpl getYamlCenterConfigsRepositoryImpl() {
 
         String filePath;
-        if ("test".equalsIgnoreCase(springProfileActive)) {
-            filePath = "config/shardingsphere-ui-configs-test.yaml";
-        }else {
+        if ("prod".equalsIgnoreCase(springProfileActive)) {
             filePath = "config/shardingsphere-ui-configs-prod.yaml";
+        }else {
+            filePath = "config/shardingsphere-ui-configs-test.yaml";
         }
         try {
             InputStream input = Objects.requireNonNull(ClassUtils.getDefaultClassLoader()).getResourceAsStream(filePath);
