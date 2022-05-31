@@ -6,11 +6,17 @@ centerConfigs:
     namespace: ec_crm_ns
     orchestrationName: ec_crm_ns
     orchestrationType: config_center
-    props:
-       timeToLiveSeconds: 30000
-       retryIntervalMilliseconds: 30000
-       operationTimeoutMilliseconds: 60000
-    serverLists: 192.168.63.26:2181
+    props: { }
+    serverLists: 192.168.243.20:12181,192.168.243.21:12181,192.168.243.22:12181
+  - activated: false
+    digest: ''
+    instanceType: Zookeeper
+    name: 电商ec_order测试
+    namespace: data_security_ns_test
+    orchestrationName: data_security_ns_test
+    orchestrationType: config_center
+    props: {}
+    serverLists: 192.168.243.34:12181
   - activated: false
     digest: ''
     instanceType: Zookeeper
@@ -19,4 +25,13 @@ centerConfigs:
     orchestrationName: data_security_ns_dev
     orchestrationType: config_center
     props: {}
-    serverLists: 192.168.63.26:2181
+    serverLists: 192.168.243.20:12181,192.168.243.21:12181,192.168.243.22:12181
+  - activated: false
+    digest: ''
+    instanceType: Zookeeper
+    name: 本地测试
+    namespace: ds_test
+    orchestrationName: ds_test
+    orchestrationType: config_center
+    props: {}
+    serverLists: 192.168.243.20:12181,192.168.243.21:12181,192.168.243.22:12181
