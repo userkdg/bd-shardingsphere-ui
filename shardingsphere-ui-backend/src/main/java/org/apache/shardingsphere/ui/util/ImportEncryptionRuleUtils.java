@@ -80,10 +80,12 @@ public class ImportEncryptionRuleUtils {
             voList.forEach(v -> {
                 if (map.containsKey(v.getName())) {
                     List<String> voField = v.getColumns().stream().map(ColumnInfoVO::getName).collect(Collectors.toList());
-                    String unExistField = map.get(v.getName()).stream().filter(m -> !voField.contains(m.getIncrFieldName()))
-                            .map(SensitiveShuffleInfo::getIncrFieldName).collect(Collectors.joining(","));
+                    List<String> unExistField = map.get(v.getName()).stream()
+                            .filter(m -> StringUtils.isNotBlank(m.getIncrFieldName()))
+                            .filter(m -> !voField.contains(m.getIncrFieldName()))
+                            .map(SensitiveShuffleInfo::getIncrFieldName).collect(Collectors.toList());
                     if (!unExistField.isEmpty()) {
-                        String error = String.format("表%s字段%s不存在", v.getName(), unExistField);
+                        String error = String.format("表%s字段%s不存在", v.getName(), String.join(",", unExistField));
                         log.info(error);
                         errorList.add(error);
                     }
@@ -154,7 +156,6 @@ public class ImportEncryptionRuleUtils {
                         throw new DapThrowException("目前只支持算法类型："+ALGORITHM_LIST);
                     }
                 }else algorithmType = "AES";
-                // TODO: 2022/5/7 mysql-aes定义失败
                 ShardingSphereAlgorithmConfiguration shardingSphereAlgorithmConfiguration = new ShardingSphereAlgorithmConfiguration(algorithmType, properties);
                 EncryptColumnRuleConfiguration encrypt = new EncryptColumnRuleConfiguration
                         (information.getFieldName(), information.getFieldName() + "_cipher",

@@ -94,7 +94,6 @@ public class ExcelHeadDataListener extends AnalysisEventListener<SensitiveInform
     public void invokeHead(Map<Integer, ReadCellData<?>> headMap, AnalysisContext context) {
         log.info("解析到一条头数据:{}", JSON.toJSONString(headMap));
         Map<Integer, String> map = ConverterUtils.convertToStringMap(headMap, context);
-        List<String> values = (List)map.values();
-        System.out.println(values);
+        System.out.println(map);
     }
 }
