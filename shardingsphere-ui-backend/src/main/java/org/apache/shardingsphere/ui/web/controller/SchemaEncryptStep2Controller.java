@@ -1,13 +1,18 @@
 package org.apache.shardingsphere.ui.web.controller;
 
+import cn.com.bluemoon.shardingsphere.custom.shuffle.base.GlobalConfig;
 import lombok.Data;
+import org.apache.shardingsphere.ui.common.dto.EncryptShuffleV2BaseDto;
+import org.apache.shardingsphere.ui.common.dto.EncryptShuffleV2Dto;
 import org.apache.shardingsphere.ui.servcie.CreateCipherService;
 import org.apache.shardingsphere.ui.servcie.EncryptShuffleService;
+import org.apache.shardingsphere.ui.servcie.EncryptShuffleV2Service;
 import org.apache.shardingsphere.ui.web.response.ResponseResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,6 +32,9 @@ public class SchemaEncryptStep2Controller {
     @Autowired
     EncryptShuffleService encryptShuffleService;
 
+    @Autowired
+    EncryptShuffleV2Service encryptShuffleV2Service;
+
     /**
      * 根据schema名称创建加密字段
      */
@@ -43,6 +51,20 @@ public class SchemaEncryptStep2Controller {
                 encryptShuffleVo.getSelectedTableNames(),
                 encryptShuffleVo.getTableNameAndIncrFieldPreVal(),
                 encryptShuffleVo.isWithIncrFieldExtractOnce());
+        return ResponseResult.ok("提交作业成功");
+    }
+
+
+    @PostMapping("encrypt/shuffleV2")
+    public ResponseResult<String> simpleEncryptShuffleV2(@RequestBody EncryptShuffleV2BaseDto encryptShuffleVo) {
+        encryptShuffleV2Service.submitJob(encryptShuffleVo.getSchema(), GlobalConfig.MYSQL, encryptShuffleVo.getShuffleTableNames(), Collections.emptyList());
+        return ResponseResult.ok("提交作业成功");
+    }
+
+    @PostMapping("encrypt/shuffleV2/custom")
+    public ResponseResult<String> customEncryptShuffleV2(@RequestBody EncryptShuffleV2Dto encryptShuffleVo) {
+        encryptShuffleV2Service.submitJob(encryptShuffleVo.getSchema(), encryptShuffleVo.getDbType(),
+                encryptShuffleVo.getShuffleTableNames(), encryptShuffleVo.getTableExtractDefines());
         return ResponseResult.ok("提交作业成功");
     }
 
