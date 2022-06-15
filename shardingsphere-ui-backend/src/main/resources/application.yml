@@ -10,3 +10,9 @@ user:
     username: admin
     password: admin@bm123
 
+auth:
+  api:
+    excludes:
+      - /api/kms-center/pull/
+      - /api/config-center/encrypt/download/
+#      - /api/config-center/encrypt/shuffleV2/

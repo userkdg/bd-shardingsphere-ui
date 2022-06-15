@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.ui.common.domain.DsSysSensitiveShuffleInfo;
 import org.apache.shardingsphere.ui.common.domain.SensitiveShuffleInfo;
+import org.apache.shardingsphere.ui.common.enums.DataVolumeLevelEnum;
 import org.apache.shardingsphere.ui.mapper.DsSySensitiveShuffleInfoMapper;
 import org.apache.shardingsphere.ui.servcie.DsSySensitiveShuffleInfoService;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,11 @@ public class DsSySensitiveShuffleInfoServiceImpl
                 each.setOnUpdateTimestampFields(m.getOnUpdateTimestampFields());
                 each.setCreateTime(LocalDateTime.now());
                 each.setSensitiveId(importUuid);
+                DataVolumeLevelEnum volumeLevelEnum;
+                if (m.getDataVolumeLevel() != null &&
+                        (volumeLevelEnum = DataVolumeLevelEnum.from(m.getDataVolumeLevel(), null)) != null) {
+                    each.setDataVolumeLevel(volumeLevelEnum.getCode());
+                }
                 log.info("shuffleInfo:{}", each);
                 return each;
             }).collect(Collectors.toList());

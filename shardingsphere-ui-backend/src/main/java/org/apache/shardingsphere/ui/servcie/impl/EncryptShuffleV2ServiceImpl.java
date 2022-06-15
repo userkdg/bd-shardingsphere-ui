@@ -29,6 +29,7 @@ import org.apache.shardingsphere.infra.config.datasource.DataSourceConfiguration
 import org.apache.shardingsphere.mode.metadata.persist.MetaDataPersistService;
 import org.apache.shardingsphere.ui.common.domain.DsSysSensitiveShuffleInfo;
 import org.apache.shardingsphere.ui.common.dto.TableExtractDefine;
+import org.apache.shardingsphere.ui.common.enums.DataVolumeLevelEnum;
 import org.apache.shardingsphere.ui.common.exception.ShardingSphereUIException;
 import org.apache.shardingsphere.ui.servcie.ConfigCenterService;
 import org.apache.shardingsphere.ui.servcie.DsSySensitiveShuffleInfoService;
@@ -216,7 +217,17 @@ public class EncryptShuffleV2ServiceImpl implements EncryptShuffleV2Service {
                     config.setExtractMode(ExtractMode.All);
                 }
 
-                // 外部自定义抽取
+                if (shuffleInfo != null) {
+                    if (StringUtils.isNotBlank(shuffleInfo.getOnUpdateTimestampFields())){
+                        // 增加避免刷库更新SQL中timestamp自动更新问题，会拿该原值数据回填，onUpdateCurrentTimestamps列字段，eg: sys_user的op_time
+                        List<String> onUpdateTimestampFields = Arrays.stream(shuffleInfo.getOnUpdateTimestampFields().split(",")).filter(StringUtils::isNotBlank).collect(Collectors.toList());
+                        config.setOnUpdateCurrentTimestamps(onUpdateTimestampFields);
+                    }
+                    DataVolumeLevelEnum dataVolumeLevelEnum = DataVolumeLevelEnum.from(shuffleInfo.getDataVolumeLevel(), DataVolumeLevelEnum.DEFAULT);
+                    config.setAdviceNumberPartition(dataVolumeLevelEnum.getAdviceNumberPartition());
+                }
+
+                // 外部自定义抽取（最后设置，会覆盖基础逻辑设置的）
                 TableExtractDefine tableExtractDefine = tableExtractDefineMap.get(tableName);
                 if (tableExtractDefine != null){
                     log.warn("外部指定抽取方式：{}", tableExtractDefine);
@@ -239,12 +250,6 @@ public class EncryptShuffleV2ServiceImpl implements EncryptShuffleV2Service {
                         config.setAdviceNumberPartition(tableExtractDefine.getAdviceNumberPartition());
                         log.warn("注：表{}自定义抽取分片数{}", tableName, tableExtractDefine.getAdviceNumberPartition());
                     }
-                }
-
-                if (shuffleInfo != null && StringUtils.isNotBlank(shuffleInfo.getOnUpdateTimestampFields())) {
-                    // 增加避免刷库更新SQL中timestamp自动更新问题，会拿该原值数据回填，onUpdateCurrentTimestamps列字段，eg: sys_user的op_time
-                    List<String> onUpdateTimestampFields = Arrays.stream(shuffleInfo.getOnUpdateTimestampFields().split(",")).filter(StringUtils::isNotBlank).collect(Collectors.toList());
-                    config.setOnUpdateCurrentTimestamps(onUpdateTimestampFields);
                 }
                 config.setOnYarn(true);
                 config.setJobName(JOB_NAME_PREFIX + tableName);

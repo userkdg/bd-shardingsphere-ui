@@ -6,10 +6,11 @@
     <resultMap id="BaseResultMap" type="org.apache.shardingsphere.ui.common.domain.DsSysSensitiveShuffleInfo">
         <id column="id" property="id"/>
         <result column="schema" property="schemaName"/>
-        <result column="tableName" property="tableName"/>
-        <result column="incrFieldName" property="incrFieldName"/>
+        <result column="incr_field_name" property="incrFieldName"/>
         <result column="table_name" property="tableName"/>
-        <result column="onUpdateTimestampFields" property="onUpdateTimestampFields"/>
+        <result column="on_update_timestamp_fields" property="onUpdateTimestampFields"/>
+        <result column="data_volume_level" property="dataVolumeLevel"/>
+        <result column="sensitive_id" property="sensitiveId"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
     </resultMap>

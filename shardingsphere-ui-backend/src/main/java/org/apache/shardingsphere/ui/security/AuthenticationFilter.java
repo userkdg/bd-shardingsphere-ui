@@ -21,6 +21,7 @@ import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shardingsphere.ui.config.AuthProperties;
 import org.apache.shardingsphere.ui.web.response.ResponseResultUtil;
 
 import javax.servlet.*;
@@ -42,12 +43,14 @@ public final class AuthenticationFilter implements Filter {
 
     private final Gson gson = new Gson();
 
-    private static final Set<String> openApi = new HashSet<String >(){{
-        add("/api/kms-center/pull");
-    }};
+    private final AuthProperties authProperties;
 
     @Setter
     private UserAuthenticationService userAuthenticationService;
+
+    public AuthenticationFilter(AuthProperties authProperties) {
+        this.authProperties = authProperties;
+    }
 
     @Override
     public void init(final FilterConfig filterConfig) {
@@ -64,7 +67,7 @@ public final class AuthenticationFilter implements Filter {
             log.info("Access-Token:{}", accessToken);
             if (!Strings.isNullOrEmpty(accessToken) && accessToken.equals(userAuthenticationService.getToken())) {
                 filterChain.doFilter(httpRequest, httpResponse);
-            } else if (openApi.contains(httpRequest.getRequestURI())){
+            } else if (authProperties.getExcludes().contains(httpRequest.getRequestURI())){
                 log.info("open api {} 放行，请求ip={}", httpRequest.getRequestURI(), getIP(httpRequest));
                 filterChain.doFilter(httpRequest, httpResponse);
             } else {

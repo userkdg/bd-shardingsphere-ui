@@ -18,4 +18,6 @@ public class SensitiveShuffleInfo {
     @ExcelProperty("表on_update_timestamp字段名")
     private String onUpdateTimestampFields;
 
+    @ExcelProperty("数据量级别")
+    private String dataVolumeLevel;
 }

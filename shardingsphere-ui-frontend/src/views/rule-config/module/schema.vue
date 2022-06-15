@@ -109,13 +109,16 @@
   </div>
 </template>
 <script>
-import {AuthYamlType,
-  TranYamlType,
-  SharYamlType,
-  ReadYamlType,
+import {
+  AuthYamlType,
   EncYamlType,
-  jsYaml}  from '../../../utils/yamlTranstoJsonGlobal'
+  jsYaml,
+  ReadYamlType,
+  SharYamlType,
+  TranYamlType
+} from '../../../utils/yamlTranstoJsonGlobal'
 import API from '../api'
+import C from '../../../utils/conf'
 
 export default {
   name: 'Schema',
@@ -193,6 +196,21 @@ export default {
         API.getSchemaRule(parent).then(res => {
           this.renderYaml(parent, child, res)
         })
+      } else if (child === '下载脚本') {
+        window.location.href = `${C.HOST}/api/config-center/encrypt/download/?schema=${parent}`
+      } else if (child === '一键刷数') {
+        this.$confirm('确定一键刷数，可一次或多次刷数？注：刷数方式，若敏感信息没设置增量字段，则每次全量，若有，则多次增量',
+          '一键刷数',
+          {confirmButtonText: '确定', cancelButtonText: '取消'})
+          .then(() => {
+            let params = {
+              schema: parent,
+              shuffleTableNames: [],
+            }
+            API.submitSchemaEncryptShuffle(params).then(res => {
+              this.$message.info(`提交刷数异步作业成功`)
+            })
+          })
       } else {
         API.getSchemaDataSource(parent).then(res => {
           this.renderYaml(parent, child, res)
@@ -215,7 +233,7 @@ export default {
     getSchema() {
       API.getSchema().then(res => {
         const data = res.model
-        const base = ['rule', 'datasource']
+        const base = ['rule', 'datasource', '下载脚本', '一键刷数']
         const newData = []
         for (const v of data) {
           newData.push({
