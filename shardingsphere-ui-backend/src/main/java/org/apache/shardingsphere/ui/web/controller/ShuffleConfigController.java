@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Nullable;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -78,6 +79,8 @@ public final class ShuffleConfigController {
             String sensitiveId = getSensitiveIdBySchemaAndTableName(model);
             model.setSensitiveId(sensitiveId);
         }
+        model.setCreateTime(LocalDateTime.now());
+        model.setUpdateTime(LocalDateTime.now());
         sensitiveShuffleInfoService.save(model);
         return ResponseResultUtil.build(model.getId());
     }
@@ -115,6 +118,7 @@ public final class ShuffleConfigController {
             String sensitiveId = getSensitiveIdBySchemaAndTableName(model);
             model.setSensitiveId(sensitiveId);
         }
+        model.setUpdateTime(LocalDateTime.now());
         sensitiveShuffleInfoService.saveOrUpdate(model);
         return ResponseResultUtil.success();
     }
