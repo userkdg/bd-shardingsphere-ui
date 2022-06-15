@@ -207,7 +207,8 @@ public class EncryptShuffleV2ServiceImpl implements EncryptShuffleV2Service {
                 DsSysSensitiveShuffleInfo shuffleInfo = tableAndShuffleInfo.get(tableName);
                 String incrFieldName = shuffleInfo != null ? shuffleInfo.getIncrFieldName() : null;
                 // 判断自定义增量字段是否有索引，没索引不允许提交作业
-                predicateIncrFieldHadIndex(tableName, primaryCols, incrFieldName);
+                final Integer dataVolumeLevel = Optional.ofNullable(shuffleInfo).map(DsSysSensitiveShuffleInfo::getDataVolumeLevel).orElse(null);
+                predicateIncrFieldHadIndex(tableName, dataVolumeLevel, primaryCols, incrFieldName);
 
                 // 结合基础信息设置抽取方式
                 if (StringUtils.isNotBlank(incrFieldName)) {
@@ -239,7 +240,7 @@ public class EncryptShuffleV2ServiceImpl implements EncryptShuffleV2Service {
                     }
                     if (StringUtils.isNotBlank(tableExtractDefine.getIncrFieldName())){
                         // 判断自定义增量字段是否有索引，没索引不允许提交作业
-                        predicateIncrFieldHadIndex(tableName, primaryCols, tableExtractDefine.getIncrFieldName());
+                        predicateIncrFieldHadIndex(tableName, dataVolumeLevel, primaryCols, tableExtractDefine.getIncrFieldName());
                         config.setIncrTimestampCol(tableExtractDefine.getIncrFieldName());
                     }
                     if (config.getExtractMode().equals(ExtractMode.WithPersistStateCustomWhere) && tableExtractDefine.isResetExtractState()) {
@@ -306,13 +307,14 @@ public class EncryptShuffleV2ServiceImpl implements EncryptShuffleV2Service {
         return shuffleCols;
     }
 
-    private void predicateIncrFieldHadIndex(String tableName, List<ColumnInfoVO> primaryCols, String incrFieldName) {
+    private void predicateIncrFieldHadIndex(String tableName, Integer dataVolumeLevel, List<ColumnInfoVO> primaryCols, String incrFieldName) {
         if (StringUtils.isNotBlank(incrFieldName)) {
+            DataVolumeLevelEnum dataVolumeLevelEnum = DataVolumeLevelEnum.from(dataVolumeLevel, DataVolumeLevelEnum.DEFAULT);
             boolean isPk = primaryCols.stream().anyMatch(p -> p.getName().equals(incrFieldName));
             if (!isPk) {
                 List<SqlIndexInfoVO> sqlIndexInfoVOS = tableAndIndexes.get(tableName);
-                if (!hadIndexIncrField(incrFieldName, sqlIndexInfoVOS)) {
-                    preSubmitErrors.add(String.format("刷数增量字段非主键且没有索引，不可刷数！提示：建议首选增量主键字段或者联系DBA添加表字段%s.%s索引", tableName, incrFieldName));
+                if (!hadIndexIncrField(incrFieldName, sqlIndexInfoVOS) && dataVolumeLevelEnum.isNeedIncrFieldIndex()) {
+                    preSubmitErrors.add(String.format("百万级别表字段%s.%s必须有索引，请联系DBA添加！", tableName, incrFieldName));
                 }
             }
         }
