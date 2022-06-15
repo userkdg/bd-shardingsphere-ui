@@ -45,6 +45,7 @@ public final class ShuffleConfigController {
     @Autowired
     private DsSySensitiveShuffleInfoService sensitiveShuffleInfoService;
 
+    @SuppressWarnings("unchecked")
     @RequestMapping(value = "", method = RequestMethod.GET)
     public ResponseResult<List<ShuffleConfig>> loadConfigs(@RequestParam(value = "keyword", required = false) String keyword) {
         LambdaQueryWrapper<DsSysSensitiveShuffleInfo> wrapper = new LambdaQueryWrapper<>();
@@ -57,8 +58,8 @@ public final class ShuffleConfigController {
                     .or()
                     .like(DsSysSensitiveShuffleInfo::getOnUpdateTimestampFields, keyword);
         });
-        wrapper.orderByAsc(DsSysSensitiveShuffleInfo::getSchemaName);
         wrapper.orderByDesc(DsSysSensitiveShuffleInfo::getUpdateTime);
+        wrapper.orderByAsc(DsSysSensitiveShuffleInfo::getSchemaName, DsSysSensitiveShuffleInfo::getTableName);
         return ResponseResultUtil.build(sensitiveShuffleInfoService.list(wrapper).stream()
                 .map(this::toShuffleConfig)
                 .collect(Collectors.toList()));

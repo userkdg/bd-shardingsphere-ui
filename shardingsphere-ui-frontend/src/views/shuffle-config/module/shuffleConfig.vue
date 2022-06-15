@@ -84,19 +84,19 @@
       width="1010px"
     >
       <el-form ref="form" :model="form" :rules="rules" label-width="170px">
-        <el-form-item :label="$t('shuffleConfig.configDialog.schemaName')" prop="name">
+        <el-form-item :label="$t('shuffleConfig.configDialog.schemaName')" prop="schemaName">
           <el-input :placeholder="$t('shuffleConfig.rules.schemaName')" v-model="form.schemaName" autocomplete="off" />
         </el-form-item>
-        <el-form-item :label="$t('shuffleConfig.configDialog.tableName')" prop="name">
+        <el-form-item :label="$t('shuffleConfig.configDialog.tableName')" prop="tableName">
           <el-input :placeholder="$t('shuffleConfig.rules.tableName')" v-model="form.tableName" autocomplete="off" />
         </el-form-item>
-        <el-form-item :label="$t('shuffleConfig.configDialog.incrFieldName')" prop="name">
+        <el-form-item :label="$t('shuffleConfig.configDialog.incrFieldName')" prop="incrFieldName">
           <el-input :placeholder="$t('shuffleConfig.rules.incrFieldName')" v-model="form.incrFieldName" autocomplete="off" />
         </el-form-item>
-        <el-form-item :label="$t('shuffleConfig.configDialog.onUpdateTimestampFields')" prop="name">
+        <el-form-item :label="$t('shuffleConfig.configDialog.onUpdateTimestampFields')" prop="onUpdateTimestampFields">
           <el-input :placeholder="$t('shuffleConfig.rules.onUpdateTimestampFields')" v-model="form.onUpdateTimestampFields" autocomplete="off" />
         </el-form-item>
-        <el-form-item :label="$t('shuffleConfig.configDialog.dataVolumeLevel')" prop="name">
+        <el-form-item :label="$t('shuffleConfig.configDialog.dataVolumeLevel')" prop="dataVolumeLevel">
           <el-input :placeholder="$t('shuffleConfig.rules.dataVolumeLevel')" v-model="form.dataVolumeLevel" autocomplete="off" />
         </el-form-item>
       </el-form>
