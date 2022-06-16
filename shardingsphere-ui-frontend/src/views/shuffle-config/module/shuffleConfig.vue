@@ -231,6 +231,13 @@ export default {
           }
         ]
       },
+      dataVolumeLevelMap: {
+        1: '万级别',
+        2: '十万级别',
+        3: '百万级别',
+        4: '千万级别',
+        5: '亿级别'
+      },
       searchKeyword: '',
       tableData: [],
       cloneTableData: [],
@@ -253,7 +260,11 @@ export default {
         keyword: this.searchKeyword
       }
       API.getShuffleConfig(params).then(res => {
-        const data = res.model
+        let result = res.model
+        for (const row of result) {
+          row.dataVolumeLevel = this.dataVolumeLevelMap[row.dataVolumeLevel | 2]
+        }
+        const data = result
         this.total = data.length
         this.cloneTableData = clone(res.model)
         this.tableData = data.splice(0, this.pageSize)
