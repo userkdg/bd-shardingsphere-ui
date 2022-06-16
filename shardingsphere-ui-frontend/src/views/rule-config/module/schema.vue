@@ -34,7 +34,9 @@
           <div v-for="(itm, idex) in item.children" :key="idex" class="coll-item">
             <div :class="'itm icon-' + idex" />
             <div class="txt">{{ itm }}</div>
-            <i class="icon-edit" @click="handlerClick(item.title, itm)" />
+            <i v-if="itm === '下载脚本'" class="icon-download" @click="handlerClick(item.title, itm)" />
+            <i v-else-if="itm === '一键刷数'" class="icon-submit" @click="handlerClick(item.title, itm)" />
+            <i v-else class="icon-edit" @click="handlerClick(item.title, itm)" />
           </div>
         </el-card>
       </el-col>
@@ -326,6 +328,14 @@ export default {
       background: url('../../../assets/img/data-source.png') no-repeat left
         center;
     }
+    .icon-2 {
+      background: url('../../../assets/img/list.png') no-repeat left
+      center;
+    }
+    .icon-3 {
+      background: url('../../../assets/img/list.png') no-repeat left
+      center;
+    }
     .edit-btn {
       float: right;
     }
@@ -350,6 +360,22 @@ export default {
   }
   .icon-edit {
     background: url('../../../assets/img/edit.png') no-repeat left center;
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    float: right;
+    cursor: pointer;
+  }
+  .icon-download {
+    background: url('../../../assets/img/download.png') no-repeat left center;
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    float: right;
+    cursor: pointer;
+  }
+  .icon-submit {
+    background: url('../../../assets/img/submit.png') no-repeat left center;
     width: 16px;
     height: 16px;
     display: inline-block;
