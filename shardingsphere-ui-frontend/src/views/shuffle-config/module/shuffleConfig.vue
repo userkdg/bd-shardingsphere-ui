@@ -173,7 +173,7 @@ export default {
         },
         {
           label: this.$t('shuffleConfig').configDialog.dataVolumeLevel,
-          prop: 'dataVolumeLevel'
+          prop: 'dataVolumeLevelName'
         }
       ],
       form: {
@@ -262,9 +262,10 @@ export default {
       API.getShuffleConfig(params).then(res => {
         let result = res.model
         for (const row of result) {
-          row.dataVolumeLevel = this.dataVolumeLevelMap[row.dataVolumeLevel | 2]
+          // 附加翻译名
+          row.dataVolumeLevelName = this.dataVolumeLevelMap[row.dataVolumeLevel]
         }
-        const data = result
+        const data = res.model
         this.total = data.length
         this.cloneTableData = clone(res.model)
         this.tableData = data.splice(0, this.pageSize)
