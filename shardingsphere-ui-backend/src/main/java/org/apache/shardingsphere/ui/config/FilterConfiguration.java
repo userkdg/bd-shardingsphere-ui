@@ -59,8 +59,8 @@ public class FilterConfiguration {
      * @return filter registration bean
      */
     @Bean
-    public FilterRegistrationBean authenticationFilter() {
-        AuthenticationFilter authenticationFilter = new AuthenticationFilter();
+    public FilterRegistrationBean authenticationFilter(AuthProperties authProperties) {
+        AuthenticationFilter authenticationFilter = new AuthenticationFilter(authProperties);
         authenticationFilter.setUserAuthenticationService(userAuthenticationService);
         FilterRegistrationBean filterRegBean = new FilterRegistrationBean();
         filterRegBean.setFilter(authenticationFilter);

@@ -1,0 +1,35 @@
+
+### 先在https://dompapi.bluemoon.com.cn/bd-shardingsphere-ui/#/config-center 选中需要处理的配置中心命名空间
+### eyJ1c2VybmFtZSI6ImFkbWluIiwicGFzc3dvcmQiOiJhZG1pbkBibTEyMyIsImJhc2U2NCI6eyJlbmNvZGVUYWJsZSI6WzY1LDY2LDY3LDY4LDY5LDcwLDcxLDcyLDczLDc0LDc1LDc2LDc3LDc4LDc5LDgwLDgxLDgyLDgzLDg0LDg1LDg2LDg3LDg4LDg5LDkwLDk3LDk4LDk5LDEwMCwxMDEsMTAyLDEwMywxMDQsMTA1LDEwNiwxMDcsMTA4LDEwOSwxMTAsMTExLDExMiwxMTMsMTE0LDExNSwxMTYsMTE3LDExOCwxMTksMTIwLDEyMSwxMjIsNDgsNDksNTAsNTEsNTIsNTMsNTQsNTUsNTYsNTcsNDMsNDddLCJkZWNvZGVUYWJsZSI6Wy0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLDYyLC0xLDYyLC0xLDYzLDUyLDUzLDU0LDU1LDU2LDU3LDU4LDU5LDYwLDYxLC0xLC0xLC0xLC0xLC0xLC0xLC0xLDAsMSwyLDMsNCw1LDYsNyw4LDksMTAsMTEsMTIsMTMsMTQsMTUsMTYsMTcsMTgsMTksMjAsMjEsMjIsMjMsMjQsMjUsLTEsLTEsLTEsLTEsNjMsLTEsMjYsMjcsMjgsMjksMzAsMzEsMzIsMzMsMzQsMzUsMzYsMzcsMzgsMzksNDAsNDEsNDIsNDMsNDQsNDUsNDYsNDcsNDgsNDksNTAsNTFdLCJkZWNvZGVTaXplIjozLCJlbmNvZGVTaXplIjo0LCJQQUQiOjYxLCJwYWQiOjYxLCJ1bmVuY29kZWRCbG9ja1NpemUiOjMsImVuY29kZWRCbG9ja1NpemUiOjQsImxpbmVMZW5ndGgiOjAsImNodW5rU2VwYXJhdG9yTGVuZ3RoIjoyLCJkZWNvZGluZ1BvbGljeSI6IkxFTklFTlQifX0==
+POST http://localhost:18088/api/login
+accept: */*
+Content-Type: application/json;charset=UTF-8
+
+{
+  "username": "admin",
+  "password": "admin@bm123"
+}
+
+### steop 2-1 下载相关脚本文件或者用浏览器访问该url
+GET http://localhost:18088/api/config-center/encrypt/download/?schema=ec_order_sandbox
+
+
+###################################################
+### step 2-2 刷库V2（可多次执行
+### 敏感信息配置中
+### 若表可以增量抽取，首次全量，后续增量
+### 若表无法增量抽取，每次都是全量
+###################################################
+POST http://localhost:18088/api/config-center/encrypt/shuffleV2
+accept: */*
+Content-Type: application/json;charset=UTF-8
+Access-Token: eyJ1c2VybmFtZSI6ImFkbWluIiwicGFzc3dvcmQiOiJhZG1pbkBibTEyMyIsImJhc2U2NCI6eyJlbmNvZGVUYWJsZSI6WzY1LDY2LDY3LDY4LDY5LDcwLDcxLDcyLDczLDc0LDc1LDc2LDc3LDc4LDc5LDgwLDgxLDgyLDgzLDg0LDg1LDg2LDg3LDg4LDg5LDkwLDk3LDk4LDk5LDEwMCwxMDEsMTAyLDEwMywxMDQsMTA1LDEwNiwxMDcsMTA4LDEwOSwxMTAsMTExLDExMiwxMTMsMTE0LDExNSwxMTYsMTE3LDExOCwxMTksMTIwLDEyMSwxMjIsNDgsNDksNTAsNTEsNTIsNTMsNTQsNTUsNTYsNTcsNDMsNDddLCJkZWNvZGVUYWJsZSI6Wy0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLC0xLDYyLC0xLDYyLC0xLDYzLDUyLDUzLDU0LDU1LDU2LDU3LDU4LDU5LDYwLDYxLC0xLC0xLC0xLC0xLC0xLC0xLC0xLDAsMSwyLDMsNCw1LDYsNyw4LDksMTAsMTEsMTIsMTMsMTQsMTUsMTYsMTcsMTgsMTksMjAsMjEsMjIsMjMsMjQsMjUsLTEsLTEsLTEsLTEsNjMsLTEsMjYsMjcsMjgsMjksMzAsMzEsMzIsMzMsMzQsMzUsMzYsMzcsMzgsMzksNDAsNDEsNDIsNDMsNDQsNDUsNDYsNDcsNDgsNDksNTAsNTFdLCJkZWNvZGVTaXplIjozLCJlbmNvZGVTaXplIjo0LCJQQUQiOjYxLCJwYWQiOjYxLCJ1bmVuY29kZWRCbG9ja1NpemUiOjMsImVuY29kZWRCbG9ja1NpemUiOjQsImxpbmVMZW5ndGgiOjAsImNodW5rU2VwYXJhdG9yTGVuZ3RoIjoyLCJkZWNvZGluZ1BvbGljeSI6IkxFTklFTlQifX0=
+
+{
+  "schema": "ec_order_sandbox",
+  "shuffleTableNames": [
+    "ec_oms_order",
+    "sys_user",
+    "ec_oms_order_import"
+  ]
+}

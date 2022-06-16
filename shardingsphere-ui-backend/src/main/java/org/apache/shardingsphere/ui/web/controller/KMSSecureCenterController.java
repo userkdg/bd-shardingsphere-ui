@@ -40,11 +40,12 @@ public class KMSSecureCenterController {
     @PostConstruct
     public void init() {
         Stream.of(
-                bmKMSConfig.getAes().stream().peek(a -> a.setType("aes")).collect(Collectors.toList()),
-                bmKMSConfig.getMd5().stream().peek(a -> a.setType("md5")).collect(Collectors.toList()),
-                bmKMSConfig.getSm3().stream().peek(a -> a.setType("sm3")).collect(Collectors.toList()),
-                bmKMSConfig.getSm4().stream().peek(a -> a.setType("sm4")).collect(Collectors.toList()),
-                bmKMSConfig.getRc4().stream().peek(a -> a.setType("rc4")).collect(Collectors.toList()))
+                new ArrayList<>(bmKMSConfig.getAes()),
+                new ArrayList<>(bmKMSConfig.getMd5()),
+                new ArrayList<>(bmKMSConfig.getSm3()),
+                new ArrayList<>(bmKMSConfig.getSm4()),
+                new ArrayList<>(bmKMSConfig.getRc4()),
+                bmKMSConfig.getMysqlAes())
                 .flatMap(Collection::stream).forEach(this::checkAlgorithmConfig);
     }
 
@@ -62,6 +63,8 @@ public class KMSSecureCenterController {
         AlgorithmType res;
         if (type.equalsIgnoreCase("aes")) {
             res = getAgloType(Optional.ofNullable(bmKMSConfig.getAes()), type, sys);
+        } else if (type.equalsIgnoreCase("mysql-aes")) {
+            res = getAgloType(Optional.ofNullable(bmKMSConfig.getMysqlAes()), type, sys);
         } else if (type.equalsIgnoreCase("sm3")) {
             res = getAgloType(Optional.ofNullable(bmKMSConfig.getSm3()), type, sys);
         } else if (type.equalsIgnoreCase("sm4")) {

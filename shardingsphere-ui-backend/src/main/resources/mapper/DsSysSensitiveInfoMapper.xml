@@ -11,7 +11,7 @@
         <result column="table_name" property="tableName"/>
         <result column="field_name" property="fieldName"/>
         <result column="data_type" property="dataType"/>
-        <result column="incr_field" property="incrField"/>
+        <result column="remark" property="remark"/>
         <result column="algorithm_type" property="algorithmType"/>
         <result column="cipher_key" property="cipherKey"/>
         <result column="create_time" property="createTime"/>

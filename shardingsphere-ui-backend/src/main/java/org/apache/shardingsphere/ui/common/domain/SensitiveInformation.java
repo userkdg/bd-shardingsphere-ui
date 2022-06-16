@@ -9,13 +9,10 @@ import java.util.List;
 @Data
 public class SensitiveInformation {
 
-    public final static List<String> ALGORITHM_LIST = Arrays.asList("AES","MD5","RC4");
+    public final static List<String> ALGORITHM_LIST = Arrays.asList("AES", "MYSQL-AES");
 
     @ExcelProperty("数据库名称")
     private String databaseName;
-
-    @ExcelProperty("模式名称")
-    private String schemaName;
 
     @ExcelProperty("数据库表名")
     private String tableName;
@@ -26,13 +23,13 @@ public class SensitiveInformation {
     @ExcelProperty("数据库字段类型")
     private String datatype;
 
-    @ExcelProperty("表增量字段(默认为否)")
-    private String tableIncrField;
-
     @ExcelProperty("算法类型(默认AES)")
     private String algorithmType;
 
     @ExcelProperty("密钥Key(默认随机生成)")
     private String cipherKey;
+
+    @ExcelProperty("说明")
+    private String remark;
 
 }

@@ -33,7 +33,7 @@ public class ExcelShardingServiceImpl implements ExcelShardingSchemaService {
 
         // 获取所有的schema名
         Collection<String> schemaList = loadAllSchemaName();
-        List<SensitiveInformation> list = infoList.stream().filter(d -> !d.getTableIncrField().equals("是")).collect(Collectors.toList());
+        List<SensitiveInformation> list = new ArrayList<>(infoList);
         // 封装规则结果集
         List<RuleConfiguration> ruleConfigurations = ImportEncryptionRuleUtils.transToRuleConfiguration(list);
         // 判断schema是否存在,存在的话覆盖规则

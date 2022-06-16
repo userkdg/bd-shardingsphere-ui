@@ -17,21 +17,20 @@
 
 package org.apache.shardingsphere.ui.repository.impl;
 
+import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.apache.shardingsphere.ui.common.domain.CenterConfigs;
 import org.apache.shardingsphere.ui.common.exception.ShardingSphereUIException;
 import org.apache.shardingsphere.ui.repository.CenterConfigsRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.ResourceUtils;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.ResourceBundle;
 
 /**
  * Implementation of Center configs repository.
@@ -41,10 +40,8 @@ public final class YamlCenterConfigsRepositoryImpl implements CenterConfigsRepos
     
     private final File file;
     
-    public YamlCenterConfigsRepositoryImpl() {
-//        file = new File(new File(System.getProperty("user.home")), "shardingsphere-ui-configs.yaml");
-        file = new File(new File(System.getProperty("user.dir")), "shardingsphere-ui-configs.yaml");
-        log.info("加载配置文件：{}", file.getAbsolutePath());
+    public YamlCenterConfigsRepositoryImpl(final File file) {
+        this.file = file;
     }
     
     @Override

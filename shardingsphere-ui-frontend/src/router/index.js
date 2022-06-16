@@ -49,6 +49,12 @@ export const constantRouterMap = [
     name: 'Rule config'
   },
   {
+    path: '/shuffle-config',
+    component: () => import('@/views/shuffle-config'),
+    hidden: true,
+    name: 'Shuffle config'
+  },
+  {
     path: '/runtime-status',
     component: () => import('@/views/runtime-status'),
     hidden: true,

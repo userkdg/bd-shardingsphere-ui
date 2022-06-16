@@ -16,6 +16,7 @@ import cn.com.bluemoon.shardingsphere.custom.shuffle.base.GlobalConfigSwapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shardingsphere.encrypt.api.config.EncryptRuleConfiguration;
@@ -78,8 +79,6 @@ public class EncryptShuffleServiceImpl implements EncryptShuffleService {
 
     private Map<String, Object> dataSourceProps;
 
-    private Map<String, String> tableAndIncField;
-
     private Map<String, DsSysSensitiveShuffleInfo> tableAndShuffleInfo;
 
     private Map<String, List<ColumnInfoVO>> tableAndPrimaryCols;
@@ -138,13 +137,55 @@ public class EncryptShuffleServiceImpl implements EncryptShuffleService {
         }
     }
 
+    public static final Map<String, Object> tableIncrIdMap = new HashMap<String, Object>(){{
+        /*put("bm_ucm_jd_membership_info", 14187779);
+        put("bm_ucm_customer_buy_info_1", 78528199);
+        put("bm_ucm_customer_buy_info_2", 78521226);
+        put("bm_ucm_customer_buy_info_3", 78528195);
+        put("bm_ucm_customer_address_1", 82803234);
+        put("bm_ucm_customer_address_2", 82774372);
+        put("bm_ucm_customer_address_3", 82774511);
+        put("bm_ucm_customer_buy_order_info_1", 109098096);
+        put("bm_ucm_customer_buy_order_info_2", 109183526);
+        put("bm_ucm_customer_buy_order_info_3", 109099870);*/
+        put("bm_ucm_jd_membership_info", 14187779);
+        put("bm_ucm_customer_buy_info_1", 78525441);
+        put("bm_ucm_customer_buy_info_2", 78528450);
+        put("bm_ucm_customer_buy_info_3", 78528191);
+        put("bm_ucm_customer_address_1", 82812828);
+        put("bm_ucm_customer_address_2", 82812829);
+        put("bm_ucm_customer_address_3", 82812830);
+        put("bm_ucm_customer_buy_order_info_1", 109231872);
+        put("bm_ucm_customer_buy_order_info_2", 109231903);
+        put("bm_ucm_customer_buy_order_info_3", 109231902);
+    }};
+
+    @SneakyThrows
     private void doSubmit() {
         Objects.requireNonNull(globalConfigs);
+        for (GlobalConfig g : globalConfigs) {
+            if (tableIncrIdMap.containsKey(g.getRuleTableName())){
+                g.setExtractMode(ExtractMode.OtherCustom);
+                String whereSql = String.format(" id >= %s", tableIncrIdMap.get(g.getRuleTableName()));
+                g.setCustomExtractWhereSql(whereSql);
+                g.setIncrTimestampColPreVal(null);
+                g.setIncrTimestampCol(null);
+            }
+        }
+        for (GlobalConfig c : globalConfigs) {
+            String jsonParam = GlobalConfigSwapper.swapToJsonStr(c);
+            String jobName = c.getRuleTableName();
+            log.info("提交作业入参：表：{}，params：{}", jobName, jsonParam);
+            String command = String.format("sh /home/data_tool/bd-spark/bd-spark-encrypt-shuffle/runSparkEncryptShuffleJob.sh '-c %s' '%s'", jsonParam, jobName);
+            System.out.println("预生产命令，如下：");
+            System.out.println(command);
+        }
         for (GlobalConfig c : globalConfigs) {
             String json = GlobalConfigSwapper.swapToJsonStr(c);
             log.info("提交作业入参：表：{}，params：{}", c.getRuleTableName(), json);
             //  2022/2/25 增加部署环境对应作业提交
             SparkSubmitEncryptShuffleMain.main(new String[]{json, c.getRuleTableName(), sparkJobEnv});
+//            TimeUnit.MINUTES.sleep(30);
         }
     }
 
@@ -189,27 +230,27 @@ public class EncryptShuffleServiceImpl implements EncryptShuffleService {
                 DsSysSensitiveShuffleInfo shuffleInfo = tableAndShuffleInfo.get(table.getName());
                 String incrFieldName = shuffleInfo != null ? shuffleInfo.getIncrFieldName() : null;
 //                incrFieldName=null;// 2022/3/10 临时改为全量跑 不走count统计
-                if (StringUtils.isBlank(incrFieldName)) {
-                    config.setExtractMode(ExtractMode.All);
-                    log.info("全量一次抽取数据进行洗数");
-                } else {
+                String incrFieldPreVal = tableNameAndIncrFieldPreVal.getOrDefault(table.getName(), null);
+                if (StringUtils.isNotBlank(incrFieldPreVal)) {
+                    config.setIncrTimestampColPreVal(incrFieldPreVal);
+                    log.info("增量抽取数据中指定了表{}只对增量字段{}大于{}的数据进行洗数", table.getName(), incrFieldName, incrFieldPreVal);
+                }
+                // 抽取方式
+                if ((withIncrFieldExtractOnce || StringUtils.isNotBlank(incrFieldName)) && StringUtils.isNotBlank(incrFieldPreVal)) {
                     config.setExtractMode(ExtractMode.WithIncField);
                     config.setIncrTimestampCol(incrFieldName);
                     log.info("增量抽取数据进行洗数, 表{}，增量字段为{}", table.getName(), incrFieldName);
-                    String incrFieldPreVal = tableNameAndIncrFieldPreVal.getOrDefault(table.getName(), null);
-                    if (incrFieldPreVal != null) {
-                        config.setIncrTimestampColPreVal(incrFieldPreVal);
-                        log.info("增量抽取数据中指定了表{}只对增量字段{}大于{}的数据进行洗数", table.getName(), incrFieldName, incrFieldPreVal);
-                    }
-                }
-                if (ExtractMode.WithIncField.equals(config.getExtractMode()) && withIncrFieldExtractOnce) {
+                } else if (withIncrFieldExtractOnce && StringUtils.isBlank(incrFieldPreVal)){
+                    config.setExtractMode(ExtractMode.All);
                     log.warn("接口入参指定了抽取模式{}，默认为根据具体业务逻辑进行设置抽取模式，由最初{}=>{}",
-                            ExtractMode.WithIncFieldOnce, config.getExtractMode(), ExtractMode.WithIncFieldOnce);
-                    config.setExtractMode(ExtractMode.WithIncFieldOnce);
+                            ExtractMode.WithIncFieldOnce, config.getExtractMode(), ExtractMode.All);
+                } else {
+                    config.setExtractMode(ExtractMode.All);
+                    log.info("全量一次抽取数据进行洗数");
                 }
-                if (shuffleInfo != null) {
+                if (shuffleInfo != null && StringUtils.isNotBlank(shuffleInfo.getOnUpdateTimestampFields())) {
                     // 增加避免刷库更新SQL中timestamp自动更新问题，会拿该原值数据回填
-                    // TODO: 2022/2/25  DsSySensitiveInfo库表（导入文件数据）增加一列，onUpdateCurrentTimestamps列字段，eg: sys_user的op_time
+                    // 2022/2/25  DsSySensitiveInfo库表（导入文件数据）增加一列，onUpdateCurrentTimestamps列字段，eg: sys_user的op_time
                     List<String> onUpdateTimestampFields = Arrays.stream(shuffleInfo.getOnUpdateTimestampFields().split(",")).filter(StringUtils::isNotBlank).collect(Collectors.toList());
                     config.setOnUpdateCurrentTimestamps(onUpdateTimestampFields);
                 }
@@ -253,7 +294,6 @@ public class EncryptShuffleServiceImpl implements EncryptShuffleService {
         wrapper.eq(DsSysSensitiveShuffleInfo::getSchemaName, schema);
         List<DsSysSensitiveShuffleInfo> sensitiveShuffleInfos = dsSySensitiveShuffleInfoService.list(wrapper);
         this.tableAndShuffleInfo = sensitiveShuffleInfos.stream().collect(Collectors.toMap(DsSysSensitiveShuffleInfo::getTableName, d -> d, (a, b) -> b));
-        this.tableAndIncField = dsSySensitiveInfoService.getTableNameAndIncFieldMap(schema);
     }
 
     private List<TableInfo> findEncryptTablesByRule(List<EncryptRuleConfiguration> encryptRules) {

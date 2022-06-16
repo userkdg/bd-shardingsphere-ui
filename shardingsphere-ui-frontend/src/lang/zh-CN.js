@@ -29,6 +29,10 @@ export default {
           {
             title: '配置管理',
             href: '/rule-config'
+          },
+          {
+            title: '刷数配置',
+            href: '/shuffle-config'
           }
         ]
       },
@@ -148,6 +152,34 @@ export default {
       address: '请选输入配置中心地址',
       orchestrationName: '请输入数据治理实例名称',
       digest: '请输入登录凭证'
+    }
+  },
+  shuffleConfig: {
+    btnTxt: '添加',
+    configDialog: {
+      title: '添加表辅助字段信息',
+      editTitle: '编辑表辅助字段信息',
+      schemaName: '数据库名',
+      tableName: '表名',
+      incrFieldName: '增量字段名',
+      onUpdateTimestampFields: '更新变化字段',
+      dataVolumeLevel: '数据量级别',
+      btnConfirmTxt: '确定',
+      btnCancelTxt: '取消'
+    },
+    table: {
+      operate: '操作',
+      operateConnect: '连接',
+      operateConnected: '已激活',
+      operateDel: '删除',
+      operateEdit: '编辑'
+    },
+    rules: {
+      schemaName: '请输入数据库名',
+      tableName: '请选择表名',
+      incrFieldName: '请输入增量字段名，请确保表增量字段有索引，否则影响刷数效率',
+      onUpdateTimestampFields: '请输入更新数据变化字段，多个用英文逗号隔开',
+      dataVolumeLevel: '请输入数据量级别，1：万级别 2：十万级别 3：百万级别 4：千万级别 5：亿级别',
     }
   },
   runtimeStatus: {

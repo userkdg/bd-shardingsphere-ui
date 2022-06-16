@@ -1,0 +1,237 @@
+- !ENCRYPT
+  encryptors:
+    mall_wash_collect_info_customer_phone:
+      props:
+        aes-key-value: 0A5nyhSZBF3JQAmL
+      type: AES
+    mall_wash_back_order_customer_name:
+      props:
+        aes-key-value: 0A5nyhSZBF3JQAmL
+      type: AES
+    mall_wash_order_back_address_address:
+      props:
+        aes-key-value: 0A5nyhSZBF3JQAmL
+      type: AES
+    mall_wash_order_back_address_back_name:
+      props:
+        aes-key-value: 0A5nyhSZBF3JQAmL
+      type: AES
+    mall_wash_carriage_finished_name:
+      props:
+        aes-key-value: 0A5nyhSZBF3JQAmL
+      type: AES
+    mall_wash_carriage_address_address:
+      props:
+        aes-key-value: 0A5nyhSZBF3JQAmL
+      type: AES
+    mall_wash_order_back_address_back_phone:
+      props:
+        aes-key-value: 0A5nyhSZBF3JQAmL
+      type: AES
+    mall_wash_clothes_unique_id_customer_phone:
+      props:
+        aes-key-value: 0A5nyhSZBF3JQAmL
+      type: AES
+    mall_wash_other_back_ways_sender_name:
+      props:
+        aes-key-value: 0A5nyhSZBF3JQAmL
+      type: AES
+    mall_wash_other_back_ways_sender_phone:
+      props:
+        aes-key-value: 0A5nyhSZBF3JQAmL
+      type: AES
+    mall_wash_back_order_operation_log_old_address:
+      props:
+        aes-key-value: 0A5nyhSZBF3JQAmL
+      type: AES
+    mall_wash_order_info_customer_name:
+      props:
+        aes-key-value: 0A5nyhSZBF3JQAmL
+      type: AES
+    mall_wash_back_order_log_receive_name:
+      props:
+        aes-key-value: 0A5nyhSZBF3JQAmL
+      type: AES
+    mall_wash_back_order_address:
+      props:
+        aes-key-value: 0A5nyhSZBF3JQAmL
+      type: AES
+    mall_wash_order_info_customer_phone:
+      props:
+        aes-key-value: 0A5nyhSZBF3JQAmL
+      type: AES
+    mall_wash_clothes_unique_id_customer_name:
+      props:
+        aes-key-value: 0A5nyhSZBF3JQAmL
+      type: AES
+    mall_wash_collect_info_address:
+      props:
+        aes-key-value: 0A5nyhSZBF3JQAmL
+      type: AES
+    mall_wash_appointment_order_address:
+      props:
+        aes-key-value: 0A5nyhSZBF3JQAmL
+      type: AES
+    mall_wash_collect_info_customer_name:
+      props:
+        aes-key-value: 0A5nyhSZBF3JQAmL
+      type: AES
+    mall_wash_appointment_order_customer_name:
+      props:
+        aes-key-value: 0A5nyhSZBF3JQAmL
+      type: AES
+    mall_wash_other_back_ways_sender_address:
+      props:
+        aes-key-value: 0A5nyhSZBF3JQAmL
+      type: AES
+    mall_wash_back_order_customer_phone:
+      props:
+        aes-key-value: 0A5nyhSZBF3JQAmL
+      type: AES
+    mall_wash_back_order_log_phone:
+      props:
+        aes-key-value: 0A5nyhSZBF3JQAmL
+      type: AES
+    mall_wash_order_info_address:
+      props:
+        aes-key-value: 0A5nyhSZBF3JQAmL
+      type: AES
+    mall_wash_appointment_order_customer_phone:
+      props:
+        aes-key-value: 0A5nyhSZBF3JQAmL
+      type: AES
+  queryWithCipherColumn: true
+  tables:
+    mall_wash_carriage_address:
+      columns:
+        address:
+          cipherColumn: address_cipher
+          encryptorName: mall_wash_carriage_address_address
+          plainColumn: address
+      queryWithCipherColumn: true
+    mall_wash_back_order_operation_log:
+      columns:
+        old_address:
+          cipherColumn: old_address_cipher
+          encryptorName: mall_wash_back_order_operation_log_old_address
+          plainColumn: old_address
+      queryWithCipherColumn: true
+    mall_wash_clothes_unique_id:
+      columns:
+        customer_name:
+          cipherColumn: customer_name_cipher
+          encryptorName: mall_wash_clothes_unique_id_customer_name
+          plainColumn: customer_name
+        customer_phone:
+          cipherColumn: customer_phone_cipher
+          encryptorName: mall_wash_clothes_unique_id_customer_phone
+          plainColumn: customer_phone
+      queryWithCipherColumn: true
+    mall_wash_other_back_ways:
+      columns:
+        sender_name:
+          cipherColumn: sender_name_cipher
+          encryptorName: mall_wash_other_back_ways_sender_name
+          plainColumn: sender_name
+        sender_phone:
+          cipherColumn: sender_phone_cipher
+          encryptorName: mall_wash_other_back_ways_sender_phone
+          plainColumn: sender_phone
+        sender_address:
+          cipherColumn: sender_address_cipher
+          encryptorName: mall_wash_other_back_ways_sender_address
+          plainColumn: sender_address
+      queryWithCipherColumn: true
+    mall_wash_back_order_log:
+      columns:
+        receive_name:
+          cipherColumn: receive_name_cipher
+          encryptorName: mall_wash_back_order_log_receive_name
+          plainColumn: receive_name
+        phone:
+          cipherColumn: phone_cipher
+          encryptorName: mall_wash_back_order_log_phone
+          plainColumn: phone
+      queryWithCipherColumn: true
+    mall_wash_collect_info:
+      columns:
+        customer_name:
+          cipherColumn: customer_name_cipher
+          encryptorName: mall_wash_collect_info_customer_name
+          plainColumn: customer_name
+        customer_phone:
+          cipherColumn: customer_phone_cipher
+          encryptorName: mall_wash_collect_info_customer_phone
+          plainColumn: customer_phone
+        address:
+          cipherColumn: address_cipher
+          encryptorName: mall_wash_collect_info_address
+          plainColumn: address
+      queryWithCipherColumn: true
+    mall_wash_appointment_order:
+      columns:
+        customer_name:
+          cipherColumn: customer_name_cipher
+          encryptorName: mall_wash_appointment_order_customer_name
+          plainColumn: customer_name
+        customer_phone:
+          cipherColumn: customer_phone_cipher
+          encryptorName: mall_wash_appointment_order_customer_phone
+          plainColumn: customer_phone
+        address:
+          cipherColumn: address_cipher
+          encryptorName: mall_wash_appointment_order_address
+          plainColumn: address
+      queryWithCipherColumn: true
+    mall_wash_order_back_address:
+      columns:
+        address:
+          cipherColumn: address_cipher
+          encryptorName: mall_wash_order_back_address_address
+          plainColumn: address
+        back_name:
+          cipherColumn: back_name_cipher
+          encryptorName: mall_wash_order_back_address_back_name
+          plainColumn: back_name
+        back_phone:
+          cipherColumn: back_phone_cipher
+          encryptorName: mall_wash_order_back_address_back_phone
+          plainColumn: back_phone
+      queryWithCipherColumn: true
+    mall_wash_back_order:
+      columns:
+        customer_name:
+          cipherColumn: customer_name_cipher
+          encryptorName: mall_wash_back_order_customer_name
+          plainColumn: customer_name
+        customer_phone:
+          cipherColumn: customer_phone_cipher
+          encryptorName: mall_wash_back_order_customer_phone
+          plainColumn: customer_phone
+        address:
+          cipherColumn: address_cipher
+          encryptorName: mall_wash_back_order_address
+          plainColumn: address
+      queryWithCipherColumn: true
+    mall_wash_carriage:
+      columns:
+        finished_name:
+          cipherColumn: finished_name_cipher
+          encryptorName: mall_wash_carriage_finished_name
+          plainColumn: finished_name
+      queryWithCipherColumn: true
+    mall_wash_order_info:
+      columns:
+        customer_name:
+          cipherColumn: customer_name_cipher
+          encryptorName: mall_wash_order_info_customer_name
+          plainColumn: customer_name
+        customer_phone:
+          cipherColumn: customer_phone_cipher
+          encryptorName: mall_wash_order_info_customer_phone
+          plainColumn: customer_phone
+        address:
+          cipherColumn: address_cipher
+          encryptorName: mall_wash_order_info_address
+          plainColumn: address
+      queryWithCipherColumn: true

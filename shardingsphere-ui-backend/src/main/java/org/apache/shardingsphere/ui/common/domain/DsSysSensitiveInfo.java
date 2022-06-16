@@ -16,6 +16,11 @@ public class DsSysSensitiveInfo {
     @TableId(value = "id",type = IdType.AUTO)
     private Integer id;
 
+    /**
+     * 导出唯一id
+     */
+    private String sensitiveId;
+
     private String dbname;
 
     private String schemaName;
@@ -29,7 +34,7 @@ public class DsSysSensitiveInfo {
     private String dataType;
 
     /**
-     * @Deprecated 增量字段管理移到 {@link DsSysSensitiveShuffleInfo#incrFieldName}管理
+     * @Deprecated 增量字段管理移到 {@link DsSysSensitiveShuffleInfo#getIncrFieldName()}管理
      *
      */
     @Deprecated
@@ -38,6 +43,8 @@ public class DsSysSensitiveInfo {
     private String algorithmType;
 
     private String cipherKey;
+
+    private String remark;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @TableField(fill = FieldFill.INSERT)

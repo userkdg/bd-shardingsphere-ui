@@ -1,0 +1,22 @@
+centerConfigs:
+  - activated: true
+    digest: ''
+    instanceType: Zookeeper
+    name: 电商CRM系统配置中心
+    namespace: ec_crm_ns
+    orchestrationName: ec_crm_ns
+    orchestrationType: config_center
+    props:
+       timeToLiveSeconds: 30000
+       retryIntervalMilliseconds: 30000
+       operationTimeoutMilliseconds: 60000
+    serverLists: 192.168.63.26:2181
+  - activated: false
+    digest: ''
+    instanceType: Zookeeper
+    name: 小屋系统-测试
+    namespace: data_security_ns_dev
+    orchestrationName: data_security_ns_dev
+    orchestrationType: config_center
+    props: {}
+    serverLists: 192.168.63.26:2181
