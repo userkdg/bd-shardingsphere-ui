@@ -1,9 +1,9 @@
 spring:
   profiles:
-    active: test
+    active: pre
 
 server:
-  port: 18088
+  port: 18089
 
 user:
   admin:
