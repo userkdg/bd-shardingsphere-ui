@@ -32,17 +32,18 @@
             <span>{{ item.title }}</span>
           </div>
           <div v-for="(itm, idex) in item.children" :key="idex" class="coll-item">
-            <div :class="'itm icon-' + idex" />
+            <div :class="'itm icon-' + idex"/>
             <div class="txt">{{ itm }}</div>
-            <i v-if="itm === '下载脚本'" class="icon-download" @click="handlerClick(item.title, itm)" />
-            <i v-else-if="itm === '一键刷数'" class="icon-submit" @click="handlerClick(item.title, itm)" />
-            <i v-else class="icon-edit" @click="handlerClick(item.title, itm)" />
+            <i v-if="itm === '下载脚本'" class="icon-download" @click="handlerClick(item.title, itm)"/>
+            <i v-else-if="itm === '一键刷数'" class="icon-submit" @click="handlerClick(item.title, itm)"/>
+            <i v-else-if="itm === '选表刷数'" class="icon-submit" @click="handlerClick(item.title, itm)"/>
+            <i v-else class="icon-edit" @click="handlerClick(item.title, itm)"/>
           </div>
         </el-card>
       </el-col>
     </el-row>
     <el-row>
-      <el-button type="primary" icon="el-icon-plus" @click="add" />
+      <el-button type="primary" icon="el-icon-plus" @click="add"/>
     </el-row>
     <el-dialog :visible.sync="centerDialogVisible" :title="type" width="80%" top="3vh">
       <el-row :gutter="20">
@@ -108,6 +109,35 @@
         <el-button type="primary" @click="addSchema('form')">{{ $t('btn.submit') }}</el-button>
       </div>
     </el-dialog>
+
+    <el-dialog :visible.sync="showSelectTable2Shuffle" title="自定义刷数请求体" width="60%" top="3vh">
+      <el-row :gutter="20">
+        <el-col :span="12">
+          <span style="font-size: 18px; font-weight: bold;">请求体:</span>
+          <el-input
+            :rows="30"
+            placeholder="请填写自定义JSON字符串格式请求体"
+            v-model="selectTableForm.customJsonRequestBody"
+            type="textarea"
+            class="edit-text"
+          />
+        </el-col>
+        <el-col :span="12">
+          <span style="font-size: 18px; font-weight: bold;">样例:</span>
+          <el-input
+            :rows="30"
+            v-model="selectTableForm.customJsonRequestBodyExample"
+            type="textarea"
+            readonly
+            class="show-text"
+          />
+        </el-col>
+      </el-row>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="showSelectTable2Shuffle = false">{{ $t('btn.cancel') }}</el-button>
+        <el-button type="primary" @click="doEncryptShuffle()">{{ $t('btn.submit') }}</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -137,6 +167,47 @@ export default {
       schemaName: ``,
       rueleConfigTextArea: ``,
       dataSourceConfigTextArea: ``,
+      showSelectTable2Shuffle: false,
+      selectTableForm: {
+        customJsonRequestBody: `{
+  "shuffleTableNames": [
+    "所属schema的表名，全匹配，否则返回成功，但忽略刷数"
+  ]
+}`,
+        customJsonRequestBodyExample: `{
+   // 必填，填写该schema下需要刷数的表
+  "shuffleTableNames": [
+    "string"
+  ],
+  // 可空，如需要对所选表自定义刷数模式，则可配置，一般为空即可
+  "tableExtractDefines": [
+    {
+      // 表名
+      "tableName":"string",
+      // 抽取模式：All-全量，customExtractWhereSql属性失效、WithPersistStateCustomWhere-支持自定义WithPersistStateCustomWhere和多次增量刷数（前提是有设置该表的增量字段）、 OtherCustom-只支持自定义WithPersistStateCustomWhere
+      "extractMode": "All",
+      // 表增量字段：extractMode=WithPersistStateCustomWhere生效，用于增量刷数
+      "incrFieldName": "last_update_time",
+      // 自定义刷数表条件，where之后（不可加where)：extractMode=WithPersistStateCustomWhere或OtherCustom生效
+      "customExtractWhereSql": "",
+      // 是否重置表多次抽取状态，用于重置extractMode=WithPersistStateCustomWhere上一次刷数状态记录
+      "resetExtractState": false,
+      // 建议该表的刷数分片数
+      "adviceNumberPartition": 50
+    }
+  ]
+  // 注：填写时，不可带上// 注释内容！
+}`,
+      },
+      selectTableRules: {
+        tableNames: [
+          {
+            required: true,
+            message: this.$t('ruleConfig').selectTableRules.tableNames,
+            trigger: 'change'
+          }
+        ],
+      },
       form: {
         name: '',
         ruleConfig: '',
@@ -180,7 +251,7 @@ export default {
       )
       const DS_SCHEMA = jsYaml.Schema.create([AuthYamlType, TranYamlType, SharYamlType, ReadYamlType, EncYamlType])
       return JSON.stringify(
-        jsYaml.load(this.textarea, { schema: DS_SCHEMA }),
+        jsYaml.load(this.textarea, {schema: DS_SCHEMA}),
         null,
         '\t'
       )
@@ -194,6 +265,7 @@ export default {
       this.addSchemaDialogVisible = true
     },
     handlerClick(parent, child) {
+      this.schemaName = parent
       if (child === 'rule') {
         API.getSchemaRule(parent).then(res => {
           this.renderYaml(parent, child, res)
@@ -213,6 +285,8 @@ export default {
               this.$message.info(`提交刷数异步作业成功`)
             })
           })
+      } else if (child === '选表刷数') {
+        this.showSelectTable2Shuffle = true
       } else {
         API.getSchemaDataSource(parent).then(res => {
           this.renderYaml(parent, child, res)
@@ -235,7 +309,7 @@ export default {
     getSchema() {
       API.getSchema().then(res => {
         const data = res.model
-        const base = ['rule', 'datasource', '下载脚本', '一键刷数']
+        const base = ['rule', 'datasource', '下载脚本', '一键刷数', '选表刷数']
         const newData = []
         for (const v of data) {
           newData.push({
@@ -248,7 +322,7 @@ export default {
     },
     onConfirm() {
       if (this.scname === 'rule') {
-        API.putSchemaRule(this.sname, { ruleConfig: this.textarea }).then(
+        API.putSchemaRule(this.sname, {ruleConfig: this.textarea}).then(
           res => {
             this._onConfirm(res)
           }
@@ -296,6 +370,28 @@ export default {
           return false
         }
       })
+    },
+    doEncryptShuffle(selectTableForm) {
+      if (!this.selectTableForm.customJsonRequestBody) {
+        this.$message.warning("请求体不可为空！")
+        return;
+      }
+      try {
+        let jsonObj = JSON.parse(this.selectTableForm.customJsonRequestBody)
+        jsonObj.dbType = 'mysql'
+        jsonObj.schema = this.schemaName
+        API.submitSchemaEncryptShuffleCustom(jsonObj).then(res => {
+          console.log(res)
+          this.$message.success(`${res.model}`)
+          this.showSelectTable2Shuffle = false
+        })
+      } catch (e) {
+        console.log(e)
+        this.$message.error("请求体内容非JSON字符串格式！")
+      }
+    },
+    selectChange(item) {
+      console.log(item)
     }
   }
 }
@@ -303,12 +399,14 @@ export default {
 <style lang='scss'>
 .schema {
   margin-top: 20px;
+
   .coll-item {
     height: 16px;
     line-height: 16px;
     width: 100%;
     float: left;
     margin-bottom: 22px;
+
     .txt {
       color: rgb(51, 51, 51);
       font-size: 14px;
@@ -316,48 +414,66 @@ export default {
       float: left;
       margin-right: 10px;
     }
+
     .itm {
       float: left;
       width: 16px;
       height: 16px;
     }
+
     .icon-0 {
       background: url('../../../assets/img/rules.png') no-repeat left center;
     }
+
     .icon-1 {
-      background: url('../../../assets/img/data-source.png') no-repeat left
-        center;
+      background: url('../../../assets/img/data-source.png') no-repeat left center;
     }
+
     .icon-2 {
-      background: url('../../../assets/img/list.png') no-repeat left
-      center;
+      background: url('../../../assets/img/list.png') no-repeat left center;
     }
+
     .icon-3 {
-      background: url('../../../assets/img/list.png') no-repeat left
-      center;
+      background: url('../../../assets/img/list.png') no-repeat left center;
     }
+
+    .icon-4 {
+      background: url('../../../assets/img/list.png') no-repeat left center;
+    }
+
+    .icon-5 {
+      background: url('../../../assets/img/list.png') no-repeat left center;
+    }
+
     .edit-btn {
       float: right;
     }
   }
+
   .el-row {
     margin-bottom: 20px;
   }
+
   .el-collapse-item__header {
     font-size: 16px;
   }
+
   .edit-text {
     margin-top: 5px;
+
     textarea {
       background: #fffffb;
     }
   }
+
   .show-text {
     margin-top: 5px;
+
     textarea {
       background: rgb(246, 246, 246);
     }
   }
+
   .icon-edit {
     background: url('../../../assets/img/edit.png') no-repeat left center;
     width: 16px;
@@ -366,6 +482,7 @@ export default {
     float: right;
     cursor: pointer;
   }
+
   .icon-download {
     background: url('../../../assets/img/download.png') no-repeat left center;
     width: 16px;
@@ -374,6 +491,7 @@ export default {
     float: right;
     cursor: pointer;
   }
+
   .icon-submit {
     background: url('../../../assets/img/submit.png') no-repeat left center;
     width: 16px;
@@ -382,12 +500,15 @@ export default {
     float: right;
     cursor: pointer;
   }
+
   .el-dialog__body {
     padding: 10px 20px;
   }
+
   .el-input {
     width: 30%;
   }
+
   .el-input__inner {
     height: 35px;
     line-height: 35px;

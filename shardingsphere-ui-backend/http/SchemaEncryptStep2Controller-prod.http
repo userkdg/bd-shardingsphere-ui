@@ -52,5 +52,15 @@ Access-Token: eyJ1c2VybmFtZSI6ImFkbWluIiwicGFzc3dvcmQiOiJhZG1pbkBibTEyMyIsImJhc2
   "schema": "mh_crm",
   "shuffleTableNames": [
     "crm_adviser_customer_info"
+  ],
+  "tableExtractDefines": [
+    {
+      "tableName":"",
+      "extractMode": "All",
+      "incrFieldName": "",
+      "customExtractWhereSql": "",
+      "resetExtractState": false,
+      "adviceNumberPartition": 50
+    }
   ]
 }
