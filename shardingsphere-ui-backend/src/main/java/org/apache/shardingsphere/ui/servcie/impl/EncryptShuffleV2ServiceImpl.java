@@ -103,6 +103,7 @@ public class EncryptShuffleV2ServiceImpl implements EncryptShuffleV2Service {
         this.schema = schema;
         this.dbType = dbType;
         this.customTableNames = Optional.ofNullable(tableNames).orElse(Collections.emptySet());
+        this.tableExtractDefineMap = Collections.emptyMap();
         if (tableExtractDefines != null) {
             this.tableExtractDefineMap = tableExtractDefines.stream().collect(Collectors.toMap(TableExtractDefine::getTableName, t -> t, (a, b) -> b));
         }
