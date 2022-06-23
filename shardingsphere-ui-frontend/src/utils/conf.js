@@ -20,7 +20,7 @@
 // 本地 测试 生产
 // const HOST = 'http://127.0.0.1:18088'
 // const HOST = 'https://dompapi.bluemoon.com.cn/bd-data-security-proxy-app'
-const HOST = 'http://192.168.63.26:18089'
+const HOST = 'https://domp.bluemoon.com.cn/bd-data-security-proxy-app'
 const OTHERHOST = ''
 
 export default {
