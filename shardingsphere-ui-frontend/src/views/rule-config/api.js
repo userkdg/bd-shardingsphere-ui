@@ -24,6 +24,7 @@ export default {
   getSchemaRule: (schemaName) => API.get(`/api/schema/rule/${schemaName}`),
   putSchemaRule: (schemaName, params = {}) => API.put(`/api/schema/rule/${schemaName}`, params),
   submitSchemaEncryptShuffle: (params = {}) => API.post(`/api/config-center/encrypt/shuffleV2`, params),
+  submitSchemaEncryptShuffleCustom: (params = {}) => API.post(`/api/config-center/encrypt/shuffleV2/custom`, params),
   getSchemaDataSource: (schemaName) => API.get(`/api/schema/datasource/${schemaName}`),
   putSchemaDataSource: (schemaName, params = {}) => API.put(`/api/schema/datasource/${schemaName}`, params),
   // Authentication

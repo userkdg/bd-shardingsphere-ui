@@ -176,7 +176,7 @@ export default {
     },
     rules: {
       schemaName: '请输入数据库名',
-      tableName: '请选择表名',
+      tableName: '请输入表名',
       incrFieldName: '请输入增量字段名，请确保表增量字段有索引，否则影响刷数效率',
       onUpdateTimestampFields: '请输入更新数据变化字段，多个用英文逗号隔开',
       dataVolumeLevel: '请输入数据量级别，1：万级别 2：十万级别 3：百万级别 4：千万级别 5：亿级别',
@@ -208,6 +208,12 @@ export default {
       name: '请输入名称',
       ruleConfig: '请输入数据分片配置规则',
       dataSourceConfig: '请输入数据源配置规则'
+    },
+    selectTable: {
+      tableNames: '表名',
+    },
+    selectTableRules: {
+      tableNames: '请选择刷数表名',
     },
     radioBtn: {
       schema: '数据源',
